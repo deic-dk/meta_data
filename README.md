@@ -9,10 +9,17 @@ The app currently supports management of tags and keys as well as
 tagging individual files and adding meta data.
 
 TODO:
+
 Write file view for main view
+
 Make tags and keys seachable
+
 Import/sync meta data from file headers
+
 Make tags shareable
+
 Enforce tag schemes on directories
+
 Group tag
+
 ...
