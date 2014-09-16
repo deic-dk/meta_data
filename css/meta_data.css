@@ -1,0 +1,33 @@
+#renameTag {
+  display: none;
+}
+
+#createTag {
+  display: none;
+}
+
+#deleteConfirm {
+  display: none;
+}
+
+#addNewKey {
+  display: none;
+}
+
+#tagscontainer {
+  float: left;
+  width: 220px;
+}
+
+#meta_data_tags_container {
+  float: left;
+  width: 220px;
+}
+
+table.hidden {
+  display: none;
+}
+
+table.visible {
+  display: inline;
+}

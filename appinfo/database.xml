@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<database>
+  <name>*dbname*</name>
+  <create>true</create>
+  <overwrite>false</overwrite>
+  <charset>utf8</charset>
+
+  <table>
+    <name>*dbprefix*meta_data_tags</name>
+    <declaration>
+      <field>
+        <name>tagid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <autoincrement>1</autoincrement>
+        <length>11</length>
+      </field>
+      <field>
+        <name>descr</name>
+        <type>text</type>
+        <notnull>true</notnull>
+        <length>80</length>
+      </field>                
+      <field>
+        <name>owner</name>
+        <type>text</type>
+        <notnull>true</notnull>
+        <length>80</length>
+      </field>     
+      <field>
+        <name>public</name>
+        <type>integer</type>
+        <length>1</length>
+      </field>     
+    </declaration>
+  </table>
+
+  <table>
+    <name>*dbprefix*meta_data_keys</name>
+    <declaration>
+      <field>
+        <name>keyid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <autoincrement>1</autoincrement>
+        <length>11</length>
+      </field>
+      <field>
+        <name>tagid</name>
+        <type>integer</type>
+        <length>11</length>
+      </field>
+      
+      <field>
+        <name>descr</name>
+        <type>text</type>
+        <notnull>true</notnull>
+        <length>80</length>
+      </field>                
+    
+    </declaration>
+  </table>
+
+
+  <table>
+    <name>*dbprefix*meta_data_docTags</name>
+    <declaration>
+      <field>
+        <name>id</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <autoincrement>1</autoincrement>
+        <length>8</length>
+      </field>
+
+      <field>
+        <name>fileid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <length>11</length>
+      </field>
+
+      <field>
+        <name>tagid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <length>11</length>
+      </field>
+    </declaration>
+  </table>
+
+  <table>
+    <name>*dbprefix*meta_data_docKeys</name>
+    <declaration>
+      <field>
+        <name>id</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <autoincrement>1</autoincrement>
+        <length>11</length>
+      </field>
+
+      <field>
+        <name>fileid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <length>11</length>
+      </field>
+
+      <field>
+        <name>tagid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <length>11</length>
+      </field>
+
+      <field>
+        <name>keyid</name>
+        <type>integer</type>
+        <default>0</default>
+        <notnull>true</notnull>
+        <length>11</length>
+      </field>
+
+      <field>
+        <name>value</name>
+        <type>text</type>
+        <length>255</length>
+      </field>
+
+    </declaration>
+  </table>
+</database>
