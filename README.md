@@ -12,7 +12,7 @@ TODO:
 
 Write file view for main view
 
-Make tags and keys seachable
+Make tags and keys searchable
 
 Import/sync meta data from file headers
 
