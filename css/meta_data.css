@@ -31,3 +31,26 @@ table.hidden {
 table.visible {
   display: inline;
 }
+
+#importTags {
+  margin-left: 20px;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.1);
+  display: inline-block;
+  border: 1px solid #74b21e;
+  color: #3d5d18;
+  background-color: #b2e567;
+  background-image: linear-gradient(to bottom, #b8e76f, #a9e25c);
+  white-space: nowrap;
+  height: 22px;
+  vertical-align: top;
+  cursor: default;
+  padding: 2px 5px;
+}
+

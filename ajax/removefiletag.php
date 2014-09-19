@@ -9,5 +9,6 @@ $tagid = $_POST['tag'];
 $fileid = $_POST['file'];
 
 $ctags->removeFileTag($tagid,$fileid);
+$ctags->removeFileKey($tagid,$fileid);
 
 

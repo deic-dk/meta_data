@@ -51,7 +51,28 @@ class tags {
       $result[] = $row;
     }    
     return $result;
-  }   
+  }  
+
+  public function searchFiles($tagid) {                                                                           
+    $sql = "SELECT fileid FROM *PREFIX*meta_data_docTags WHERE tagid = ?";
+    $args = array($tagid);                                                                                    
+    $query = \OCP\DB::prepare($sql);                                                                                       
+    $output = $query->execute($args);                                                                                     
+
+    while($row=$output->fetchRow()){
+      $sql = "SELECT * FROM *PREFIX*filecache WHERE fileid=? ";
+      $args = array($row['fileid']);                                                                                    
+      $query = \OCP\DB::prepare($sql);                                                                                       
+      $output2 = $query->execute($args);                                                                                     
+      $result[] = $output2->fetchRow();
+    }    
+    return $result;
+  }       
+
+
+
+
+
 
   public function newKey($tagid, $key) {                                                                   
     if(trim($key) === '') {                   
@@ -233,6 +254,13 @@ class tags {
 
   public function removeFileTag($tagid,$fileid){
       $sql = 'DELETE FROM *PREFIX*meta_data_docTags WHERE fileid=? AND tagid=?';
+      $args = array($fileid, $tagid);
+      $query = \OCP\DB::prepare($sql);
+      $output = $query->execute($args);
+  }
+
+  public function removeFileKey($tagid,$fileid){
+      $sql = 'DELETE FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=?';
       $args = array($fileid, $tagid);
       $query = \OCP\DB::prepare($sql);
       $output = $query->execute($args);

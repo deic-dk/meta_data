@@ -25,19 +25,29 @@ $(document).ready(
 
         checkbox: false,
 
-        select: function(event, data) {
-          var selectedNodes = data.tree.getSelectedNodes();
-          var selNodesData = new Array();
+        activate: function(event, data) {
+        $.ajax({
+          url: OC.filePath('meta_data', 'ajax', 'searchfiles.php'),
+          async: false,
+          timeout: 200,
 
-          for(i = 0; i < selectedNodes.length; i++) {
-            var nodeData = new Object();
-            nodeData.key = selectedNodes[i].key;
-            nodeData.title = selectedNodes[i].title;
+          data: {
+            tagName: data.node.title,
+          },
 
-            selNodesData.push(nodeData);
-          }
+          type: "POST",
 
-          var tags = JSON.stringify(selNodesData);
+          success: function(result) {
+            $('#meta_data_fileList').html(result );
+            $('#meta_data_emptylist').html("");
+          },
+
+          error: function( xhr, status ) {
+          }                            
+        });                        
+
+
+
 
 
         },

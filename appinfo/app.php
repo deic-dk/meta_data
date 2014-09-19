@@ -26,4 +26,6 @@
 \OCP\Util::addScript('meta_data', 'meta_data_fileinfo');
 \OCP\Util::addStyle('meta_data', 'meta_data');
 
+\OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
+
 

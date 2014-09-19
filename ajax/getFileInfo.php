@@ -38,19 +38,19 @@ if(substr($filePath, -1) === '/') {
 $fileInfos = \OC\Files\Filesystem::getFileInfo($filePath);
 
 
-$infos = array();
-$infos[] = '<strong>Filename: </strong>' . $fileInfos['name'];
-$infos[] = '<strong>MIME: </strong>' . $fileInfos['mimetype'];
-//$infos[] = '<strong>etag: </strong>' . $fileInfos['etag'];
-//$infos[] = '<strong>Size: </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['size'], 2, TRUE);
-//$infos[] = '<strong>' . $l->t('When added') . ': </strong>' . \OCP\Util::formatDate($fileInfos['storage_mtime']);
-//$infos[] = '<strong>' . $l->t('Encrypted? ') . '</strong>' . (($fileInfos['encrypted'] === TRUE) ? $l->t('Yes') : $l->t('No'));
+//$infos = array();
+//$infos[] = '<strong>Filename: </strong>' . $fileInfos['name'];
+//$infos[] = '<strong>MIME: </strong>' . $fileInfos['mimetype'];
+//$htmlInfos = implode('<br />', $infos);
 
-//if($fileInfos['encrypted']) {
-//    $infos[] = '<strong>' . $l->t('Unencrypted size') . ': </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['unencrypted_size'], 2, TRUE);
-//}
+$htmlInfos  = '<strong>Filename: </strong>' . $fileInfos['name'] . "<br>";
+$htmlInfos .= '<strong>MIME: </strong>' . $fileInfos['mimetype'];
+if($fileInfos['mimetype'] == "audio/mpeg"){
+  $htmlInfos .= '<input type="button" id="importTags" class="MP3" value="Import MP3 tags"><br>';
+} else {
+  $htmlInfos .= '<br>';
+}
 
-$htmlInfos = implode('<br />', $infos);
 
 $result = array('infos' => $htmlInfos, 'fileid' => $fileInfos['fileid']);
 
