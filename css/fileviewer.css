@@ -1,0 +1,32 @@
+#filestable {                                                                                                            
+  position: relative;                                                                                                  
+  left: 20px;
+  //width: 70%;                                                                                                         
+}  
+
+#filestable tbody tr { 
+  background-color:#fff; 
+  height:2.5em; 
+}                                                            
+
+#filestable tbody tr:hover, tbody tr:active {                                                                            
+  background-color: rgb(240,240,240);                                                                                  
+} 
+
+#filestable tbody td.active {                                                                            
+  background-color: rgb(240,240,240);                                                                                  
+}
+
+table th, table td { 
+  border-bottom:1px solid #ddd; 
+  text-align:left; 
+  font-weight:normal; 
+}                                
+
+table td {                                                                                                               
+  border-bottom: 1px solid #eee;                                                                                       
+  font-style: normal;                                                                                                  
+  background-position: 8px center;                                                                                     
+  background-repeat: no-repeat;         
+}
+

@@ -11,9 +11,11 @@
         </div>
     </div>
 
+</table>
     <div class="center" id="fileTable">
         <div id="meta_data_fileList"></div>
-        <div id="meta_data_emptylist"><?php p($l->t('Select one or more tags to view the associated files.')) ?></div>
+<table id="filestable"><legend id="filestable_leg"></legend></table>        
+<div id="meta_data_emptylist"><?php p($l->t('Select one or more tags to view the associated files.')) ?></div>
     </div>
 </div>
 

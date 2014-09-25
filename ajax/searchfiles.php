@@ -3,18 +3,15 @@
 \OCP\JSON::checkLoggedIn();
 \OCP\JSON::checkAppEnabled('meta_data');
 
-$ctags = new \OCA\meta_data\tags();
-$tagname    = $_POST['tagName'];
+$cfiles = new OC_meta_data_mainview();
+$tagid    = $_POST['tagid'];
 
-$tagid  = $ctags->searchTag($tagname, OC_User::getUser(), "%");
-$files = $ctags->searchFiles($tagid[0]['tagid']);
+$files = $cfiles->searchFiles($tagid);
 
 $result="";
 
-$result .= "<table><legend>Files tagged with: ".$tagname."</legend>";
 foreach($files as $file){
-  $result .= "<tr><td>".$file['name']."</td></tr>";
+  $result .= "<tr><td id=\"".$file['fileid'] ."\">".$file['name']."</td></tr>";
 }
-$result .= "</table>";
 
 echo $result;

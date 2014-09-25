@@ -17,7 +17,7 @@
 
     // the title of your application. This will be used in the
     // navigation or on the settings page of your app
-    'name' => 'Tags - dev'
+    'name' => 'Tags - beta'
 ));
 
 \OCP\Util::addScript('meta_data', 'bootstrap-tokenfield');
