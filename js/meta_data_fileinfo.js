@@ -325,7 +325,10 @@ function hideKeys(eventData){
 function showFileInfo(fileName) {
   var infoContent = "";
   var fileID = -1;
-  var directory = $('#dir').val();
+  var directory = "";
+  if( $('#dir').val() ){
+    directory = $('#dir').val();
+  }
   directory = (directory === "/") ? directory : directory + "/";
 
 
@@ -418,9 +421,13 @@ function showFileInfo(fileName) {
       $('#meta_data_tags').tokenfield('createToken', tag);
     }
 
-    var url = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(fileName) + '&dir=' + encodeURIComponent($('#dir').val());
+    // import mp3 tags mock up
+//    var url = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(fileName) + '&dir=' + encodeURIComponent(directory);
+    var url = "/tank/data/owncloud/cbri\@dtu.dk/files/Data/03-machinae_supremacy-i_turn_to_you.mp3";
     $('#placeholder').html("Reading MP3 tags. Please wait...")
-    ID3.loadTags(url, function() {
+  
+  // Deprecated method
+  /*  ID3.loadTags(url, function() {
       var data = ID3.getAllTags( url ); 
       $.each(data, function(key, value) {
         var found = 0;
@@ -437,6 +444,39 @@ function showFileInfo(fileName) {
       $('#placeholder').html("")
       displayKeys($('#activeTag').data('tag'));
     });
+*/
+    $.ajax({
+      url: OC.filePath('meta_data', 'ajax', 'getMP3.php'),
+    data: {
+      url: url
+    },
+    type: "POST",
+    success: function(data) {
+      var result = jQuery.parseJSON(data);
+      $.each(result.tags.id3v1, function(key, value) {
+        var found = 0;
+        $.each( $('.keyRow[data-tag='+$('#activeTag').data('tag')+']').children('td').children('input[data-keyid]'), function()   {
+          if( $(this).data('key').toUpperCase() == key.toUpperCase() ){
+            $(this).val(value);
+            found = 1;
+          }
+        });
+        if (found == 0){
+          addsinglekey($('#activeTag').data('tag'),key,value); 
+        }
+      });
+      $('#placeholder').html("")
+        displayKeys($('#activeTag').data('tag'));
+
+    },
+
+    error: function (xhr, status) {
+      window.alert(t('meta_data', 'Unable to import! Ajax error.'));
+    }
+    })    
+
+
+
   });
 }
 

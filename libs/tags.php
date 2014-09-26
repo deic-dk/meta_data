@@ -6,14 +6,14 @@ class tags {
 
   public function getAllTags($userid, $public) {
     $output=$this->searchTag('%', $userid, $public);
-    $c=0;
+    
     for($i=0;$i<count($output);$i++){  
       $result[$i] = array(
-        'key' => $c+=1,
         'title' => $output[$i]['descr'],
         'expanded' => false,
         'class' => 'global',
         'tagid' => $output[$i]['tagid'],
+        'icon'=>'/apps/meta_data/img/icon_tag.png',
         'children' => array()
       );
 
@@ -21,7 +21,7 @@ class tags {
 
       $output2 = $this->searchKey($output[$i]['tagid'],'%');
       for($j=0;$j<count($output2);$j++){
-        $childrenData[] = array('key'=> $c+=1, 'title'=>$output2[$j]['descr'], 'keyid'=>$output2[$j]['keyid'], 'otitle'=>$output2[$j]['descr'], 'class'=>'global','icon'=>'/apps/meta_data/img/icon_document.png');
+        $childrenData[] = array('title'=>$output2[$j]['descr'], 'keyid'=>$output2[$j]['keyid'], 'otitle'=>$output2[$j]['descr'], 'class'=>'global','icon'=>''); ///apps/meta_data/img/icon_document.png');
       }
       $result[$i]['children'] = $childrenData;
     }

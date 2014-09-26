@@ -10,7 +10,7 @@ class OC_meta_data_mainview
     $output = $query->execute($args);                                                                                     
 
     while($row=$output->fetchRow()){
-      $sql = "SELECT fileid,name FROM *PREFIX*filecache WHERE fileid=?";
+      $sql = "SELECT fileid,name,path FROM *PREFIX*filecache WHERE fileid=?";
       $args = array($row['fileid']);                                                                                    
       $query = \OCP\DB::prepare($sql);                                                                                       
       $output2 = $query->execute($args);                                                                                     
@@ -20,6 +20,7 @@ class OC_meta_data_mainview
     foreach ($result as $key => $row) {
       $fileid[$key]  = $row['fileid'];
       $name[$key] = $row['name'];
+      $path[$key] = $row['path'];
     }
     array_multisort($name, SORT_ASC, $result);
 

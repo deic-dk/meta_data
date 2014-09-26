@@ -6,22 +6,9 @@ $(document).ready(
 
       $("#tagstree").fancytree({
 
-//        renderNode: function(event, data) {
-          // Optionally tweak data.node.span
-//          var nodeClass = data.node.data.class;
-//
-//          if(nodeClass === 'global') {
-//            var globalIconCSS = "URL(" + OC.filePath('meta_data', 'img', 'icon_small.png') + ")";
-//            var span = $(data.node.span);
-//            var findResult = span.find("> span.fancytree-icon");
-//            findResult.css("backgroundImage", globalIconCSS);
-//            findResult.css("backgroundPosition", "0 0");
-//          }
-//        },
-
         source: {
           url: dataPath,
-          datatype: "json"
+        datatype: "json"
         },
 
         checkbox: false,
@@ -51,21 +38,18 @@ $(document).ready(
             });                     
           }   
         },
-
+/*
         deactivate: function(event, data) {
           var children = data.node.getChildren();                                                                                      
           if(children){ 
             children.forEach(function(child) {                                                                                          
-              child.title = child.data.otitle;                                                                                          
+              child.setTitle(child.data.otitle);                                                                                          
             })   
           }
           data.node.setExpanded(flag=false);
-          data.node.render(force=true, deep=true);                                                                                 
           $('#filestable').html("");
-
-
         }
- 
+*/
       });
 
 
@@ -74,9 +58,11 @@ $(document).ready(
         var actiNode = $("#tagstree").fancytree("getActiveNode");                                                               
         var children = actiNode.getChildren(); 
 
-        children.forEach(function(child) {
-          child.title = child.data.otitle;
-        })
+        if(children){ 
+          children.forEach(function(child) {
+            child.title = child.data.otitle;
+          })
+        }
         $(this).addClass("active");
         actiNode.setExpanded(); 
         $.ajax({                                                                                                                    
@@ -95,22 +81,33 @@ $(document).ready(
             var values = JSON.parse(result);            
             var actiNode = $("#tagstree").fancytree("getActiveNode");                                                               
             var children = actiNode.getChildren(); 
-
+            if(children){
             children.forEach(function(child) {
               if(values!=null){                                                                                                  
                 for(var i=0;i < values.length; i++) {  
                   if(child.data.keyid == values[i].keyid) 
-              child.title = child.data.otitle+": "+values[i].value;                                                                              
+              child.setTitle(child.data.otitle+": "+values[i].value); 
                 }
               }
             })
-            actiNode.render(force=true, deep=true);                                                                                 
+            }
           },                                                                                                                        
 
           error: function( xhr, status ) {                                                                                          
           }                                                                                                                         
         });                                  
       });
+
+      $('#filestable').on('click', 'a.action', function() {
+        var fileName = $(this).parent().siblings('span.path').attr('id');
+//        alert(fileName);
+        showFileInfo(fileName);
+      
+      })
+
+
+
+
 
 
 
@@ -436,4 +433,4 @@ $(document).ready(
           }
         }
       });
-      }));
+    }));
