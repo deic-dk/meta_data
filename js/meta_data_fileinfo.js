@@ -423,7 +423,7 @@ function showFileInfo(fileName) {
 
     // import mp3 tags mock up
 //    var url = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(fileName) + '&dir=' + encodeURIComponent(directory);
-    var url = "/tank/data/owncloud/cbri\@dtu.dk/files/Data/03-machinae_supremacy-i_turn_to_you.mp3";
+    var url = "/tank/data/owncloud/"+oc_current_user+"/files"+directory+fileName;
     $('#placeholder').html("Reading MP3 tags. Please wait...")
   
   // Deprecated method
@@ -448,7 +448,7 @@ function showFileInfo(fileName) {
     $.ajax({
       url: OC.filePath('meta_data', 'ajax', 'getMP3.php'),
     data: {
-      url: url
+      filename: url
     },
     type: "POST",
     success: function(data) {
