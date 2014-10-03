@@ -4,7 +4,7 @@ $(document).ready(function(){
   // Attach tag button to 'files' mouse-over bar'
   if(typeof FileActions !== 'undefined') {
     // Add action to tag a group of files
-    $(".selectedActions").html(function(index, oldhtml) {
+/*    $(".selectedActions").html(function(index, oldhtml) {
       if(oldhtml.indexOf("download") > 0) {
         var tagIconPath = OC.imagePath('meta_data','icon_tag');
         var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
@@ -14,7 +14,7 @@ $(document).ready(function(){
       } else {
         return oldhtml;
       }
-    });
+    });*/
 
     var infoIconPath = OC.imagePath('meta_data','icon_info');
     FileActions.register('file', t('meta_data', 'Tags'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
