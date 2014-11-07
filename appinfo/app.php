@@ -20,12 +20,19 @@
     'name' => 'Tags - beta'
 ));
 
+OC::$CLASSPATH['OCA\meta_data\tags']   = 'apps/meta_data/libs/tags.php';
+OC::$CLASSPATH['OC_meta_data_mainview']= 'apps/meta_data/libs/file_viewer.php';
+OC::$CLASSPATH['OCA\meta_data\hooks']  = 'apps/meta_data/libs/hooks.php';
+
 \OCP\Util::addScript('meta_data', 'bootstrap-tokenfield');
 \OCP\Util::addStyle( 'meta_data', 'bootstrap-tokenfield');
 \OCP\Util::addStyle( 'meta_data', 'tokenfield-typeahead');
 \OCP\Util::addScript('meta_data', 'meta_data_fileinfo');
 \OCP\Util::addStyle('meta_data', 'meta_data');
+\OCP\Util::addStyle('meta_data/3rdparty/font-awesome', 'font-awesome');
 
 \OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
+
+\OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\meta_data\hooks', 'deleteFile');  
 
 

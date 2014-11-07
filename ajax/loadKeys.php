@@ -7,7 +7,7 @@ $ctags = new \OCA\meta_data\tags();
 
 $list = $_POST['list'];
 
-
+$result = "";
 foreach($list as $tag){
   $keyData = $ctags->searchKey($tag['value'], "%");
   

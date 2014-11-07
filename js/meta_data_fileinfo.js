@@ -1,6 +1,7 @@
 
 $(document).ready(function(){
 
+
   // Attach tag button to 'files' mouse-over bar'
   if(typeof FileActions !== 'undefined') {
     // Add action to tag a group of files
@@ -17,12 +18,23 @@ $(document).ready(function(){
     });*/
 
     var infoIconPath = OC.imagePath('meta_data','icon_info');
-    FileActions.register('file', t('meta_data', 'Tags'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
+    FileActions.register('file', t('meta_data', 'Tags'), OC.PERMISSION_UPDATE, infoIconPath, function(filename) {
       // Action to perform when clicked
       if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
-
-      showFileInfo(fileName);
+      if($('#dropdown').length == 0){      
+        var tr = FileList.findFileEl(filename);                                    
+        var itemType = 'file';                                                             
+        var itemSource = $(tr).data('id');
+        var html = '<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="test"></div></div>';
+        $(html).appendTo( $(tr).find('td.filename') );  
+        $(tr).addClass('mouseOver');
+        addNewDropDown(itemSource);
+      } else {
+        $("#dropdown").remove();
+        $('tr').removeClass('mouseOver');
+    }
     });
+
   }
 
 
@@ -89,7 +101,7 @@ $(document).ready(function(){
     var tag = $('#activeTag').data('tag');  
     var key = $('#newKey').val();
     if( $('#newKey').val() ){
-    addsinglekey(tag,key,"");
+      addsinglekey(tag,key,"");
     }
   });
 
@@ -101,28 +113,28 @@ $(document).ready(function(){
 
 
 function addsinglekey(tag,key,value){
-    $.ajax({                                                                                                                   
-      url: OC.filePath('meta_data', 'ajax', 'addSingleKey.php'),                                                                        
-      async: false,                                                                                                            
-      timeout: 2000,                                                                                                           
+  $.ajax({                                                                                                                   
+    url: OC.filePath('meta_data', 'ajax', 'addSingleKey.php'),                                                                        
+    async: false,                                                                                                            
+    timeout: 2000,                                                                                                           
 
-      data: {                                                                                                                  
-        tagName: tag,                                                                                                       
-      keyName: key                                                                                                            
-      },                                                                                                                       
+    data: {                                                                                                                  
+      tagName: tag,                                                                                                       
+    keyName: key                                                                                                            
+    },                                                                                                                       
 
-      type: "POST",                                                                                                            
+    type: "POST",                                                                                                            
 
-      success: function(result) {
-        var array=JSON.parse(result);
-        $('#newKey').val('');
-        $('#keyTable').append('<tr data-tag="'+ tag + '" class="keyRow visible"><td>'+key+'</td><td><input type="text" value="'+value+'" data-key="'+ key +'" data-keyid="'+array[0]['keyid']+'"></td></tr>');            
-      },                                                                                                                       
+    success: function(result) {
+      var array=JSON.parse(result);
+      $('#newKey').val('');
+      $('#keyTable').append('<tr data-tag="'+ tag + '" class="keyRow visible"><td>'+key+'</td><td><input type="text" value="'+value+'" data-key="'+ key +'" data-keyid="'+array[0]['keyid']+'"></td></tr>');            
+    },                                                                                                                       
 
-      error: function(xhr, status) {                                                                                         
-        window.alert(t('meta_data', 'Unable to create new key! Ajax error.'));                                                  
-      }                                                                                                                      
-    });              
+    error: function(xhr, status) {                                                                                         
+      window.alert(t('meta_data', 'Unable to create new key! Ajax error.'));                                                  
+    }                                                                                                                      
+  });              
 }
 
 
@@ -422,29 +434,29 @@ function showFileInfo(fileName) {
     }
 
     // import mp3 tags mock up
-//    var url = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(fileName) + '&dir=' + encodeURIComponent(directory);
+    //    var url = OC.filePath('files', 'ajax', 'download.php') + '?files=' + encodeURIComponent(fileName) + '&dir=' + encodeURIComponent(directory);
     var url = "/tank/data/owncloud/"+oc_current_user+"/files"+directory+fileName;
     $('#placeholder').html("Reading MP3 tags. Please wait...")
-  
-  // Deprecated method
-  /*  ID3.loadTags(url, function() {
-      var data = ID3.getAllTags( url ); 
-      $.each(data, function(key, value) {
+
+    // Deprecated method
+    /*  ID3.loadTags(url, function() {
+        var data = ID3.getAllTags( url ); 
+        $.each(data, function(key, value) {
         var found = 0;
         $.each( $('.keyRow[data-tag='+$('#activeTag').data('tag')+']').children('td').children('input[data-keyid]'), function()   {
-          if( $(this).data('key').toUpperCase() == key.toUpperCase() ){
-            $(this).val(value);
-            found = 1;
-          }
+        if( $(this).data('key').toUpperCase() == key.toUpperCase() ){
+        $(this).val(value);
+        found = 1;
+        }
         });
         if (found == 0){
-          addsinglekey($('#activeTag').data('tag'),key,value); 
+        addsinglekey($('#activeTag').data('tag'),key,value); 
         }
-      });
-      $('#placeholder').html("")
-      displayKeys($('#activeTag').data('tag'));
-    });
-*/
+        });
+        $('#placeholder').html("")
+        displayKeys($('#activeTag').data('tag'));
+        });
+        */
     $.ajax({
       url: OC.filePath('meta_data', 'ajax', 'getMP3.php'),
     data: {
@@ -480,3 +492,83 @@ function showFileInfo(fileName) {
   });
 }
 
+function addNewDropDown(file){
+  $.ajax({
+    url: OC.filePath('meta_data', 'ajax', 'getTags.php'),
+    async: false,
+    timeout: 200,
+    data: {
+      type: "drop"
+    },
+    type: "POST",
+    success: function(result) {
+      $('#test').html('<ul><li id="newTag"><input type=\"text\" value=\"\" placeholder=\"new tag\"></li></ul>');
+      $('#test').append(result);
+      $('#test').show();                                                         
+    },
+    error: function() {
+    }                            
+  }); 
+
+
+  $('div#dropwdown').on("click", "input", function(e) {
+    e.stopPropagation();
+  });
+
+  $('div#dropdown').on("focusout", "input", function() {
+    if($(this).val() != ''){
+      $.ajax({                                                                                                                                                                                                                    
+        url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),                                                                                                                                                                      
+        async: false,                                                                                                                                                                                                             
+        timeout: 2000,                                                                                                                                                                                                            
+        data: {                                                                                                                                                                                                                   
+          tagOp: 'new',                                                                                                                                                                                                        
+        tagName: $(this).val(),                                                                                                                                                                                                   
+        tagState: "1",                                                                                                                                                                                                       
+        },                                                                                                                                                                                                                        
+        type: "POST",                                                                                                                                                                                                             
+        success: function(result) {               
+          $.ajax({
+            url: OC.filePath('meta_data', 'ajax', 'updatefileinfo.php'),
+          async: false,
+          timeout: 200,
+          data: {
+            fileid: file,
+          tagid: $.parseJSON(result)['tagid'] 
+          },
+          type: "POST",
+          success: function(result) {
+            $("#dropdown").remove();          
+ $('tr').removeClass('mouseOver');
+          },
+          error: function() {
+          }          
+          });
+        },
+          error: function(){
+          }
+      });
+
+    };
+  });
+  $('div#dropdown').on("click", "div#test ul li" , function() {
+    if( $(this).attr('id') != "newTag"){
+      $.ajax({
+        url: OC.filePath('meta_data', 'ajax', 'updatefileinfo.php'),
+        async: false,
+        timeout: 200,
+        data: {
+          fileid: file,
+        tagid: $(this).attr('id') 
+        },
+        type: "POST",
+        success: function(result) {
+          $("#dropdown").remove();
+ $('tr').removeClass('mouseOver');
+        },
+        error: function() {
+        }          
+      });
+    }
+  });
+}

@@ -3,28 +3,33 @@
 \OCP\JSON::checkLoggedIn();
 \OCP\JSON::checkAppEnabled('meta_data');
 
-$cfiles = new OC_meta_data_mainview();
-$tagid    = $_POST['tagid'];
-
-$files = $cfiles->searchFiles($tagid);
-
-
-
-$result="";
-
-foreach($files as $file){
-  $result .= "<tr><td id=\"".$file['fileid'] ."\">";
-//  $result .= "  <a class=\"name\" href=\"https://data.deic.dk/index.php/apps/files?dir=".$path."\">";
-  $result .= "    <span class=\"nametext\">".$file['name']."</span>";
-  $result .= "    <span class=\"path\" id=\"".str_replace("files","",$file['path'])."\"></span>";
-  $result .= "    <span class=\"fileactions\">";
-  $result .= "      <a class=\"action\" data-action=\"Tags\" href=\"#\" original-title=\"\">";
-  $result .= "        <img class=\"svg\" src=\"/apps/meta_data/img/icon_info.svg\">";
-  $result .= "        <span> Tags</span>";
-  $result .= "      </a>";
-  $result .= "    </span>";
-//  $result .= "  </a>";
-  $result .= "</td></tr>";
+function compare($val1, $val2){
+  return strcmp($val1['fileid'], $val2['fileid']);
 }
 
+$cfiles = new OC_meta_data_mainview();
+
+$owner = OC_User::getUser(); 
+
+
+if( isset($_POST['tagids'])){
+  $tags = json_decode(stripslashes($_POST['tagids']));
+  $files = $cfiles->searchFiles($owner, $tags[0]);
+  foreach($tags as $tag){
+    $temp = $cfiles->searchFiles($owner, $tag);
+    $files = array_uintersect($files, $temp, 'compare');
+  }
+} else {
+  $files = $cfiles->searchFiles($owner);
+}
+
+if($files){
+  $result="<ul>";
+  foreach($files as $file){
+    $result .= "<li id=\"". $file['fileid']  . "\" data-original=\"".$file['name']."\"></li>" ;
+  }
+  $result .= "</ul>";
+} else {
+  $result="<div id=\"emptysearch\">No files found</div>";
+}
 echo $result;

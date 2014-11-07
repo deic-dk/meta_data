@@ -14,6 +14,7 @@ $(document).ready(
         checkbox: false,
 
         activate: function(event, data) {
+
           if(data.node.getLevel() == 1){
             $.ajax({
               url: OC.filePath('meta_data', 'ajax', 'searchfiles.php'),
@@ -50,10 +51,23 @@ $(document).ready(
           $('#filestable').html("");
         }
 */
+ 
       });
 
 
-      $('#filestable').on('click', 'td', function() {
+      $(document).on('click', function(){
+        $('td.active').removeClass("active");
+        var actiNode = $("#tagstree").fancytree("getActiveNode");                                                               
+        var children = actiNode.getChildren();                                                                                      
+        if(children){ 
+          children.forEach(function(child) {                                                                                          
+            child.setTitle(child.data.otitle);                                                                                          
+          })   
+        }
+      })
+
+      $('#filestable').on('click', 'td', function(e) {
+        e.stopPropagation();
         $('td.active').removeClass("active");
         var actiNode = $("#tagstree").fancytree("getActiveNode");                                                               
         var children = actiNode.getChildren(); 

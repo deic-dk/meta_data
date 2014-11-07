@@ -4,56 +4,44 @@ OCP\JSON::callCheck();
 OCP\JSON::checkAppEnabled('meta_data');
 OCP\User::checkLoggedIn();
 
-// Check for a valid operation to perform
-$tagOp = filter_input(INPUT_POST, 'tagOp', FILTER_SANITIZE_STRING);
-$validOps = array('new', 'rename', 'delete');
-
-if(array_search($tagOp, $validOps) === FALSE) {
-    $result = array(
-        'result' => 'KO, options invalid',
-        'title' => '',
-        'key' => '',
-        'class' => ''
-    );
-    
-    die(json_encode($result));
-}
-
-// Check for valid input parameters
-$descr = filter_input(INPUT_POST, 'tagName', FILTER_SANITIZE_STRING);
-$oldtagname = filter_input(INPUT_POST, 'oldtagname', FILTER_SANITIZE_STRING);
 $owner = OC_User::getUser();
-$public = filter_input(INPUT_POST, 'tagState', FILTER_SANITIZE_STRING);
-$keylist = filter_input(INPUT_POST, 'keyList', FILTER_SANITIZE_STRING);
 
-
-if($descr === FALSE) {
-    $result = array(
-        'result' => 'KO, descr is false',
-        'title' => '',
-        'key' => '',
-        'class' => ''
-    );
-    
-    die(json_encode($result));
-}
-
-// Switch between possible operations
 $ctags = new \OCA\meta_data\tags();
 
-switch($tagOp) {
-case 'new': {
-        $result = $ctags->newTag($descr, $owner, $public,$keylist);
+switch($_POST['tagOp']) {
+    case 'new': {
+        $result = $ctags->newTag($_POST['tagName'], $owner, $_POST['tagState']);
         break;
     }
     
-    case 'rename': {
-        $result = $ctags->alterTag($oldtagname, $descr, $owner, $public, $keylist);
+    case 'new_key': {
+        $result = $ctags->newKey($_POST['tagId'], $_POST['keyName']);
+        break;
+    }
+
+    case 'rename_tag': {
+        $result = $ctags->alterTag($_POST['tagId'], $_POST['tagName'], $owner, $_POST['tagState']);
         break;
     }
     
+    case 'rename_key': {
+        $result = $ctags->alterKey($_POST['tagId'],$_POST['keyId'], $_POST['newName'], $owner);
+        break;
+    }
+
     case 'delete': {
-        $result = $ctags->deleteTag($descr, $owner);
+        $result = $ctags->deleteTag($_POST['tagId'], $owner);
+        break;
+    }
+
+    case 'delete_key': {
+        $result = $ctags->removeFileKey($_POST['tagId'],"%", $_POST['keyId']);
+        $result = $ctags->deleteKeys($_POST['tagId'], $_POST['keyId']);
+        break;
+    }
+
+    case 'update_file_key': {
+        $result = $ctags->updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['newName']);
         break;
     }
 }
@@ -62,16 +50,14 @@ case 'new': {
 if($result === FALSE) {
     $result = array(
         'result' => 'KO, result is false',
-        'title' => '',
-        'key' => '',
-        'class' => ''
     );
 } else {
     $result = array(
         'result' => 'OK',
-        'title' => $descr,
-        'key' => $result,
-        'class' => 'global'
+        'tagid' => $result[0]['tagid'],
+        'tagname' => $result[0]['descr'],
+        'keyid' => $result[0]['keyid'],
+        'result' => $result,
     );
 }
 

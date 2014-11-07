@@ -33,7 +33,12 @@
         <type>integer</type>
         <length>1</length>
       </field>     
-    </declaration>
+      <field>
+        <name>color</name>
+        <type>text</type>
+        <length>12</length>
+    </field>     
+  </declaration>
   </table>
 
   <table>

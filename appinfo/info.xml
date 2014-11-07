@@ -3,7 +3,7 @@
 	<id>meta_data</id>
 	<name>Meta-data tags</name>
 	<description>Add meta data tags to files and directories.</description>
-	<version>0.0.9</version>
+	<version>0.1.0</version>
 	<licence>GNU GPL Version 3</licence>
 	<author>Christian Brinch, DeIC (cbri@dtu.dk)</author>
 	<require>6</require>

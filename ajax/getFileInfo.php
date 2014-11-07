@@ -3,20 +3,6 @@
 \OCP\JSON::checkAppEnabled('meta_data');
 \OCP\User::checkLoggedIn();
 
-// Revert parameters from ajax
-$filePath = filter_input(INPUT_POST, 'filePath', FILTER_SANITIZE_STRING);
-
-// Check if multiple file has been choosen
-if(substr($filePath, -1) === '/') {
-    
-    $infos = '<strong>' . $l->t('Multiple files selected') . '</strong>';
-
-    $result = array('infos' => $infos, 'fileid' => -1);
-
-    print json_encode($result);
-    die();
-}
-
 // Begin to collect files informations
 /*
  *  $fileInfos contains:
@@ -35,23 +21,35 @@ if(substr($filePath, -1) === '/') {
  * [etag] => 52c326b169ba4
  * [permissions] => 27 ) 
  */
-$fileInfos = \OC\Files\Filesystem::getFileInfo($filePath);
+
+$filepath = \OC\Files\Filesystem::getpath($_POST['fileId']);
+$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
 
 
-//$infos = array();
-//$infos[] = '<strong>Filename: </strong>' . $fileInfos['name'];
-//$infos[] = '<strong>MIME: </strong>' . $fileInfos['mimetype'];
-//$htmlInfos = implode('<br />', $infos);
 
-$htmlInfos  = '<strong>Filename: </strong>' . $fileInfos['name'] . "<br>";
-$htmlInfos .= '<strong>MIME: </strong>' . $fileInfos['mimetype'];
-if($fileInfos['mimetype'] == "audio/mpeg"){
-  $htmlInfos .= '<input type="button" id="importTags" class="MP3" value="Import MP3 tags"><br>';
-} else {
-  $htmlInfos .= '<br>';
+$units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+$bytes = $fileInfo['size'];
+$bytes = max($bytes, 0); 
+$pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
+$pow = min($pow, count($units) - 1); 
+$bytes /= pow(1024, $pow);
+$size=round($bytes, 2) . ' ' . $units[$pow];
+
+$result = "<div id='infopath'>https://data.deic.dk/".$fileInfo['path']."</div>";
+$result.= "<div id='minsize'>".$fileInfo['mimetype']." - ".$size."</div>";
+$result.= "<div id='modified'><b>Modified</b> ".gmdate("d-m-Y H:i:s", $fileInfo['mtime'])."</div>";
+$result.= "<div id='taginfo'>";
+$ctags = new \OCA\meta_data\tags();
+$tagData = $ctags->loadFileTags($_POST['fileId']);
+foreach($tagData as $tag){
+  if(!$tag['color']) $tag['color']="tc_white";
+  $result.= "<i class=\"fa fa-tag ". $tag['color'] ."\"></i>".$tag['descr']. " ";
 }
+$result.= "<div id=\"addNewTag\"><a>add tag</a><div id=\"test\"></div></div></div>";
 
 
-$result = array('infos' => $htmlInfos, 'fileid' => $fileInfos['fileid']);
+
+
+
 
 print json_encode($result);
