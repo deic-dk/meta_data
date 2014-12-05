@@ -29,7 +29,6 @@ OC::$CLASSPATH['OCA\meta_data\hooks']  = 'apps/meta_data/libs/hooks.php';
 \OCP\Util::addStyle( 'meta_data', 'tokenfield-typeahead');
 \OCP\Util::addScript('meta_data', 'meta_data_fileinfo');
 \OCP\Util::addStyle('meta_data', 'meta_data');
-\OCP\Util::addStyle('meta_data/3rdparty/font-awesome', 'font-awesome');
 
 \OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
 

@@ -30,7 +30,7 @@ class OC_meta_data_mainview
       $output2 = $query->execute($args);                                              
       $id = $output2->fetchRow();
       
-      $sql = "SELECT fileid,name,path FROM *PREFIX*filecache WHERE storage=? AND path LIKE ? AND mimetype > ? ORDER BY mimetype";         
+      $sql = "SELECT fileid,name,path,mimetype FROM *PREFIX*filecache WHERE storage=? AND path LIKE ? AND mimetype > ? ORDER BY mimetype";         
       $args = array( $id['numeric_id'], 'files/%', '2' );                                                  
       $query = \OCP\DB::prepare($sql);                                                
       $output = $query->execute($args);                                              

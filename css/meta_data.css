@@ -128,13 +128,19 @@ a.action {
 }
 
 #meta_data_table #files_col li {
-/*  border-bottom: 2px solid #ddd;*/
   display: block;
   height: 24px;
   line-height: 24px;
-//  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+}
+
+#meta_data_table #files_col #mtype {
+  font-size: x-small;
+  background: #eee;
+  color: #888;
+  text-weight: bold;
+  text-align: center;
 }
 
 #meta_data_table span {

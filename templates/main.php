@@ -1,7 +1,8 @@
 
 
 <div id="meta_data_main">
-<div id="searchbar"><input id="searchinput" type="text" name="" placeholder="Search meta data [e.g., tag:mp3 or artist:dylan]"> </div>
+<div id="searchbar">
+<input id="searchinput" type="text" name="" placeholder="Search meta data [e.g., tag:mp3 or key:artist=dylan]"> </div>
 <table id="meta_data_table">
 <thead>
 <tr>

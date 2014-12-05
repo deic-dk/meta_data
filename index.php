@@ -10,8 +10,7 @@ OCP\App::setActiveNavigationEntry('meta_data');
 
 //\OCP\Util::addScript('meta_data', 'meta_data_tagtree');
 \OCP\Util::addScript('meta_data', 'meta_data_main');
-
-\OCP\Util::addStyle('meta_data/3rdparty/font-awesome', 'font-awesome');
+\OCP\Util::addScript('meta_data', 'meta_data_search');
 
 \OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('meta_data');

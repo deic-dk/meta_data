@@ -182,6 +182,7 @@ class tags {
     $query = \OCP\DB::prepare($sql);                                                                                       
     $resRsrc = $query->execute($args);
 
+    $result = [];
     while($row=$resRsrc->fetchRow()){
       $tag = $this->searchTagbyID($row['tagid']);
       $result[] = array( 'tagid' => $row['tagid'],
@@ -275,4 +276,15 @@ class tags {
     }
 
   }
+
+  public function getMimeType($mtype){
+    $sql = "SELECT mimetype FROM *PREFIX*mimetypes WHERE id = ?";
+    $args = array($mtype);                                                                                    
+    $query = \OCP\DB::prepare($sql);                                                                                       
+    $output = $query->execute($args);                                                                                     
+
+    return $output->fetchRow();
+  }
+
+
 }
