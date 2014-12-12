@@ -17,7 +17,7 @@
 
     // the title of your application. This will be used in the
     // navigation or on the settings page of your app
-    'name' => 'Tags - beta'
+    'name' => 'Tags'
 ));
 
 OC::$CLASSPATH['OCA\meta_data\tags']   = 'apps/meta_data/libs/tags.php';
