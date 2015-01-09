@@ -16,7 +16,7 @@ $(document).ready(function(){
         return oldhtml;
       }
     });*/
-
+    
     var infoIconPath = OC.imagePath('meta_data','icon_info');
     FileActions.register('file', t('meta_data', 'Tags'), OC.PERMISSION_UPDATE, infoIconPath, function(filename) {
       // Action to perform when clicked

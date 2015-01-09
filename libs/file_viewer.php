@@ -24,8 +24,8 @@ class OC_meta_data_mainview
         array_multisort($name, SORT_ASC, $result);
       }    
     } else {
-      $sql = "SELECT numeric_id FROM *PREFIX*storages WHERE id LIKE CONCAT('%',?,'%')";         
-      $args = array($owner);                                                  
+      $sql = "SELECT numeric_id FROM *PREFIX*storages WHERE id LIKE ?";         
+      $args = array('%'.$owner.'%');                                                  
       $query = \OCP\DB::prepare($sql);                                                
       $output2 = $query->execute($args);                                              
       $id = $output2->fetchRow();
