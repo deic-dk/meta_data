@@ -14,24 +14,28 @@
 		},
 
 		reload: function() {
-				this._selectedFiles = {};
-				this._selectionSummary.clear();
-				this.$el.find('.select-all').prop('checked', false);
-				this.showMask();
-				if (this._reloadCall) {
-						this._reloadCall.abort();
-				}
-				this._reloadCall = $.ajax({
-						url: this.getAjaxUrl('list'),
-						data: { 
-								dir : this.getCurrentDirectory(),
-								sort: this._sort,
-								sortdirection: this._sortDirection,
-								tagid: this.tagid
+				if(this.tagid) {
+						this._selectedFiles = {};
+						this._selectionSummary.clear();
+						this.$el.find('.select-all').prop('checked', false);
+						this.showMask();
+						if (this._reloadCall) {
+								this._reloadCall.abort();
 						}
-				}); 
-				var callBack = this.reloadCallback.bind(this);
-				return this._reloadCall.then(callBack, callBack);
+						this._reloadCall = $.ajax({
+								url: this.getAjaxUrl('list'),
+								data: { 
+										dir : this.getCurrentDirectory(),
+										sort: this._sort,
+										sortdirection: this._sortDirection,
+										tagid: this.tagid
+								}
+						}); 
+						var callBack = this.reloadCallback.bind(this);
+						return this._reloadCall.then(callBack, callBack);
+				} else {
+						return OCA.Files.FileList.prototype.reload.apply(this, arguments);
+				}
 		},
 
 		getAjaxUrl: function(action, params) {
@@ -50,7 +54,7 @@
 		},
 
 		_createRow: function(fileData) {
-				return OCA.Files.FileList.prototype._createRow.apply(this, arguments);
+				return OCA.Files.FileList.prototype._createRow.apply(this, arguments); 
 		}
 
 	});

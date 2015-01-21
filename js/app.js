@@ -58,22 +58,6 @@ OCA.Meta_data.App = {
 				});
 				fileActions.merge(OCA.Files.fileActions);
 
-				//				if (!this._globalActionsInitialized) {
-				//						// in case actions are registered later
-				//						this._onActionsUpdated = _.bind(this._onActionsUpdated, this);
-				//						OCA.Files.fileActions.on('setDefault.app-sharing', this._onActionsUpdated);
-				//						OCA.Files.fileActions.on('registerAction.app-sharing', this._onActionsUpdated);
-				//						this._globalActionsInitialized = true;
-				//				}
-
-
-				// when the user clicks on a folder, redirect to the corresponding
-				// folder in the files app instead of opening it directly
-				//				fileActions.register('dir', 'Open', OC.PERMISSION_READ, '', function (filename, context) {
-				//				OCA.Files.App.setActiveView('files', {silent: true});
-				//				OCA.Files.App.fileList.changeDirectory(context.$file.attr('data-path') + '/' + filename, true, true);
-				//				});
-				//				fileActions.setDefault('dir', 'Open');
 				return fileActions;
 		},
 
@@ -92,6 +76,54 @@ OCA.Meta_data.App = {
 												);
 						}
 				});
+		},
+
+		modifyFilelist: function() {
+				var oldCreateRow = OCA.Files.FileList.prototype._createRow;
+				OCA.Files.FileList.prototype._createRow = function(fileData) {
+						var tr = oldCreateRow.apply(this, arguments);
+						if(!fileData.tags){
+								if(fileData.type == 'file'){
+										var tags = '';
+										$.ajax({
+												async: false,
+												url: OC.filePath('meta_data', 'ajax', 'single.php'),
+												data: {fileid: fileData.id},
+												success: function( response )
+												{
+														tags = response;
+												}
+										});
+
+
+
+										tr.attr('data-tags', tags['data']);
+										var tag = $('<span></span>').addClass('tag');
+										var tagids = tags['data'].split(',');
+										tagids.forEach(function(entry) {
+												tag.append('<i class=\'fa fa-tag\'></i>');
+										});
+
+										tr.children('td').children('a').append(tag);
+								}
+						} else {
+								tr.attr('data-tags', fileData.tags);
+								var tag = $('<span></span>').addClass('tag');
+								var tagids = fileData.tags.split(',');
+								tagids.forEach(function(entry) {
+										tag.append('<i class=\'fa fa-tag\'></i>');
+								});
+
+								tr.children('td').children('a').append(tag);
+
+
+
+						}
+
+
+
+						return tr;
+				}
 		}
 
 };
@@ -106,4 +138,7 @@ $(document).ready(function() {
 		$('[id^=app-content-tag]').on('hide', function() {
 				OCA.Meta_data.App.removeTaggedFiles();
 		});
+		if (OCA.Files) {
+				OCA.Meta_data.App.modifyFilelist();
+		}
 })
