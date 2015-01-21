@@ -14,7 +14,7 @@
 <tbody>
 <tr>
 <td><div id="tag_col"  class="scrollable"></div><div class="meta_data_add addtag">+</div></td>
-<td><div id="files_col" class="scrollable2""></div><div class="meta_data_add addfile hidden">+</div></td>
+<td><div id="files_col" class="scrollable2"></div><div class="meta_data_add addfile hidden">+</div></td>
 <td><div class="scrollable"><div id="fileInfo" class="hidden"></div><div id="data_col"></div></div><div class="meta_data_add adddata hidden">+</div></td>
 </tr>
 </tbody>
