@@ -3,7 +3,7 @@ if (!OCA.Meta_data){
 }
 
 OCA.Meta_data.App = {
- 
+
 		_dummy: null,
 
 		initTaggedFiles: function($el, tagid) {
@@ -22,11 +22,10 @@ OCA.Meta_data.App = {
 								}
 								);
 
-//				this._linkFileList.appName = t('Meta_data', 'Tagname');
 				this._linkFileList.$el.find('#emptycontent').text(t('Meta_data', 'No files found'));
 				return this._linkFileList;
 		},
-		
+
 		removeTaggedFiles: function() {
 				if (this._linkFileList) {
 						this._linkFileList.$fileList.empty();
@@ -94,27 +93,27 @@ OCA.Meta_data.App = {
 														tags = response;
 												}
 										});
+										
+										if(tags['data']){
+												tr.attr('data-tags', tags['data']);
+												var tag = $('<span></span>').addClass('tag');
+												var tagids = tags['data'].split(',');
+												tagids.forEach(function(entry) {
+														tag.append('<i class=\'icon-tag\'></i>');
+												});
 
-
-
-										tr.attr('data-tags', tags['data']);
-										var tag = $('<span></span>').addClass('tag');
-										var tagids = tags['data'].split(',');
-										tagids.forEach(function(entry) {
-												tag.append('<i class=\'fa fa-tag\'></i>');
-										});
-
-										tr.children('td').children('a').append(tag);
+												tr.children('td.date').append(tag);
+										}
 								}
 						} else {
 								tr.attr('data-tags', fileData.tags);
 								var tag = $('<span></span>').addClass('tag');
 								var tagids = fileData.tags.split(',');
 								tagids.forEach(function(entry) {
-										tag.append('<i class=\'fa fa-tag\'></i>');
+										tag.append('<i class=\'icon-tag\'></i>');
 								});
 
-								tr.children('td').children('a').append(tag);
+								tr.children('td.filename').children('div.row').append(tag);
 
 
 
@@ -127,7 +126,6 @@ OCA.Meta_data.App = {
 		}
 
 };
-
 
 
 $(document).ready(function() {
