@@ -6,7 +6,7 @@
 $ctags = new \OCA\meta_data\tags();
 
 $params = explode(" ", $_POST['color']);
-$color=$params[2];
+$color=$params[1];
 
 $ctags->updateColor($_POST['tagid'],$color);
 echo json_encode(array($color, $_POST['tagid']));

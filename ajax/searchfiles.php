@@ -70,7 +70,7 @@ if($files){
       foreach($tags as $tag){
         $color = $ctags->searchTagbyID($tag['tagid']);
         $result .= "<span style=\"margin: 0 0 0 -0.5em\">";
-        $result .= "<i class=\"fa fa-tag ".$color['color']."\"></i></span>";    
+        $result .= "<i class=\"icon-tag ".$color['color']."\"></i></span>";    
       }
     }
     $result .= "</span></li>";

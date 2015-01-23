@@ -3,12 +3,12 @@
 \OCP\JSON::checkLoggedIn();
 \OCP\JSON::checkAppEnabled('meta_data');
 
-$ctags = new \OCA\meta_data\tags();
 
-$tagid = $_POST['tag'];
-$fileid = $_POST['file'];
+$fileid = isset( $_GET['fileid'] ) ? $_GET['fileid'] : '';
+$tagid =  isset( $_GET['tagid'] ) ? $_GET['tagid'] : '';
 
-$ctags->removeFileTag($tagid,$fileid);
-$ctags->removeFileKey($tagid,$fileid);
+$result = \OCA\meta_data\tags::removeFileTag($tagid,$fileid);
+
+//$ctags->removeFileKey($tagid,$fileid);
 
 

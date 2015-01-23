@@ -80,7 +80,7 @@ a.action {
 }
 
 #tag_head {
-  width: 15%;
+  width: 25%;
 }
 #files_head {
   width: 25%;
@@ -328,7 +328,7 @@ div#taginfo a {
   display: none;
   position:absolute;
   opacity: .9;
-  width: 25px;
+  width: 35px;
   z-index: 10;
   padding: .5em;
   padding-bottom: 0;

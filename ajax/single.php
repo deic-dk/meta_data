@@ -5,14 +5,17 @@ OCP\JSON::checkLoggedIn();
 $fileid = isset( $_GET['fileid'] ) ? $_GET['fileid'] : '';
 
 
-try {
-		$tags = \OCA\Meta_data\Helper::getFileTags($fileid);
-} catch (Exception $e) {
-		header("HTTP/1.0 404 Not Found");
-		exit();
+$tags = \OCA\Meta_data\Helper::getFileTags($fileid);
+
+foreach ($tags as $tag){
+		$result = \OCA\Meta_data\Helper::getTagName($tag);
+		$tagname[]=$result[0];
+		$tagcolor[]=$result[1];
+	
 }
 
-$data=implode(',',$tags);
+
+$tagids  =implode(',',$tags);
 
 
-OCP\JSON::success(array('data' => $data));
+OCP\JSON::success(array('tagids' => $tagids, 'tagnames' => $tagname, 'tagcolor' => $tagcolor));

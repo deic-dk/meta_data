@@ -87,7 +87,7 @@ $(document).ready(
       // Add tag when add icon is clicked
       $('.addtag').click(function(){
         $('div#tag_col').append("<ul class=\"new\"><li id=\"\">"                                                 
-          +"<span class=\"tagcolor hidden\"><i class=\"fa fa-tag tc_white\"></i></span>"
+          +"<span class=\"tagcolor hidden\"><i class=\"icon-tag tc_white\"></i></span>"
           +"<span id=\"tagname\"></span>"                                              
           +"<input class=\"\" type=\"text\" value=\"\" placeholder=\"New tag name\">"  
           +"<span class=\"deletetag\">&#10006;</span>"                                

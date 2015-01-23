@@ -22,13 +22,13 @@
 </div>
 
 <ul id="tc_colors">
-  <li><i class="fa fa-tag tc_white"></i></li>
-  <li><i class="fa fa-tag tc_gray"></i></li>
-  <li><i class="fa fa-tag tc_red"></i></li>
-  <li><i class="fa fa-tag tc_yellow"></i></li>
-  <li><i class="fa fa-tag tc_blue"></i></li>
-  <li><i class="fa fa-tag tc_green"></i></li>
-  <li><i class="fa fa-tag tc_purple"></i></li>
+  <li><i class="icon-tag tc_white"></i></li>
+  <li><i class="icon-tag tc_gray"></i></li>
+  <li><i class="icon-tag tc_red"></i></li>
+  <li><i class="icon-tag tc_yellow"></i></li>
+  <li><i class="icon-tag tc_blue"></i></li>
+  <li><i class="icon-tag tc_green"></i></li>
+  <li><i class="icon-tag tc_purple"></i></li>
 </ul>
 
 <div id="deleteConfirm" title="<?php p($l->t('Delete tag')) ?>"> 

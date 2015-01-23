@@ -53,6 +53,19 @@ class Helper
 				return $result;
 		}  
 
+
+		public static function getTagName($tagid) {
+				$sql = "SELECT descr,color FROM *PREFIX*meta_data_tags WHERE tagid = ?";
+				$args = array($tagid);                                                                                    
+				$query = \OCP\DB::prepare($sql);                                                                                       
+				$output = $query->execute($args);                                                                                     
+
+				$row=$output->fetchRow();
+				return array($row['descr'],$row['color']);;
+		}
+
+
+
 		public static function formatFileInfo($i) {
 				$entry = array();
 

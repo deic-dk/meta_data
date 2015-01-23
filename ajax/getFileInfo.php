@@ -43,7 +43,7 @@ $ctags = new \OCA\meta_data\tags();
 $tagData = $ctags->loadFileTags($_POST['fileId']);
 foreach($tagData as $tag){
   if(!$tag['color']) $tag['color']="tc_white";
-  $result.= "<i class=\"fa fa-tag ". $tag['color'] ."\"></i>".$tag['descr']. " ";
+  $result.= "<i class=\"icon-tag ". $tag['color'] ."\"></i>".$tag['descr']. " ";
 }
 $result.= "<div id=\"addNewTag\"><a>add tag</a><div id=\"test\"></div></div></div>";
 

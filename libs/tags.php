@@ -230,7 +230,7 @@ class tags {
     return $tag;
   }
 
-  public function removeFileTag($tagid,$fileid){
+  public static function removeFileTag($tagid,$fileid){
       $sql = 'DELETE FROM *PREFIX*meta_data_docTags WHERE fileid=? AND tagid=?';
       $args = array($fileid, $tagid);
       $query = \OCP\DB::prepare($sql);

@@ -19,6 +19,7 @@ $order=800;
 
 $tags=\OCA\Meta_data\Helper::searchTag('%',\OCP\User::getUser()); 
 
+
 foreach ($tags as $tag){
 		\OCA\Files\App::getNavigationManager()->add(
 				array(
@@ -31,13 +32,20 @@ foreach ($tags as $tag){
 		);
 
 }
- 
+
+
 OCP\Util::addScript('meta_data', 'fileactions');
+OCP\Util::addScript('meta_data', 'app');
+
+\OCP\Util::addStyle('meta_data', 'filelist');
 
 
 \OCP\Util::addScript('meta_data', 'meta_data_fileinfo');
 \OCP\Util::addStyle('meta_data', 'meta_data');
 \OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
 \OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\meta_data\hooks', 'deleteFile');  
+
+
+
 
 
