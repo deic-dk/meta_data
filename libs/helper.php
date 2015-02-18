@@ -32,7 +32,7 @@ class Helper
 				$query = \OCP\DB::prepare($sql);
 				$output = $query->execute($args);
 
-				
+				$result = [];
 				while($row=$output->fetchRow()){
 						$result[] = $row['tagid'];
 				}
@@ -47,6 +47,7 @@ class Helper
 				$query = \OCP\DB::prepare($sql);                                                                                       
 				$output = $query->execute($args);                                                                                     
 
+				$result = [];
 				while($row=$output->fetchRow()){
 						$result[] = $row;
 				}    

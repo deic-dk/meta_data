@@ -10,7 +10,7 @@
    	    
 
 		initialize: function($el, options) {
-			return OCA.Files.FileList.prototype.initialize.apply(this, arguments);
+				return OCA.Files.FileList.prototype.initialize.apply(this, arguments);
 		},
 
 		reload: function() {

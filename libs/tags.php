@@ -98,7 +98,7 @@ class tags {
     }
 
     $sql = "INSERT INTO *PREFIX*meta_data_tags (descr,owner,public,color) VALUES (?,?,?,?)";  
-    $args = array($descr,$userid,$public,"tc_white");                                                                                              
+    $args = array($descr,$userid,"0","tc_white");                                                                                              
     $query = \OCP\DB::prepare($sql);                                                                                       
     $resRsrc = $query->execute($args);                                                                                     
 
@@ -149,9 +149,8 @@ class tags {
     $resRsrc = $query->execute($args);
   }
 
-  public function deleteTag($tagid, $userid){
-                                                                                                                     
-    $this->deleteKeys($tagid, '%');
+  public static function deleteTag($tagid, $userid){
+    //$this->deleteKeys($tagid, '%');
     $sql = 'DELETE FROM *PREFIX*meta_data_tags WHERE tagid=? AND owner=?';
     $args = array($tagid, $userid);
     $query = \OCP\DB::prepare($sql);

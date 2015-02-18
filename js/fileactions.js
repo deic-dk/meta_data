@@ -4,7 +4,7 @@
 		}
 		OCA.Meta_data.Util = {
 				initialize: function(fileActions) {
-						FileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('core', 'actions/star'), function(filename) {
+						FileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename) {
 								// Action to perform when clicked
 								if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
 								if($('#dropdown').length == 0){      

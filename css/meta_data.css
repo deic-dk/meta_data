@@ -179,13 +179,12 @@ a.action {
   background: #ccc;
 }
 
-.tc_white  {color: #bbb}
-.tc_gray   {color: #888}
-.tc_red    {color: #FF3030}
-.tc_blue   {color: #3385FF}
-.tc_yellow {color: #EEEE44}
-.tc_green  {color: #59D659}
-.tc_purple {color: #DA6CFF}
+.tc_white  {box-shadow: inset 0 0 0px 1px #006b93; color: #006b93}
+.tc_gray   {box-shadow: inset 0 0 0px 1px #5bc0de; color: #5bc0de}
+.tc_red    {box-shadow: inset 0 0 0px 1px #5cb85c; color: #5cb85c}
+.tc_blue   {box-shadow: inset 0 0 0px 1px #777; color: #777}      
+.tc_yellow {box-shadow: inset 0 0 0px 1px #f7941e; color: #f7941e}
+.tc_green  {box-shadow: inset 0 0 0px 1px #f0491c; color: #f0491c}
 
 
 #meta_data_table .tagcolor {
