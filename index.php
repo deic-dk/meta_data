@@ -4,12 +4,14 @@
 //OCP\App::setActiveNavigationEntry('meta_data');
 
 
-\OCP\Util::addScript('meta_data', 'meta_data_main');
-\OCP\Util::addScript('meta_data', 'meta_data_search');
+//\OCP\Util::addScript('meta_data', 'meta_data_search');
 
 \OCP\User::checkLoggedIn();
 \OCP\App::checkAppEnabled('meta_data');
 
+\OCP\Util::addStyle('files', 'files');
+\OCP\Util::addStyle('meta_data', 'meta_data');
+\OCP\Util::addScript('meta_data', 'meta_data_main');
 
 
 

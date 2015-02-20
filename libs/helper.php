@@ -42,7 +42,7 @@ class Helper
 
 
 		public static function searchTag($descr, $userid) {                                                                           
-				$sql = "SELECT tagid,descr,color FROM *PREFIX*meta_data_tags WHERE descr LIKE ? AND owner LIKE ?";
+				$sql = "SELECT tagid,descr,public,color FROM *PREFIX*meta_data_tags WHERE descr LIKE ? AND owner LIKE ?";
 				$args = array($descr,$userid);                                                                                    
 				$query = \OCP\DB::prepare($sql);                                                                                       
 				$output = $query->execute($args);                                                                                     
@@ -64,6 +64,20 @@ class Helper
 				$row=$output->fetchRow();
 				return array($row['descr'],$row['color']);;
 		}
+
+		public static function updateTag($tagid, $tagname, $color, $visible) {
+
+				$sql = 'UPDATE *PREFIX*meta_data_tags SET descr=?, color=?, public=? WHERE tagid=?';
+				$args = array($tagname, $color, $visible, $tagid);
+				$query = \OCP\DB::prepare($sql);
+				$resRsrc = $query->execute($args);
+
+				return true;
+		}
+
+
+
+
 
 
 

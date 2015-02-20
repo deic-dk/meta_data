@@ -1,37 +1,77 @@
 
-
-<div id="meta_data_main">
-<div id="searchbar">
-<input id="searchinput" type="text" name="" placeholder="Search meta data [e.g., tag:mp3 or key:artist=dylan]"> </div>
-<table id="meta_data_table">
-<thead>
-<tr>
-<td id="tag_head">Tags</td>
-<td id="files_head">Files</td>
-<td id="data_head">Meta data</td>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><div id="tag_col"  class="scrollable"></div><div class="meta_data_add addtag">+</div></td>
-<td><div id="files_col" class="scrollable2"></div><div class="meta_data_add addfile hidden">+</div></td>
-<td><div class="scrollable"><div id="fileInfo" class="hidden"></div><div id="data_col"></div></div><div class="meta_data_add adddata hidden">+</div></td>
-</tr>
-</tbody>
-</table>
+<div id="app-content" style="transition: all 0.3s ease 0s;">
+<div id="app-content-meta_data" class="viewcontainer">
+<div id="controls">
+  <div class="row">
+    <div class="col-sm-12 text-right">
+      <div class="actions creatable">
+        <div id="upload" original-title="">
+		  <a class="btn btn-primary btn-flat" href="#"><i class="icon-tag"></i>
+             New tag
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<ul id="tc_colors">
-  <li><i class="icon-tag tc_white"></i></li>
-  <li><i class="icon-tag tc_gray"></i></li>
-  <li><i class="icon-tag tc_red"></i></li>
-  <li><i class="icon-tag tc_yellow"></i></li>
-  <li><i class="icon-tag tc_blue"></i></li>
-  <li><i class="icon-tag tc_green"></i></li>
-  <li><i class="icon-tag tc_purple"></i></li>
-</ul>
+<table id="filestable" class="panel">
+<thead class="panel-heading">
+<tr>
+  <th id="headerName" class="column-name">
+    <div id="headerName-container" class="row">
+      <div class="col-xs-4 col-sm-1"></div>
+      <div class="col-xs-3 col-sm-6">	  
+        <a class="name sort columntitle" data-sort="name">
+		  <span class="text-semibold">Tag name</span>         
+          <span class="sort-indicator icon-triangle-n"></span>
+	    </a>
+      </div>
+    </div>
+  </th>
+  <th id="headerDisplay" class="column-display">
+    <a class="display sort columntitle" data-sort="display">
+      <span>Visible in menu</span>
+      <span class="sort-indicator hidden icon-triangle-s"></span>
+    </a>
+  </th>
+  <th id="headerSize" class="column-size">
+    <a class="size sort columntitle" data-sort="size">
+      <span>Tagged files</span>
+      <span class="sort-indicator hidden icon-triangle-s"></span>
+    </a>
+  </th>
+</tr>
+</thead>
 
-<div id="deleteConfirm" title="<?php p($l->t('Delete tag')) ?>"> 
+<tbody id="fileList">
+</tbody>
+<tfoot>
+</tfoot>
+
+
+
+
+
+</table>
+
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="hidden" id="deleteConfirm" title="<?php p($l->t('Delete tag')) ?>"> 
     <div>
         <span id="deleteType"></span>
         <?php p($l->t('Are you sure you want to delete the tag:')) ?><br />

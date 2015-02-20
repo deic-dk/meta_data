@@ -129,11 +129,12 @@ OCA.Meta_data.App = {
 };
 
 function colorTranslate(color){
-		if(color=='tc_green')  return "label-success";
-		if(color=='tc_blue')   return "label-primary";
-		if(color=='tc_yellow') return "label-info";
-		if(color=='tc_orange') return "label-warning";
-		if(color=='tc_red')    return "label-danger";
+		if(color.indexOf('color-1') > -1)  return "label-default";
+		if(color.indexOf('color-2') > -1)  return "label-primary";
+		if(color.indexOf('color-3') > -1)  return "label-success";
+		if(color.indexOf('color-4') > -1) return "label-info";
+		if(color.indexOf('color-5') > -1) return "label-warning";
+		if(color.indexOf('color-6') > -1) return "label-danger";
 		return "label-default";
 }
 
@@ -154,7 +155,9 @@ function updateSidebar(){
 						if(response){
 								$('.nav-sidebar').append('<li class="empty"></li>');
 								$.each( response['tags'], function(key,value) {
-										$('.nav-sidebar').append('<li data-id="tag-'+value.tagid+'"><span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class="icon-tag"></i> '+value.descr+' </span></li>');
+										if(value.public==1){
+										  	$('.nav-sidebar').append('<li data-id="tag-'+value.tagid+'"><span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class="icon-tag"></i> '+value.descr+' </span></li>');
+										}
 								});
 						}
 				}
@@ -266,10 +269,10 @@ $(document).ready(function() {
 		/*
 		 *
 		 * This next block of code is for deleting tags (and removes the tag from all files)
-		 *
+		 * CURRENTLY DISABLED
 		 */ 
 
-		$('.nav-sidebar').on('mouseenter', 'span[class^=label]', function(){
+/*		$('.nav-sidebar').on('mouseenter', 'span[class^=label]', function(){
 				$(this).children('i').hide();
 				$(this).children('span.deletetag').show();
 		}).on('mouseleave', 'span[class^=label]', function(){
@@ -299,6 +302,6 @@ $(document).ready(function() {
 
 
 		});				
-
+*/
 
 })
