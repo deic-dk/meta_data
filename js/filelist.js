@@ -46,6 +46,18 @@
 				return OC.filePath('meta_data', 'ajax', action + '.php') + q;
 		},
 
+		updateEmptyContent: function() {
+				var dir = this.getCurrentDirectory();
+				if (dir === '/') {
+						// root has special permissions
+						this.$el.find('#emptycontent').toggleClass('hidden', !this.isEmpty);
+						this.$el.find('#filestable thead th').toggleClass('hidden', this.isEmpty);
+				}
+				else {
+						OCA.Files.FileList.prototype.updateEmptyContent.apply(this, arguments);
+				}
+		},
+
 		_createSummary: function() {
 				var $tr = $('<tr class="summary"></tr>');
 				this.$el.find('tfoot').html($tr);

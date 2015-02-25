@@ -10,7 +10,7 @@ $ctags = new \OCA\meta_data\tags();
 
 switch($_POST['tagOp']) {
     case 'new': {
-        $result = $ctags->newTag($_POST['tagName'], $owner, $_POST['tagState']);
+        $result = $ctags->newTag($_POST['tagName'], $owner, $_POST['tagState'], $_POST['tagColor']);
         break;
     }
     

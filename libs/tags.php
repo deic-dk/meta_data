@@ -84,7 +84,7 @@ class tags {
 
 
 
-  public function newTag($descr, $userid, $public) {                                                                   
+  public function newTag($descr, $userid, $public, $color) {                                                                   
     if(trim($descr) === '') {                   
       return FALSE;                                                                                                      
     }                                                                                                                      
@@ -98,7 +98,7 @@ class tags {
     }
 
     $sql = "INSERT INTO *PREFIX*meta_data_tags (descr,owner,public,color) VALUES (?,?,?,?)";  
-    $args = array($descr,$userid,"0","tc_white");                                                                                              
+    $args = array($descr,$userid,$public,$color);                                                                                              
     $query = \OCP\DB::prepare($sql);                                                                                       
     $resRsrc = $query->execute($args);                                                                                     
 

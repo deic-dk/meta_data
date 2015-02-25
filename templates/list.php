@@ -1,17 +1,23 @@
-<div id="controls">
+<div id="controls" style="height:63px;">
 	<input type="hidden" name="permissions" value="" id="permissions">
 </div>
 
 <div id="emptycontent" class="hidden"></div>
 
-<table id="filestable">
-	<thead>
+<table id="filestable" class="panel">
+	<thead class="panel-heading">
 		<tr>
 			<th id='headerName' class="hidden column-name">
-				<div id="headerName-container">
+				<div id="headerName-container" class="row">
+<div class="col-xs-4 col-sm-1">
 					<input type="checkbox" id="select_all_files" class="select-all"/>
 					<label for="select_all_files"></label>
+</div>
+<div class="col-xs-3 col-sm-6">
+
 					<a class="name sort columntitle" data-sort="name"><span><?php p($l->t( 'Name' )); ?></span><span class="sort-indicator"></span></a>
+</div>
+<div class="col-xs-5 col-sm-5 text-right">
 					<span id="selectedActionsList" class="selectedActions">
 						<a href="" class="download">
 							<img class="svg" alt="Download"
@@ -19,6 +25,7 @@
 							<?php p($l->t('Download'))?>
 						</a>
 					</span>
+</div>
 				</div>
 			</th>
 			<th id="headerSize" class="hidden column-size">
