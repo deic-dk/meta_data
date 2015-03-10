@@ -5,32 +5,39 @@ if (!OCA.Meta_data){
 OCA.Meta_data.App = {
 
 		_dummy: null,
+		_FileList: null,
 
 		initTaggedFiles: function($el, tagid) {
-				if (this._linkFileList && this._dummy==tagid) {
-						return this._linkFileList;
+				if (this._FileList && this._dummy==tagid) {
+						return this._FileList;
 				}
 				this._dummy = tagid;
 				
-				this._linkFileList = new OCA.Meta_data.FileList(
+				this._FileList = new OCA.Meta_data.FileList(
 								$el,
 								{
 										scrollContainer: $('#app-content'),
-										linksOnly: true,
+										//linksOnly: true,
 										fileActions: this._createFileActions(),
 										tagid: tagid
 								}
 								);
 				
-				this._linkFileList.$el.find('#emptycontent').text(t('Meta_data', 'No files found'));
+				this._FileList.$el.find('#emptycontent').text(t('Meta_data', 'No files found'));
 				
-				return this._linkFileList;
+				return this._FileList;
 		},
 
 		removeTaggedFiles: function() {
-				if (this._linkFileList) {
-						this._linkFileList.$fileList.empty();
+				if (this._FileList) {
+						this._FileList.$fileList.empty();
 				}
+		},
+
+		destroy: function() {
+				this.removeTaggedFiles();
+				this._FileList = null;
+				delete this._globalActionsInitialized;
 		},
 
 		_createFileActions: function() {
@@ -73,7 +80,7 @@ OCA.Meta_data.App = {
 										{
 												if( response){
 
-														
+
 														var tagwidth = 0;
 														var overflow = 0;
 														tr.find('div.filelink-wrap').after('<div class="filetags-wrap col-xs-4"></div>');
@@ -118,6 +125,16 @@ function colorTranslate(color){
 		return "label-default";
 }
 
+function colorTranslateTag(color){
+		if(color.indexOf('color-1') > -1)  return "tag-default";
+		if(color.indexOf('color-2') > -1)  return "tag-primary";
+		if(color.indexOf('color-3') > -1)  return "tag-success";
+		if(color.indexOf('color-4') > -1)  return "tag-info";
+		if(color.indexOf('color-5') > -1)  return "tag-warning";
+		if(color.indexOf('color-6') > -1)  return "tag-danger";
+		return "label-default";
+}
+
 function start_and_end(str, element) {
 		if(str.length > 24 ){
 				return str.substr(0, 10) + '...' + str.substr(str.length-8, str.length);
@@ -133,12 +150,16 @@ function updateSidebar(){
 				url: OC.filePath('meta_data', 'ajax', 'temp.php'),
 				success: function(response)	{
 						if(response){
-								$('.nav-sidebar').append('<li class="empty"></li>');
+								var tags = '';
 								$.each( response['tags'], function(key,value) {
 										if(value.public==1){
-												$('.nav-sidebar').append('<li data-id="tag-'+value.tagid+'"><span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class="icon-tag"></i> '+value.descr+' </span></li>');
+												tags = tags+'<li data-id="tag-'+value.tagid+'"><a href="#"><i class="icon icon-tag '+colorTranslateTag(value.color)+'" data-tag="'+value.tagid+'"></i><span>'+value.descr+'</span></a></li>';
 										}
 								});
+								$('ul.nav-sidebar li#tags').after(tags);
+								if($('ul.nav-sidebar li#tags span i.icon-angle-right').is(':visible')){
+										$('ul.nav-sidebar li[data-id^="tag-"]').hide();
+								}
 						}
 				}
 		});
@@ -173,8 +194,8 @@ function updateFileListTags(tr, showall){
 												tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
 										} else {
 												if(showall) { 
-														tr.find('div.filetags-wrap').append('<p>');
-														tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
+														tr.find('div.filetags-wrap').append('<br>');
+														tr.find('div.filetags-wrap').append('<span style="line-height:1.5;" data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span style="padding-bottom:10px;" class=\'tagtext\'>'+value.descr+'</span></span>' );
 														width=42;
 														tagwidth=0;
 												} else overflow += 1;
@@ -195,13 +216,13 @@ function updateFileListTags(tr, showall){
 $(document).ready(function() {
 		updateSidebar();
 
-		$('ul.nav-sidebar').on('click', 'li[data-id^=tag-] span', function(e) {
-				var tagid = $(e.target).parent().attr('data-id').split('-');
-				$('div[id^=app-content-]').hide();
-				$('div#app-content-tag-'+tagid[1]).removeClass('hidden');
-				$('div#app-content-tag-'+tagid[1]).show();
-				window.history.pushState("object or string","title", '/index.php/apps/files/?dir=%2F&view=tag-'+tagid[1]);
-				location.reload();
+		$('ul.nav-sidebar').on('click', 'li[data-id^="tag-"]', function(e) {
+				if($('#app-navigation').length !== 0){
+						$('#app-navigation ul li[data-id="'+$(this).attr('data-id')+'"] a').click();
+				} else {
+						window.location.href = "/index.php/apps/files?dir=%2F&view=" + $(this).attr('data-id');;
+				}
+
 		});
 
 		$('[id^=app-content-tag]').on('show', function(e) {

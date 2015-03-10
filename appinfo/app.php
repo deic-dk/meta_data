@@ -5,33 +5,37 @@ OC::$CLASSPATH['OCA\meta_data\hooks']  = 'apps/meta_data/libs/hooks.php';
 OC::$CLASSPATH['OCA\Meta_data\Helper'] = 'apps/meta_data/libs/helper.php';
 
 
-$order=800;
+$order=3;
 
 \OCP\App::addNavigationEntry(
 		array(
 				'appname' => 'meta_data', 
 				'id' => 'meta_data',
-				'order' => 800,
+				'order' => $order,
 				'href' => OCP\Util::linkTo("meta_data", "index.php"),
 				'name' => 'Manage tags'
 		)
 );
 
+
 $tags=\OCA\Meta_data\Helper::searchTag('%',\OCP\User::getUser()); 
 
 
 foreach ($tags as $tag){
+		$order+=1./100;
 		\OCA\Files\App::getNavigationManager()->add(
 				array(
 						"id" => 'tag-'.$tag['tagid'],
 						"appname" => 'meta_data',
 						"script" => 'list.php',
-						"order" =>  ++$order,
+						"order" =>  $order,
 						"name" => $tag['descr']
 				)
 		);
 
 }
+ 
+
 
 if(\OCP\User::isLoggedIn() ){
 		OCP\Util::addScript('meta_data', 'fileactions');
@@ -41,7 +45,6 @@ if(\OCP\User::isLoggedIn() ){
 		\OCP\Util::addStyle('meta_data', 'filelist');
 }
 
-//\OCP\Util::addStyle('meta_data', 'meta_data');
 //\OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
 \OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\meta_data\hooks', 'deleteFile');  
 

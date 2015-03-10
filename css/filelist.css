@@ -1,0 +1,32 @@
+span.label {
+		margin-right:6px;
+}
+
+
+div.filetags-wrap {
+		display: inline-block;
+		height: auto;
+		line-height: 1;
+		padding: 0 15px 0 0;
+		position: relative;	  
+		top: 2px;
+}
+
+div.filetags-wrap span.tagtext {
+		font-size: x-small;
+		font-weight: bold;
+		padding-left: 4px;
+		height: auto;
+		padding: 10px 0 2px 0;
+		display: inline-block;
+}
+
+span.label {
+		cursor: pointer;
+}
+
+div.filelink-wrap {
+		overflow: hidden;
+}
+
+

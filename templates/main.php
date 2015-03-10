@@ -40,17 +40,16 @@
   <th id="headerName" class="column-name">
     <div id="headerName-container" class="row">
       <div class="col-xs-4 col-sm-1"></div>
-      <div class="col-xs-3 col-sm-3">	  
-        <a class="name sort columntitle" data-sort="descr">
+      <div class="col-xs-6 col-sm-6">	  
+	<a class="name sort columntitle" data-sort="descr">
 		  <span>Tag name</span>         
           <span class="sort-indicator hidden icon-triangle-n"></span>
 	    </a>
-      </div>
-      <div class="col-xs-3 col-sm-3">	  
-        <a class="color sort columntitle" data-sort="color">
-		  <span class="text-semibold">Tag color</span>         
+<span> / </span>
+        <a class="name sort columntitle" data-sort="color">
+		  <span>Tag color</span>         
           <span class="sort-indicator icon-triangle-n"></span>
-	    </a>
+		</a>
       </div>
     </div>
   </th>

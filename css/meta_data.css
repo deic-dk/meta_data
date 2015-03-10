@@ -1,9 +1,7 @@
-span.tagtext {
-		line-height: 1.5;
-		height: 33px;
-		padding: 5px 0 8px 0;
-		display: inline-block;
+table th .columntitle {
+		display: inline-block !important;
 }
+
 
 td.display {
 		text-align: center;
@@ -11,7 +9,7 @@ td.display {
 
 input.edittag {
 		line-height: 1.5;
-		padding: 2px 0px 4px 5px;;
+		padding: 2px 0px 4px 5px;
 		position: relative;
 		top: -5px;
 

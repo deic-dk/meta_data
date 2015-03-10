@@ -8,11 +8,6 @@
 	FileList.prototype = _.extend({}, OCA.Files.FileList.prototype, {
 		appName: 'Meta_data',
    	    
-
-		initialize: function($el, options) {
-				return OCA.Files.FileList.prototype.initialize.apply(this, arguments);
-		},
-
 		reload: function() {
 				if(this.tagid) {
 						this._selectedFiles = {};
@@ -64,10 +59,6 @@
 
 				return new OCA.Files.FileSummary($tr);
 		},
-
-		_createRow: function(fileData) {
-				return OCA.Files.FileList.prototype._createRow.apply(this, arguments); 
-		}
 
 	});
 
