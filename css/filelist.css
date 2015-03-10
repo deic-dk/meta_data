@@ -12,9 +12,8 @@ div.filetags-wrap {
 		top: 2px;
 }
 
-div.filetags-wrap span.tagtext {
-		font-size: x-small;
-		font-weight: bold;
+/*div.filetags-wrap*/ 
+span.tagtext {
 		padding-left: 4px;
 		height: auto;
 		padding: 10px 0 2px 0;

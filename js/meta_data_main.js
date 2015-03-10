@@ -15,12 +15,15 @@ function updateTagsView(sortValue, direction){
 									total+=value.size;
 									$('tbody#fileList').append(' \
 													<tr data-id="'+value.tagid+'" data-name="'+value.descr+'">\
-													<td class="filename">\
+													<td class="filename" style="height:34px">\
+													<div class="row">\
 													<div class="col-xs-1 text-right"></div>\
-													<div class="col-xs-8 filelink-wrap">\
-													<span class="tagtext">\
+													<div class="col-xs-8 filelink-wrap" style="height:34px">\
+													<span class="taginfo">\
 													<a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.tagid+'" style="text-decoration:none" >\
-													<span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"><i class="icon-tag" style="display: inline;"></i>'+value.descr+'</span>\
+													<span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
+														<i class="icon-tag" style="display: inline;"></i><span class="tagtext">'+value.descr+'</span>\
+													</span>\
 													</a>\
 													<input class="edittag" type="text" value="'+value.descr+'" style="display: none">\
 													<div class="color-box color-1" style="display:none"></div>\
@@ -46,6 +49,7 @@ function updateTagsView(sortValue, direction){
 													</div>\
 													<div class="btn-group btn-group-xs confirm" style="display:none">\
 													<a class="btn btn-flat btn-default action-primary action action-ok" href="#" original-title=""> Confirm</a>\
+													</div>\
 													</div>\
 													</div>\
 													</td>\
@@ -189,7 +193,7 @@ $(document).ready(function() {
 		$("tbody#fileList").on('click', 'tr td.filename a.action-edit', function(){
 				$(this).parent('div').siblings('div.confirm').toggle();
 				$(this).parent('div').hide();
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.tagtext').children().toggle(); 
+				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children().toggle(); 
 		});	
 
 		$('tbody#fileList').on('click', 'tr a.action-delete', function(){
@@ -215,7 +219,7 @@ $(document).ready(function() {
 		$("tbody#fileList").on('click', 'tr td.filename a.action-ok', function(){
 				$(this).parent('div.confirm').hide();
 				$(this).parent('div').siblings('div.fileactions').show();
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.tagtext').children().toggle(); 
+				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children().toggle(); 
 
 				var color   = $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('div.border').attr('class');
 				color=color.replace('color-box','').replace('border','').replace(' ','');
@@ -225,14 +229,14 @@ $(document).ready(function() {
 						newname = $(this).parents('tr').attr('data-name');
 				}
 
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.tagtext').children('a').children('span').removeClass(function (index, css) {
+				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('a').children('span').removeClass(function (index, css) {
 						return (css.match (/(^|\s)label-\S+/g) || []).join(' ');
 				}).addClass(colorTranslate(color));
 				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] span').removeClass(function (index, css) {
 						return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
 				}).addClass(colorTranslateTag(color));		
 
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.tagtext').children('span').html('<i class="icon-tag" style="display: inline;"></i>'+newname);
+				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('span').html('<i class="icon-tag" style="display: inline;"></i>'+newname);
 				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
 				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a i').addClass(colorTranslateTag(color));
 				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('input').val(newname);

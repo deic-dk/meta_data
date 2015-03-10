@@ -1,7 +1,7 @@
 <?php
 
 // Highlight current menu item
-//OCP\App::setActiveNavigationEntry('meta_data');
+\OCP\App::setActiveNavigationEntry('meta_data');
 
 
 //\OCP\Util::addScript('meta_data', 'meta_data_search');
