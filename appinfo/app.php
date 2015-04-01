@@ -13,7 +13,7 @@ $order=3;
 				'id' => 'meta_data',
 				'order' => $order,
 				'href' => OCP\Util::linkTo("meta_data", "index.php"),
-				'name' => 'Manage tags'
+				'name' => 'Metadata'
 		)
 );
 
