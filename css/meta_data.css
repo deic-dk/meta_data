@@ -14,6 +14,10 @@ input.edittag {
 
 }
 
+.meta_data {
+  margin-left:20px;
+}
+
 .color-box {
 		width: 20px;
 		height: 20px;
@@ -56,20 +60,36 @@ input.edittag {
 		background-color: #d9534f ;
 }
 
+.notitle .ui-dialog-titlebar {
+	display:none
+}
 
+div#meta_data_container {
+   max-height: 85%;
+   overflow-y: auto;
+}
 
+div#emptysearch {
+		font-size: x-large;
+		color: #ddd;
+		text-align: center;
+		margin-top: 40px;
+		margin-bottom: 20px;
+}
 
+input.edit {
+  width: 25% !important;
+}
 
-
-
-
-
+span.deletekey {
+  cursor: pointer;
+}
 
 
 
 /* ------------- OLD STUFF ----------------- */
 
-
+/*
 #meta_data_tags_container {
 		float: left;
 		width: 220px;
@@ -111,13 +131,9 @@ a.action > img {
 		vertical-align: text-bottom;
 }
 
-//a.action {
-//		margin-left: 20px;
-//}
 
 
 
-/* Here is the style for the meta_data_table */
 
 
 #meta_data_main {
@@ -174,9 +190,8 @@ a.action > img {
 }
 
 #meta_data_table .meta_data_add {
-		/*  border-bottom: 2px solid #ddd;*/
-		height: 32px; /*42px;*/
-		line-height: 32px; /*42px;*/
+		height: 32px; 
+		line-height: 32px; 
 		text-align: center;
 		vertical-align: middle;
 		color: #bbb;
@@ -193,9 +208,8 @@ a.action > img {
 }
 
 #meta_data_table li {
-		/*  border-bottom: 2px solid #ddd;*/
-		height: 33px; /*42px;*/
-		line-height: 33px; /*42px;*/
+		height: 33px; 
+		line-height: 33px; 
 		padding: 0px 0 0 15px;
 }
 
@@ -309,7 +323,6 @@ div#emptysearch {
 }
 
 
-/* file info box */
 div#fileInfo {
 		height: 100px;
 		width: 100%;
@@ -416,3 +429,4 @@ div#taginfo a {
 		text-weight: bold;
 		text-align: center;
 }
+*/

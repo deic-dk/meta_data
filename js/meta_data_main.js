@@ -15,25 +15,29 @@ function updateTagsView(sortValue, direction){
 									total+=value.size;
 									$('tbody#fileList').append(' \
 													<tr data-id="'+value.tagid+'" data-name="'+value.descr+'">\
-													<td class="filename" style="height:34px">\
-													<div class="row">\
-													<div class="col-xs-1 text-right"></div>\
-													<div class="col-xs-8 filelink-wrap" style="height:34px">\
-													<span class="taginfo">\
-													<a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.tagid+'" style="text-decoration:none" >\
-													<span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
-														<i class="icon-tag" style="display: inline;"></i><span class="tagtext">'+value.descr+'</span>\
-													</span>\
-													</a>\
-													<input class="edittag" type="text" value="'+value.descr+'" style="display: none">\
-													<div class="color-box color-1" style="display:none"></div>\
-													<div class="color-box color-2" style="display:none"></div>\
-													<div class="color-box color-3" style="display:none"></div>\
-													<div class="color-box color-4" style="display:none"></div>\
-													<div class="color-box color-5" style="display:none"></div>\
-													<div class="color-box color-6" style="display:none"></div>\
-													</span>\
-													</div>\
+													  <td class="filename" style="height:34px">\
+													    <div class="row">\
+													      <div class="col-xs-1 text-right"></div>\
+													      <div class="col-xs-8 filelink-wrap" style="height:34px">\
+													        <span class="taginfo">\
+													          <a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.tagid+'" style="text-decoration:none" >\
+													            <span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
+														          <i class="icon-tag" style="display: inline;"></i>\
+																  <span class="tagtext">'+value.descr+'</span>\
+													            </span>\
+													          </a>\
+													        </span>\
+															<span class="editstuff hidden">\
+															  <input class="edittag" type="text" value="'+value.descr+'">\
+													          <div class="color-box color-1"></div>\
+													          <div class="color-box color-2"></div>\
+													          <div class="color-box color-3"></div>\
+													          <div class="color-box color-4"></div>\
+													          <div class="color-box color-5"></div>\
+													          <div class="color-box color-6"></div>\
+													          <span class="meta_data btn-group btn-group-xs"><a href="#" original-title="" class="btn btn-flat btn-default action action-primary action-meta_data">Meta data template</a></span>\
+															</span>\
+													      </div>\
 													<div class="col-xs-3 fileactions-wrap text-right">\
 													<div class="btn-group btn-group-xs fileactions">\
 													<a class="btn btn-flat btn-default action-primary action action-edit" href="#" original-title=""> Edit</a>\
@@ -94,6 +98,20 @@ function resetInput(){
 		$('div#controls input.edittag').val('');;
 		$('div#newtag').toggle();
 }
+
+
+function newEntry(entry){
+    entry = typeof entry !== 'undefined' ? entry : null;
+	
+	if(!entry){
+ 	  return $('<li class="new"><span class="keyname hidden"></span><input class="edit" type="text" placeholder="New key name" value=""><span class="deletekey">&#10006;</span><input class="value hidden" type="text" value=""></li>');
+	} else {
+      return $('<li id="'+entry['keyid']+'"><span class="keyname hidden">'+entry['descr']+'</span><input class="edit" type="text" value="'+entry['descr']+'"><span class="deletekey">&#10006;</span><input class="'+entry['keyid']+' value hidden" type="text" value=""></li>');
+	}
+}
+
+
+
 
 $(document).ready(function() {
 		updateTagsView("color");
@@ -193,7 +211,9 @@ $(document).ready(function() {
 		$("tbody#fileList").on('click', 'tr td.filename a.action-edit', function(){
 				$(this).parent('div').siblings('div.confirm').toggle();
 				$(this).parent('div').hide();
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children().toggle(); 
+				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children().toggleClass('hidden'); 
+				$(this).parent('div').find('.meta_data').toggle();
+
 		});	
 
 		$('tbody#fileList').on('click', 'tr a.action-delete', function(){
@@ -209,6 +229,151 @@ $(document).ready(function() {
 		});
 
 
+		/*
+		 * Bind click to Edit meta data button
+		 */
+		$("tbody#fileList").on('click', 'tr td.filename a.action-meta_data', function(){
+		    var title=$(this).parents('.filename').find('.tagtext').html();
+			var tagid=$(this).parents('tr').attr('data-id');
+
+
+			var html = $('<div><span id="tagid" class="'+tagid+'"><h3 class="oc-dialog-title">Meta data template editor for the tag: '+title+'</h3></span><a class="oc-dialog-close close svg"></a><div id="meta_data_container">\
+				<div id=\"emptysearch\">No meta data defined</div><ul id="meta_data_keys"></ul></div><div style="text-align:center;"><button id="add_key" class="btn btn-flat btn-default">Add meta data field</button></div>\
+				<div style="position:absolute;bottom:0;left:0;" class="oc-dialog-buttonrow onebutton"><button id="popup_ok" class="btn-primary">OK</button><button id="popup_cancel" class="btn-default" style="margin-right:15px;">Cancel</button></div></div>');
+			
+
+			$(html).dialog({
+			  dialogClass: "oc-dialog notitle",
+			  resizeable: false,
+			  draggable: false,
+			  height: 800,
+			  width: 1024
+			});
+
+			$.ajax({
+			  url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
+			  async: false,
+			  data: {
+				tagid: tagid
+			  },
+			  type: "POST",
+			  success: function(result) {
+				if(result['data']){
+				  $('body').find('#emptysearch').toggleClass('hidden');
+				  $.each(result['data'], function(i,item){
+					$('body').find('#meta_data_keys').append(newEntry(item));
+				  });
+				}
+			  }
+			});
+
+
+
+
+		});
+
+		$('body').on('click', '#add_key', function(){
+		  $('body').find('#emptysearch').hide();
+		  $('body').find('#meta_data_keys').append(newEntry());
+		  $('body').find('#meta_data_keys li:last-child input').focus();
+		});
+
+		$('body').on('focusout', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.edit', function(){
+		  if( !$(this).val() ){
+			if($(this).parent('li').siblings().size() === 0) $('body').find('#emptysearch').show();
+			$(this).parent('li').remove();
+		  } else if ( !$(this).parent('li').hasClass('new')) {
+			 $(this).parent('li').addClass('alt') 
+		  }
+		}); 
+
+		$('body').on('keypress', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.edit', function (e) {
+		  var key = e.which;
+		  if(key == 13)  
+		  {
+			$('body').find('#add_key').focus();
+			return false;  
+		  }
+		});
+
+
+		$('body').on('click', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li span.deletekey', function(){
+		  if($(this).parent('li').siblings().size() === 0) $('body').find('#emptysearch').show();
+		  if( !$(this).parent('li').hasClass('new') ){
+			$(this).parent('li').addClass('del');
+			$(this).parent('li').hide();
+		  } else {
+			$(this).parent('li').remove();
+		  }
+		}); 
+
+
+
+		$('body').on('click', '.oc-dialog-close', function(){
+		  $('body').find('.ui-dialog').remove();
+		});
+
+		$('body').on('click', '#popup_cancel', function(){
+		  $('body').find('.ui-dialog').remove();
+		});
+
+
+		$('body').on('click', '#popup_ok', function(){
+		  $('body').find('#meta_data_keys li').each(function() {
+			if($(this).children('input.edit').val() != '' && $(this).hasClass('new') ){
+			  $.ajax({                                                                                                                                                                                                                    
+				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),                                                                                                                                                                      
+				type: "POST",                                                                                                                                                                                                             
+				data: {                                                                                                                                                                                                                   
+				  tagOp: 'new_key',                                                                                                                                                                                                        
+				  keyName: $(this).children('input.edit').val(),                                                                                                                                                                                                   
+				  tagId: $('body').find('#tagid').attr('class')                                                                                                                                                                                                        
+				},                                                                                                                                                                                                                        
+				success: function(result) {               
+				},
+			  });
+			} else if($(this).children('input.edit').val() != '' && $(this).hasClass('del')) {
+			  $.ajax({
+				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
+				type: "POST",
+				data: {
+				  tagOp: 'delete_key',
+				  keyId: $(this).attr('id'),
+				  tagId: $('body').find('#tagid').attr('class')
+				},
+				success: function(result) {
+				},
+			  });
+			} else if($(this).children('input.edit').val() != '' && $(this).hasClass('alt')) {
+			  $.ajax({
+				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
+				type: "POST",
+				data: {
+				  tagOp: 'rename_key',
+				  keyId:  $(this).attr('id'),
+				  tagId:  $('body').find('#tagid').attr('class'),
+				  newName:$(this).children('input.edit').val()
+				},
+				success: function(result) {
+				},
+			  });
+			}	  
+		  });
+		  $('body').find('.ui-dialog').remove();
+		});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		/*
 		 * Handle edit tag
@@ -217,39 +382,39 @@ $(document).ready(function() {
 
 
 		$("tbody#fileList").on('click', 'tr td.filename a.action-ok', function(){
-				$(this).parent('div.confirm').hide();
-				$(this).parent('div').siblings('div.fileactions').show();
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children().toggle(); 
+		  $(this).parent('div.confirm').hide();
+		  $(this).parent('div').siblings('div.fileactions').show();
+		  $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children().toggleClass('hidden');  
 
-				var color   = $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('div.border').attr('class');
-				color=color.replace('color-box','').replace('border','').replace(' ','');
-				var tagid   = $(this).parents('tr').attr('data-id');
-				var newname = $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('input').val();	
-				if(newname == ""){
-						newname = $(this).parents('tr').attr('data-name');
-				}
+		  var color   = $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('div.border').attr('class');
+		  color=color.replace('color-box','').replace('border','').replace(' ','');
+		  var tagid   = $(this).parents('tr').attr('data-id');
+		  var newname = $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('input').val();	
+		  if(newname == ""){
+			newname = $(this).parents('tr').attr('data-name');
+		  }
 
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('a').children('span').removeClass(function (index, css) {
-						return (css.match (/(^|\s)label-\S+/g) || []).join(' ');
-				}).addClass(colorTranslate(color));
-				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] span').removeClass(function (index, css) {
-						return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
-				}).addClass(colorTranslateTag(color));		
+		  $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('a').children('span').removeClass(function (index, css) {
+			return (css.match (/(^|\s)label-\S+/g) || []).join(' ');
+		  }).addClass(colorTranslate(color));
+		  $('ul.nav-sidebar li[data-id="tag-'+tagid+'"] span').removeClass(function (index, css) {
+			return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
+		  }).addClass(colorTranslateTag(color));		
 
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('span').html('<i class="icon-tag" style="display: inline;"></i>'+newname);
-				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
-				$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a i').addClass(colorTranslateTag(color));
-				$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('input').val(newname);
+		  $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('span').html('<i class="icon-tag" style="display: inline;"></i>'+newname);
+		  $('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
+		  $('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a i').addClass(colorTranslateTag(color));
+		  $(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').find('input').val(newname);
 
-				if($(this).parents('td').siblings('td.display').children('input').is(':checked')){
-						var state=1;
-				} else {
-						var state=0;
-				}
-				$.ajax({
-						url: OC.filePath('meta_data', 'ajax', 'update.php'), 
-						data: {tagid: tagid, tagname: newname, color: color, visible: state},
-				});
+		  if($(this).parents('td').siblings('td.display').children('input').is(':checked')){
+			var state=1;
+		  } else {
+			var state=0;
+		  }
+		  $.ajax({
+			url: OC.filePath('meta_data', 'ajax', 'update.php'), 
+			data: {tagid: tagid, tagname: newname, color: color, visible: state},
+		  });
 		});	
 
 
