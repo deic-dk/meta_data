@@ -81,6 +81,18 @@ input.edit {
   width: 25% !important;
 }
 
+
+span.keyname {
+  text-align: right;
+  display: inline-block;
+  width: 25% !important;
+}
+
+input.value{
+  width:60% !important;
+  margin-left: 10px;
+}
+
 span.deletekey {
   cursor: pointer;
 }

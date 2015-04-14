@@ -41,7 +41,7 @@ switch($_POST['tagOp']) {
     }
 
     case 'update_file_key': {
-        $result = $ctags->updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['newName']);
+        $result = $ctags->updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['value']);
         break;
     }
 }

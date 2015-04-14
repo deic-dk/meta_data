@@ -192,10 +192,10 @@ class tags {
     return $result;
   }
   
-  public function loadFileKeys($fileid){
+  public function loadFileKeys($fileid,$tagid){
     $result = array();
-    $sql = "SELECT keyid,value FROM *PREFIX*meta_data_docKeys WHERE fileid=?";                                                          
-    $args = array($fileid);                                                                                              
+    $sql = "SELECT keyid,value FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=?";                                                          
+    $args = array($fileid, $tagid);                                                                                              
     $query = \OCP\DB::prepare($sql);                                                                                       
     $resRsrc = $query->execute($args);
 
@@ -247,43 +247,67 @@ class tags {
 
 
   public function updateFileKeys ($fileid, $tagid, $keyid, $value){
-    if(is_null($value)){
-      $value="";
-    }
-    
-    //$result = "";
-    $sql = 'SELECT id FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND keyid=?';
-    $args = array($fileid, $keyid);
+    $sql = 'SELECT id FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=? and keyid=?';
+    $args = array($fileid, $tagid, $keyid);
     $query = \OCP\DB::prepare($sql);
     $output = $query->execute($args);
     while($row=$output->fetchRow()){
       $result[] = $row;
     } 
-    
-    if(count($result) == 0 ) {       
-      $sql = 'INSERT INTO *PREFIX*meta_data_docKeys (fileid,tagid,keyid,value) VALUES (?,?,?,?)';
-      $args = array($fileid, $tagid, $keyid ,$value);
-      $query = \OCP\DB::prepare($sql);
-      $resRsrc = $query->execute($args);
-    } else if (count($result) == 1 ) {
-      $sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=?';
-      $args = array($value, $fileid, $keyid);
-      $query = \OCP\DB::prepare($sql);
-      $resRsrc = $query->execute($args);
-    } else {
-      return FALSE;
-    }
-
-  }
-
-  public function getMimeType($mtype){
-    $sql = "SELECT mimetype FROM *PREFIX*mimetypes WHERE id = ?";
-    $args = array($mtype);                                                                                    
-    $query = \OCP\DB::prepare($sql);                                                                                       
-    $output = $query->execute($args);                                                                                     
-
-    return $output->fetchRow();
-  }
+	if(count($result) == 0 ) {       
+	  $sql = 'INSERT INTO *PREFIX*meta_data_docKeys (fileid,tagid,keyid,value) VALUES (?,?,?,?)';
+	  $args = array($fileid, $tagid, $keyid ,$value);
+	  $query = \OCP\DB::prepare($sql);
+	  $resRsrc = $query->execute($args);
+	} else if (count($result) == 1 ) {
+	  $sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=? AND tagid=?';
+	  $args = array($value, $fileid, $keyid, $tagid);
+	  $query = \OCP\DB::prepare($sql);
+	  $resRsrc = $query->execute($args);
+	} else {
+	  return FALSE;
+	}
 
 
-}
+
+
+/*    if(is_null($value)){
+	  $value="";
+	}
+
+	//$result = "";
+	$sql = 'SELECT id FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND keyid=?';
+	$args = array($fileid, $keyid);
+	$query = \OCP\DB::prepare($sql);
+	$output = $query->execute($args);
+	while($row=$output->fetchRow()){
+	  $result[] = $row;
+	} 
+
+	if(count($result) == 0 ) {       
+	  $sql = 'INSERT INTO *PREFIX*meta_data_docKeys (fileid,tagid,keyid,value) VALUES (?,?,?,?)';
+	  $args = array($fileid, $tagid, $keyid ,$value);
+	  $query = \OCP\DB::prepare($sql);
+	  $resRsrc = $query->execute($args);
+	} else if (count($result) == 1 ) {
+	  $sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=?';
+	  $args = array($value, $fileid, $keyid);
+	  $query = \OCP\DB::prepare($sql);
+	  $resRsrc = $query->execute($args);
+	} else {
+	  return FALSE;
+	}
+ */
+	}
+
+	public function getMimeType($mtype){
+	  $sql = "SELECT mimetype FROM *PREFIX*mimetypes WHERE id = ?";
+	  $args = array($mtype);                                                                                    
+	  $query = \OCP\DB::prepare($sql);                                                                                       
+	  $output = $query->execute($args);                                                                                     
+
+	  return $output->fetchRow();
+	}
+
+
+	}
