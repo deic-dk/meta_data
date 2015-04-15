@@ -10,7 +10,7 @@
    	    
 		reload: function() {
 				if(this.tagid) {
-						this._selectedFiles = {};
+				        this._selectedFiles = {};
 						this._selectionSummary.clear();
 						this.$el.find('.select-all').prop('checked', false);
 						this.showMask();

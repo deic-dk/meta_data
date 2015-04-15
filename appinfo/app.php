@@ -40,9 +40,9 @@ foreach ($tags as $tag){
 if(\OCP\User::isLoggedIn() ){
 		OCP\Util::addScript('meta_data', 'fileactions');
 		OCP\Util::addScript('meta_data', 'app');
-		\OCP\Util::addScript('meta_data', 'fileDropdown');
+		OCP\Util::addScript('meta_data', 'fileDropdown');
 
-		\OCP\Util::addStyle('meta_data', 'filelist');
+		OCP\Util::addStyle('meta_data', 'filelist');
 }
 
 //\OCP\Util::addScript('meta_data', 'mp3/id3-minimized');
