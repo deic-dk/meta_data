@@ -36,7 +36,6 @@ OCA.Meta_data.App = {
   },
 
   destroy: function() {
-	alert('hello');
 	this.removeTaggedFiles();
 	this._FileList = null;
 	delete this._globalActionsInitialized;
@@ -335,7 +334,7 @@ $(document).ready(function() {
    *
    */ 
 
-  $('tbody').on('click', 'span.label', function(e){
+  $('tbody').on('click', 'span.label:not(.more)', function(e){
 	e.stopPropagation();
 	var title=$(this).children('span.tagtext').html();
 	var file =$(this).parents('tr').attr('data-file');
