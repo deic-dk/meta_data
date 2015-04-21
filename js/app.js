@@ -436,5 +436,7 @@ $(document).ready(function() {
 	updateFileListTags($(this).parents('tr'), true)
   });
 
-
+  OC.search.resultTypes.tag = "Tag" ;
+  OC.search.resultTypes.metadata = "Metadata" ;
+  
 })

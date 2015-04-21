@@ -1,8 +1,13 @@
 <?php
-OC::$CLASSPATH['OCA\meta_data\tags']   = 'apps/meta_data/libs/tags.php';
-OC::$CLASSPATH['OC_meta_data_mainview']= 'apps/meta_data/libs/file_viewer.php';
-OC::$CLASSPATH['OCA\meta_data\hooks']  = 'apps/meta_data/libs/hooks.php';
-OC::$CLASSPATH['OCA\Meta_data\Helper'] = 'apps/meta_data/libs/helper.php';
+OC::$CLASSPATH['OCA\meta_data\tags']       = 'apps/meta_data/lib/tags.php';
+OC::$CLASSPATH['OC_meta_data_mainview']    = 'apps/meta_data/lib/file_viewer.php';
+OC::$CLASSPATH['OCA\meta_data\hooks']      = 'apps/meta_data/lib/hooks.php';
+OC::$CLASSPATH['OCA\Meta_data\Helper']     = 'apps/meta_data/lib/helper.php';
+OC::$CLASSPATH['OCA\Search_meta_data\Tag'] = 'apps/meta_data/lib/search_tag.php';
+
+
+OC_Search::registerProvider('OCA\Search_meta_data\Tag');
+OC_Search::registerProvider('OCA\Search_meta_data\Metadata');
 
 
 $order=3;
