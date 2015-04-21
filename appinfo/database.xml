@@ -29,7 +29,7 @@
         <length>80</length>
       </field>     
       <field>
-        <name>visible</name>
+        <name>public</name>
         <type>integer</type>
         <length>1</length>
       </field>     
