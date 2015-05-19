@@ -168,9 +168,9 @@ function colorTranslate(color){
   if(color.indexOf('color-1') > -1)  return "label-default";
   if(color.indexOf('color-2') > -1)  return "label-primary";
   if(color.indexOf('color-3') > -1)  return "label-success";
-  if(color.indexOf('color-4') > -1) return "label-info";
-  if(color.indexOf('color-5') > -1) return "label-warning";
-  if(color.indexOf('color-6') > -1) return "label-danger";
+  if(color.indexOf('color-4') > -1)  return "label-info";
+  if(color.indexOf('color-5') > -1)  return "label-warning";
+  if(color.indexOf('color-6') > -1)  return "label-danger";
   return "label-default";
 }
 
@@ -195,6 +195,7 @@ function start_and_end(str, element) {
 
 function updateSidebar(){
   $('.nav-sidebar li[data-id^=tag-]').remove();
+  $('ul.nav-sidebar li#tags').hide();
   $.ajax({
 	url: OC.filePath('meta_data', 'ajax', 'temp.php'),
 	success: function(response)	{
@@ -202,6 +203,7 @@ function updateSidebar(){
 		var tags = '';
 		$.each( response['tags'], function(key,value) {
 		  if(value.public==1){
+			$('ul.nav-sidebar li#tags').show();
 			tags = tags+'<li data-id="tag-'+value.tagid+'"><a href="#"><i class="icon icon-tag '+colorTranslateTag(value.color)+'" data-tag="'+value.tagid+'"></i><span>'+value.descr+'</span></a></li>';
 		  }
 		});
@@ -286,7 +288,7 @@ $(document).ready(function() {
   });
 
   if (OCA.Files) {
-	OCA.Meta_data.App.modifyFilelist();
+//	OCA.Meta_data.App.modifyFilelist();
 	OCA.Meta_data.App.modifyFilelist_2();
   }
 
