@@ -68,44 +68,32 @@ OCA.Meta_data.App = {
 
   modifyFilelist: function() {
 	var oldCreateRow = OCA.Files.FileList.prototype._createRow;
-	OCA.Meta_data.FileList.prototype._createRow = function(fileData) {
-    var tr = oldCreateRow.apply(this, arguments);
+	OCA.Files.FileList.prototype._createRow = function(fileData) {
+	  var tr = oldCreateRow.apply(this, arguments);
 	  
 	  if(fileData.type == 'file'){
-		var tags = '';
-		$.ajax({
-		  async: false,
-		  url: OC.filePath('meta_data', 'ajax', 'single.php'),
-		  data: {fileid: fileData.id},
-		  success: function( response )
-		  {
-			if( response){
-
-
-			  var tagwidth = 0;
-			  var overflow = 0;
-			  tr.find('div.filelink-wrap').after('<div class="filetags-wrap col-xs-4"></div>');
-			  $.each(response['tags'], function(key,value) {
-				var color = colorTranslate(value.color);
-				if(tagwidth + value.descr.length <= 20){
-				  tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
-				} else {
-				  overflow += 1;
-				}
-				tagwidth += value.descr.length;
-			  });
-			  if(overflow > 0){
-				tr.find('div.filetags-wrap').append('<span class=\'label outline label-default more\'>+'+overflow+' more</span>');
-			  }
-
-
-			  tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
-			  var width = tr.find('div.filelink-wrap').width();
-			  var filename = tr.find('span.innernametext').html();
-			  tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));										
-			}
+		var tagwidth = 0;
+		var overflow = 0;
+		tr.find('div.filelink-wrap').after('<div class="filetags-wrap col-xs-4"></div>');
+		$.each(fileData.tags, function(key,value) {
+		  var color = colorTranslate(value.color);
+		  if(tagwidth + value.descr.length <= 20){
+			tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
+		  } else {
+			overflow += 1;
 		  }
+		  tagwidth += value.descr.length;
 		});
+		if(overflow > 0){
+		  tr.find('div.filetags-wrap').append('<span class=\'label outline label-default more\'>+'+overflow+' more</span>');
+		}
+
+
+		tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
+		var width = tr.find('div.filelink-wrap').width();
+		var filename = tr.find('span.innernametext').html();
+		tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));										
+
 
 
 	  }
@@ -113,54 +101,28 @@ OCA.Meta_data.App = {
 	}
   },
 
-  modifyFilelist_2: function() {
-	var oldCreateRow = OCA.Files.FileList.prototype._createRow;
-	OCA.Files.FileList.prototype._createRow = function(fileData) {
-    var tr = oldCreateRow.apply(this, arguments);
-	  
-	  if(fileData.type == 'file'){
-		var tags = '';
-		$.ajax({
-		  async: false,
-		  url: OC.filePath('meta_data', 'ajax', 'single.php'),
-		  data: {fileid: fileData.id},
-		  success: function( response )
-		  {
-			if( response){
-
-
-			  var tagwidth = 0;
-			  var overflow = 0;
-			  tr.find('div.filelink-wrap').after('<div class="filetags-wrap col-xs-4"></div>');
-			  $.each(response['tags'], function(key,value) {
-				var color = colorTranslate(value.color);
-				if(tagwidth + value.descr.length <= 20){
-				  tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
-				} else {
-				  overflow += 1;
-				}
-				tagwidth += value.descr.length;
-			  });
-			  if(overflow > 0){
-				tr.find('div.filetags-wrap').append('<span class=\'label outline label-default more\'>+'+overflow+' more</span>');
-			  }
-
-
-			  tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
-			  var width = tr.find('div.filelink-wrap').width();
-			  var filename = tr.find('span.innernametext').html();
-			  tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));										
-			}
-		  }
-		});
-
-
+  loadTags: function() {
+	OCA.Files.FileList.prototype.reload = function() {
+	  this._selectedFiles = {};
+	  this._selectionSummary.clear();
+	  this.$el.find('.select-all').prop('checked', false);
+	  this.showMask();
+	  if (this._reloadCall) {
+		this._reloadCall.abort();
 	  }
-	  return tr;
+	  this._reloadCall = $.ajax({
+		url: OC.linkTo('meta_data','ajax/list_mod.php'),
+		data: {
+		  dir : this.getCurrentDirectory(),
+		  sort: this._sort,
+		  sortdirection: this._sortDirection
+		}
+	  });
+	  var callBack = this.reloadCallback.bind(this);
+	  return this._reloadCall.then(callBack, callBack);
+
 	}
   }
-
-
 };
 
 
@@ -280,7 +242,7 @@ $(document).ready(function() {
   $('[id^=app-content-tag]').on('show', function(e) {
 	var tagid = e.target.getAttribute('id').split('-');
 	OCA.Meta_data.App.initTaggedFiles($(e.target), tagid[3]);
-//	OCA.Meta_data.App.modifyFilelist();
+	//	OCA.Meta_data.App.modifyFilelist();
   });
 
   $('[id^=app-content-tag]').on('hide', function() {
@@ -288,8 +250,8 @@ $(document).ready(function() {
   });
 
   if (OCA.Files) {
-//	OCA.Meta_data.App.modifyFilelist();
-	OCA.Meta_data.App.modifyFilelist_2();
+	OCA.Meta_data.App.loadTags();
+	OCA.Meta_data.App.modifyFilelist();
   }
 
   /*
@@ -440,5 +402,5 @@ $(document).ready(function() {
 
   OC.search.resultTypes.tag = "Tag" ;
   OC.search.resultTypes.metadata = "Metadata" ;
-  
+
 })
