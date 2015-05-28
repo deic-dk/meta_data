@@ -10,7 +10,7 @@ function build_sorter_desc($key) {
 
 OCP\JSON::checkLoggedIn();
 \OC::$session->close();
-$l = OC_L10N::get('files');
+//$l = OC_L10N::get('files');
 
 // Load the files
 $dir = isset($_GET['dir']) ? $_GET['dir'] : '';
@@ -28,19 +28,19 @@ try {
 
   $permissions = $dirInfo->getPermissions();
 
-  $sortAttribute = isset($_GET['sort']) ? $_GET['sort'] : 'name';
-  $sortDirection = isset($_GET['sortdirection']) ? ($_GET['sortdirection'] === 'desc') : false;
+//  $sortAttribute = isset($_GET['sort']) ? $_GET['sort'] : 'name';
+//  $sortDirection = isset($_GET['sortdirection']) ? ($_GET['sortdirection'] === 'desc') : false;
 
   // make filelist
 
-  $files = \OCA\Files\Helper::getFiles($dir, $sortAttribute, $sortDirection);
-  $data['directory'] = $dir;
-  $data['files'] = \OCA\Files\Helper::formatFileInfos($files);
-  $data['permissions'] = $permissions;
+//  $files = \OCA\Files\Helper::getFiles($dir, $sortAttribute, $sortDirection);
+//  $data['directory'] = $dir;
+//  $data['files'] = \OCA\Files\Helper::formatFileInfos($files);
+//  $data['permissions'] = $permissions;
 
+  $files = isset($_GET['fileData']) ? $_GET['fileData'] : '';
 
-
-  foreach ($data['files'] as $nindex => $file){
+  foreach ($files as $nindex => $file){
     $tagids = \OCA\Meta_data\Helper::getFileTags($file['id']);
     $tags=[];
     foreach ($tagids as $index => $tag){
@@ -54,11 +54,13 @@ try {
 
 	if($tags != null){
 	  usort($tags,build_sorter_desc("color")); 
-	  $data['files'][$nindex]['tags']=$tags;
+	  $files[$nindex]['tags']=$tags;
 	}
   }
 
-
+  $data = array('files' => $files);
+  $data['directory'] = $dir;
+  $data['permissions'] = $permissions;
 
   OCP\JSON::success(array('data' => $data));
 } catch (\OCP\Files\StorageNotAvailableException $e) {
