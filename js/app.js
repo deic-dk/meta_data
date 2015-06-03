@@ -75,6 +75,7 @@ OCA.Meta_data.App = {
 	  var test = function(data, dir, callback) {
 		$.ajax({
 		  async: false,
+		  type: "POST",
 		  url: OC.linkTo('meta_data','ajax/list_mod.php'),
 		  data: {
 			fileData: data,
@@ -88,12 +89,22 @@ OCA.Meta_data.App = {
 	  }
 
 	  var dummy;
+	  var fileids = this.files.map(function(obj){return {id: obj.id }; });
 
-	  test(this.files, this.getCurrentDirectory(), function(data){ 
-	     dummy = data.data.files;
+	  test(fileids, this.getCurrentDirectory(), function(data){  		
+		dummy = data.files;
 	  });
 
-	  this.files=dummy;
+
+	  for(var i=0; i<this.files.length; i++){
+		var id=this.files[i].id;
+		var entry = $.grep(dummy, function(e){ return e.id==id});
+		if( typeof entry[0].tags !== 'undefined') {
+		  this.files[i]['tags'] = entry[0].tags;
+		} else {
+		  this.files[i]['tags'] = {};
+		}
+	  }
 
 
 	  return  oldnextPage.apply(this,arguments);
