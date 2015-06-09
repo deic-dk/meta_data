@@ -301,7 +301,8 @@ $(document).ready(function() {
 
 
 		$('body').on('click', '#popup_ok', function(){
-		  $('body').find('#meta_data_keys li').each(function() {
+		  var tagid=$(this).parent('div').siblings('span').attr('class'); 
+		  $(this).parent('div').siblings('div#meta_data_container').children('ul').children('li').each(function() {
 			if($(this).children('input.edit').val() != '' && $(this).hasClass('new') ){
 			  $.ajax({                                                                                                                                                                                                                    
 				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),                                                                                                                                                                      
@@ -309,7 +310,7 @@ $(document).ready(function() {
 				data: {                                                                                                                                                                                                                   
 				  tagOp: 'new_key',                                                                                                                                                                                                        
 				  keyName: $(this).children('input.edit').val(),                                                                                                                                                                                                   
-				  tagId: $('body').find('#tagid').attr('class')                                                                                                                                                                                                        
+				  tagId: tagid 
 				},                                                                                                                                                                                                                        
 				success: function(result) {               
 				},
@@ -321,7 +322,7 @@ $(document).ready(function() {
 				data: {
 				  tagOp: 'delete_key',
 				  keyId: $(this).attr('id'),
-				  tagId: $('body').find('#tagid').attr('class')
+				  tagId: tagid
 				},
 				success: function(result) {
 				},
@@ -333,7 +334,7 @@ $(document).ready(function() {
 				data: {
 				  tagOp: 'rename_key',
 				  keyId:  $(this).attr('id'),
-				  tagId:  $('body').find('#tagid').attr('class'),
+				  tagId:  tagid,
 				  newName:$(this).children('input.edit').val()
 				},
 				success: function(result) {
