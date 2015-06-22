@@ -7,7 +7,7 @@ OCA.Meta_data.App = {
   _dummy: null,
   _FileList: null,
 
-  initTaggedFiles: function($el, tagidx) {
+  initTaggedFiles: function($el, tagid) {
 	if (this._FileList && this._dummy==tagid) {
 	  return this._FileList;
 	}
