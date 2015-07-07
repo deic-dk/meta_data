@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2015, written by Christian Brinch, DeIC.
+ *
+ * This file is licensed under the Affero General Public License version 3
+ * or later.
+ *
+ * THIS FILE extends the default filelist. When the filelist is reloaded, tags
+ * are loaded too.
+ *
+ */
+ 
 (function() {
 
   var FileList = function($el, options) {
@@ -51,13 +62,6 @@
 	  else {
 		OCA.Files.FileList.prototype.updateEmptyContent.apply(this, arguments);
 	  }
-	},
-
-	_createSummary: function() {
-	  var $tr = $('<tr class="summary"></tr>');
-	  this.$el.find('tfoot').html($tr);
-
-	  return new OCA.Files.FileSummary($tr);
 	},
 
   });

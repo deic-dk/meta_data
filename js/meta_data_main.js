@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2015, written by Christian Brinch, DeIC.
+ *
+ * This file is licensed under the Affero General Public License version 3
+ * or later.
+ *
+ * THIS FILE contains the script for the meta data main view
+ *  
+ */
+
+
 function updateTagsView(sortValue, direction){	
   $('tbody#fileList').html('');
   $('tfoot').html('');
@@ -21,7 +32,7 @@ function updateTagsView(sortValue, direction){
 			  <div class="col-xs-8 filelink-wrap" style="height:34px">\
 			  <span class="taginfo">\
 			  <a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.tagid+'" style="text-decoration:none" >\
-			  <span class="label outline '+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
+			  <span class="label outline label-'+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
 			  <i class="icon-tag" style="display: inline;"></i>\
 			  <span class="tagtext">'+value.descr+'</span>\
 			  </span>\
@@ -379,7 +390,7 @@ $(document).ready(function() {
 
 	$(this).parents('div.fileactions-wrap').siblings('div.filelink-wrap').children('span.taginfo').children('a').children('span').removeClass(function (index, css) {
 	  return (css.match (/(^|\s)label-\S+/g) || []).join(' ');
-	}).addClass(colorTranslate(color));
+	}).addClass('label-'+colorTranslate(color));
 	$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] span').removeClass(function (index, css) {
 	  return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
 	}).addClass(colorTranslateTag(color));		

@@ -1,3 +1,14 @@
+/*
+ * Copyright (c) 2015, written by Christian Brinch, DeIC.
+ *
+ * This file is licensed under the Affero General Public License version 3
+ * or later.
+ *
+ * THIS FILE contains the main functions for the meta data app. Functions
+ * are documented below.
+ *
+ */
+ 
 if (!OCA.Meta_data){
   OCA.Meta_data = {};
 }
@@ -12,20 +23,16 @@ OCA.Meta_data.App = {
 	  return this._FileList;
 	}
 	this._dummy = tagid;
-	
 	this._FileList = new OCA.Meta_data.FileList(
 		$el,
 		{
 		  scrollContainer: $('#app-content'),
-		  //linksOnly: true,
 		  fileActions: this._createFileActions(),
 		  allowLegacyActions: true,
 		  tagid: tagid
 		}
 		);
-
 	this._FileList.$el.find('#emptycontent').text(t('Meta_data', 'No files found'));
-
 	return this._FileList;
   },
 
@@ -41,10 +48,10 @@ OCA.Meta_data.App = {
 	delete this._globalActionsInitialized;
   },
 
+
   _createFileActions: function() {
 	var fileActions = new OCA.Files.FileActions();
 	fileActions.registerDefaultActions();
-
 	fileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename,context) {
 	  // Action to perform when clicked
 	  if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
@@ -52,7 +59,11 @@ OCA.Meta_data.App = {
 		var tr = context.$file;
 		var itemType = 'file';                                                             
 		var itemSource = $(tr).data('id');
-		var html = '<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="test"></div></div>';
+		var html = '\
+				    <div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'">\
+					  <div id="test"></div>\
+					</div>\
+				   ';
 		$(html).appendTo( $(tr).find('td.filename') );  
 		$(tr).addClass('mouseOver');
 		addNewDropDown(itemSource);
@@ -71,7 +82,6 @@ OCA.Meta_data.App = {
   modifyFilelist: function() {
 	var oldnextPage = OCA.Files.FileList.prototype._nextPage;
 	OCA.Files.FileList.prototype._nextPage = function(animate) {
-
 	  var test = function(data, dir, callback) {
 		$.ajax({
 		  async: false,
@@ -84,18 +94,13 @@ OCA.Meta_data.App = {
 		  success: function(data){
 			callback(data);
 		  }
-
 		});
 	  }
-
 	  var dummy;
 	  var fileids = this.files.map(function(obj){return {id: obj.id }; });
-
 	  test(fileids, this.getCurrentDirectory(), function(data){  		
 		dummy = data.files;
 	  });
-
-
 	  for(var i=0; i<this.files.length; i++){
 		var id=this.files[i].id;
 		var entry = $.grep(dummy, function(e){ return e.id==id});
@@ -105,8 +110,6 @@ OCA.Meta_data.App = {
 		  this.files[i]['tags'] = {};
 		}
 	  }
-
-
 	  return  oldnextPage.apply(this,arguments);
 	}
 
@@ -114,7 +117,6 @@ OCA.Meta_data.App = {
 	var oldCreateRow = OCA.Files.FileList.prototype._createRow;
 	OCA.Files.FileList.prototype._createRow = function(fileData) {
 	  var tr = oldCreateRow.apply(this, arguments);
-
 	  if(fileData.type == 'file'){
 		var tagwidth = 0;
 		var overflow = 0;
@@ -123,7 +125,15 @@ OCA.Meta_data.App = {
 		  $.each(fileData.tags, function(key,value) {
 			var color = colorTranslate(value.color);
 			if(tagwidth + value.descr.length <= 20){
-			  tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
+			  tr.find('div.filetags-wrap').append('\
+				                                   <span data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+												     <span class="deletetag" style="display:none">\
+												       <i class=\'icon-cancel-circled\'></i>\
+												     </span>\
+												     <i class=\'icon-tag\'></i>\
+												     <span class=\'tagtext\'>'+value.descr+'</span>\
+												   </span>\
+				 								   ');
 			} else {
 			  overflow += 1;
 			}
@@ -133,15 +143,10 @@ OCA.Meta_data.App = {
 		if(overflow > 0){
 		  tr.find('div.filetags-wrap').append('<span class=\'label outline label-default more\'>+'+overflow+' more</span>');
 		}
-
-
 		tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
 		var width = tr.find('div.filelink-wrap').width();
 		var filename = tr.find('span.innernametext').html();
 		tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));										
-
-
-
 	  }
 	  return tr;
 	}
@@ -151,26 +156,30 @@ OCA.Meta_data.App = {
 };
 
 
+
+
+
+/*
+ * This function translates color code into color name
+ */
 function colorTranslate(color){
-  if(color.indexOf('color-1') > -1)  return "label-default";
-  if(color.indexOf('color-2') > -1)  return "label-primary";
-  if(color.indexOf('color-3') > -1)  return "label-success";
-  if(color.indexOf('color-4') > -1)  return "label-info";
-  if(color.indexOf('color-5') > -1)  return "label-warning";
-  if(color.indexOf('color-6') > -1)  return "label-danger";
-  return "label-default";
+  if(color.indexOf('color-1') > -1)  return "default";
+  if(color.indexOf('color-2') > -1)  return "primary";
+  if(color.indexOf('color-3') > -1)  return "success";
+  if(color.indexOf('color-4') > -1)  return "info";
+  if(color.indexOf('color-5') > -1)  return "warning";
+  if(color.indexOf('color-6') > -1)  return "danger";
+  return "default";
 }
 
-function colorTranslateTag(color){
-  if(color.indexOf('color-1') > -1)  return "tag-default";
-  if(color.indexOf('color-2') > -1)  return "tag-primary";
-  if(color.indexOf('color-3') > -1)  return "tag-success";
-  if(color.indexOf('color-4') > -1)  return "tag-info";
-  if(color.indexOf('color-5') > -1)  return "tag-warning";
-  if(color.indexOf('color-6') > -1)  return "tag-danger";
-  return "label-default";
-}
 
+
+
+
+
+/*
+ * This function shortens the file name to make room for the tags
+ */
 function start_and_end(str, element) {
   if(str.length > 24 ){
 	return str.substr(0, 10) + '...' + str.substr(str.length-8, str.length);
@@ -180,6 +189,12 @@ function start_and_end(str, element) {
 }
 
 
+
+
+
+/*
+ * This function updates the tags in the left hand side menu
+ */
 function updateSidebar(){
   $('.nav-sidebar li[data-id^=tag-]').remove();
   $('ul.nav-sidebar li#tags').hide();
@@ -191,7 +206,13 @@ function updateSidebar(){
 		$.each( response['tags'], function(key,value) {
 		  if(value.public==1){
 			$('ul.nav-sidebar li#tags').show();
-			tags = tags+'<li data-id="tag-'+value.tagid+'"><a href="#"><i class="icon icon-tag '+colorTranslateTag(value.color)+'" data-tag="'+value.tagid+'"></i><span>'+value.descr+'</span></a></li>';
+			tags = tags+'\
+				         <li data-id="tag-'+value.tagid+'">\
+						   <a href="#"><i class="icon icon-tag tag-'+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"></i>\
+						     <span>'+value.descr+'</span>\
+						   </a>\
+						 </li>\
+						';
 		  }
 		});
 		$('ul.nav-sidebar li#tags').after(tags);
@@ -201,10 +222,16 @@ function updateSidebar(){
 	  }
 	}
   });
-
-
 }
 
+
+
+
+
+
+/*
+ * This function updates the tags on a single file
+ */
 function updateFileListTags(tr, showall){
   var width = 20;
   if(tr.find('.filetags-wrap').length !=0){
@@ -222,18 +249,33 @@ function updateFileListTags(tr, showall){
 	success: function( response )
 	{
 	  if(response){
-
 		var tagwidth = 0;
 		var overflow = 0;
 		$.each(response['tags'], function(key,value) {
 		  var color = colorTranslate(value.color);
 
 		  if(tagwidth + value.descr.length <= width){
-			tr.find('div.filetags-wrap').append('<span data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span class=\'tagtext\'>'+value.descr+'</span></span>' );
+			tr.find('div.filetags-wrap').append('\
+				                                 <span data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+												   <span class="deletetag" style="display:none">\
+												     <i class=\'icon-cancel-circled\'></i>\
+												   </span>\
+												   <i class=\'icon-tag\'></i>\
+												   <span class=\'tagtext\'>'+value.descr+'</span>\
+												 </span>\
+												');
 		  } else {
 			if(showall) { 
 			  tr.find('div.filetags-wrap').append('<br>');
-			  tr.find('div.filetags-wrap').append('<span style="line-height:1.5;" data-tag=\''+value.tagid+'\' class=\'label outline '+color+'\'><span class="deletetag" style="display:none"><i class=\'icon-cancel-circled\'></i></span><i class=\'icon-tag\'></i><span style="padding-bottom:10px;" class=\'tagtext\'>'+value.descr+'</span></span>' );
+			  tr.find('div.filetags-wrap').append('\
+				                                   <span style="line-height:1.5;" data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+												     <span class="deletetag" style="display:none">\
+													   <i class=\'icon-cancel-circled\'></i>\
+													 </span>\
+													 <i class=\'icon-tag\'></i>\
+													 <span style="padding-bottom:10px;" class=\'tagtext\'>'+value.descr+'</span>\
+												   </span>\
+												  ');
 			  width=42;
 			  tagwidth=0;
 			} else overflow += 1;
@@ -246,14 +288,18 @@ function updateFileListTags(tr, showall){
 	  }
 	}
   });
-
   return tr;
 }
 
 
+
+
+
 $(document).ready(function() {
+  /* Always update menu on reload */
   updateSidebar();
 
+  /* Switch to tag view when tag is clicked */
   $('ul.nav-sidebar').on('click', 'li[data-id^="tag-"]', function(e) {
 	$('ul.nav-sidebar').find('.active').removeClass('active');	
 	$(this).children('a').addClass('active');
@@ -277,12 +323,13 @@ $(document).ready(function() {
 	OCA.Meta_data.App.modifyFilelist();
   }
 
-  /*
-   *
-   * This next block of code is for deleting tags from a file
-   *
-   */ 
 
+
+
+
+  /*
+   * This next block of code is for deleting tags from a file
+   */ 
   $('tbody').on('mouseenter', 'tr td div.row div.filetags-wrap span[class^=label]', function(){
 	$(this).children('i').hide();
 	$(this).children('span.deletetag').show();
@@ -315,25 +362,34 @@ $(document).ready(function() {
 
   });				
 
+  
+  
+  
+  
   /*
-   *
    * This next block of code is for entering the meta data editor
-   *
    */ 
-
   $('tbody').on('click', 'span.label:not(.more)', function(e){
 	e.stopPropagation();
 	var title=$(this).children('span.tagtext').html();
 	var file =$(this).parents('tr').attr('data-file');
 	var fileid=$(this).parents('tr').attr('data-id');
 	var tagid=$(this).attr('data-tag');
-
-
-	var html = $('<div><span id="tagid" class="'+tagid+'"><h3 class="oc-dialog-title">Meta data editor for the file: <span id="fileid" class="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3></span><a class="oc-dialog-close close svg"></a><div id="meta_data_container">\
-		<div id=\"emptysearch\">No meta data defined</div><ul id="meta_data_keys"></ul></div>\
-		<div style="position:absolute;bottom:0;left:0;" class="oc-dialog-buttonrow onebutton"><button id="popup_ok" class="btn-primary">OK</button><button id="popup_cancel" class="btn-default" style="margin-right:15px;">Cancel</button></div></div>');
-
-
+	var html = $('\
+		          <div>\
+				    <span id="tagid" class="'+tagid+'">\
+					  <h3 class="oc-dialog-title">Meta data editor for the file: <span id="fileid" class="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
+					</span>\
+					<a class="oc-dialog-close close svg"></a>\
+					<div id="meta_data_container">\
+		              <div id=\"emptysearch\">No meta data defined</div>\
+					  <ul id="meta_data_keys"></ul>\
+					</div>\
+		            <div style="position:absolute;bottom:0;left:0;" class="oc-dialog-buttonrow onebutton">\
+					  <button id="popup_ok" class="btn-primary">OK</button>\
+					  <button id="popup_cancel" class="btn-default" style="margin-right:15px;">Cancel</button>\
+					</div>\
+				  </div>');
 	$(html).dialog({
 	  dialogClass: "oc-dialog notitle",
 	  resizeable: false,
@@ -341,7 +397,6 @@ $(document).ready(function() {
 	  height: 800,
 	  width: 1024
 	});
-
 	$.ajax({
 	  url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
 	  async: false,
@@ -375,10 +430,12 @@ $(document).ready(function() {
 		}
 	  }
 	});
-
-
   });
 
+
+  /*
+   * This block of code is for leaving the meta data editor
+   */
   $('body').on('click', '#popup_ok', function(){
 	$('body').find('#meta_data_keys li').each(function() {
 	  if($(this).children('input.value').val() != '' ){
@@ -399,7 +456,6 @@ $(document).ready(function() {
 	});
 	$('body').find('.ui-dialog').remove();
   });
-
   $('body').on('keypress', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.value', function (e) {
 	var key = e.which;
 	if(key == 13)  
@@ -411,18 +467,19 @@ $(document).ready(function() {
 
 
 
-
-
-
-
-
-
-
+  /*
+   * Show all tags when click on '+n more'
+   */
   $('tbody').on('click', 'span.more', function(e){
 	e.stopPropagation();
 	updateFileListTags($(this).parents('tr'), true)
   });
 
+
+
+
+
+  /* Additional search result types */
   OC.search.resultTypes.tag = "Tag" ;
   OC.search.resultTypes.metadata = "Metadata" ;
 

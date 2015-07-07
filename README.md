@@ -9,16 +9,11 @@ tagging individual files and adding meta data.
 
 TODO:
 
-Write file view for main view
-
-Make tags and keys searchable
-
 Import/sync meta data from file headers
 
 Make tags shareable
 
 Enforce tag schemes on directories
 
-Group tag
+Group tags
 
-...
