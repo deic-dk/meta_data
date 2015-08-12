@@ -11,7 +11,7 @@ input.edittag {
 		line-height: 1.5;
 		padding: 2px 0px 4px 5px;
 		position: relative;
-
+		width: 400px;
 }
 
 .meta_data {
@@ -73,8 +73,8 @@ div#emptysearch {
 		font-size: x-large;
 		color: #ddd;
 		text-align: center;
-		margin-top: 40px;
-		margin-bottom: 20px;
+		margin-top: 0;
+		margin-bottom: 16px;
 }
 
 input.edit {
@@ -97,6 +97,95 @@ span.deletekey {
   cursor: pointer;
 }
 
+#meta_data_keys .new .highlight {
+	border: 1px solid #f7941e;
+}
+
+.taginfo .label {
+	line-height: 0.8;
+}
+
+.taginfo  {
+	line-height: 1.2;
+}
+
+.oc-dialog input.edittag {
+	width: 90%;
+}
+
+#fileList tr td.filename.meta_data_row {
+	height: 32px;
+	padding: 2px 0 7px 12px;
+}
+
+#headerName.column-name {
+	padding-left: 12px;
+}
+
+.editstuff {
+	line-height: 27px;
+}
+
+#filestable tbody tr td {
+	margin-left: 10px;
+}
+
+tr.summary td span.info {
+	margin-left: 4px;
+}
+
+tr.summary td.filesize {
+	text-align: center;
+}
+
+#filestable .color-box:not(.border) {
+	display: none;
+}
+
+a.color {
+	width: 168px;
+}
+
+#newtag {
+	border:solid 1px #e4e4e4;
+	margin-bottom:20px;
+	height:55px;
+	display:none;
+}
+
+.newtag-buttons {
+	float: right;
+	margin-right: 10px;
+	line-height: 50px;
+}
+
+.newtag-edit {
+	margin-left: 10px;
+	line-height: 54px;
+}
+
+.tags-space:first-of-type {
+	line-height: 1.8;
+}
+
+.tags-space {
+	line-height: 0;
+}
+
+a.less-tags {
+	color:#c5c5c5;
+	font-size:12px;
+	background-image:none;
+	text-decoration: none;
+}
+
+span[data-tag]{
+	line-height: 2px;
+}
+
+span[data-tag]:last-of-type{
+	margin-bottom: 8px;
+}
 
 
 /* ------------- OLD STUFF ----------------- */

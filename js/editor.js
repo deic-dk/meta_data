@@ -14,20 +14,20 @@ function newEntry(entry){
 
   if(!entry){
 	return $('\
-		      <li class="new">\
-		        <span class="keyname hidden"></span>\
-				<input class="edit" type="text" placeholder="New key name" value="">\
-				<span class="deletekey">&#10006;</span>\
-				<input class="value hidden" type="text" value="">\
+				<li class="new">\
+					<span class="keyname hidden"></span>\
+					<input class="edit" type="text" placeholder="New key name" value="" />\
+						<span class="deletekey">&#10006;</span>\
+					<input class="value hidden" type="text" value="" />\
 			  </li>');
   } else {
 	return $('\
-		      <li id="'+entry['keyid']+'">\
-			    <span class="keyname hidden">'+entry['descr']+'</span>\
-				<input class="edit" type="text" value="'+entry['descr']+'">\
-				<span class="deletekey">&#10006;</span>\
-				<input class="'+entry['keyid']+' value hidden" type="text" value="">\
-		      </li>');
+				<li id="'+entry['keyid']+'">\
+					<span class="keyname hidden">'+entry['descr']+'</span>\
+					<input class="edit" type="text" value="'+entry['descr']+'" />\
+					<span class="deletekey">&#10006;</span>\
+					<input class="'+entry['keyid']+' value hidden" type="text" value="" />\
+				</li>');
   }
 }
 

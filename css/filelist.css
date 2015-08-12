@@ -6,8 +6,8 @@ span.label {
 div.filetags-wrap {
 		display: inline-block;
 		height: auto;
-		line-height: 1;
-		padding: 0 15px 0 0;
+		line-height: 1.94;
+		padding: 0 15px 4px 0;
 		position: relative;	  
 		top: 2px;
 }
@@ -28,4 +28,7 @@ div.filelink-wrap {
 		overflow: hidden;
 }
 
+td.taggedfiles {
+	text-align: center;
+}
 

@@ -56,7 +56,7 @@ if($result === FALSE) {
         'result' => 'OK',
         'tagid' => $result[0]['tagid'],
         'tagname' => $result[0]['descr'],
-        'keyid' => $result[0]['keyid'],
+        'keyid' => isset($result[0]['keyid'])?$result[0]['keyid']:null,
         'result' => $result,
     );
 }

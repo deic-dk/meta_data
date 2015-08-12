@@ -36,50 +36,50 @@ class Helper
 				while($row=$output->fetchRow()){
 						$result[] = $row['tagid'];
 				}
-				
+
 				return $result;
 		}
 
 
-		public static function searchTag($descr, $userid) {                                                                           
+		public static function searchTag($descr, $userid) {
 				$sql = "SELECT tagid,descr,public,color FROM *PREFIX*meta_data_tags WHERE descr LIKE ? AND owner LIKE ?";
-				$args = array($descr,$userid);                                                                                    
-				$query = \OCP\DB::prepare($sql);                                                                                       
-				$output = $query->execute($args);                                                                                     
+				$args = array($descr,$userid);
+				$query = \OCP\DB::prepare($sql);
+				$output = $query->execute($args);
 
 				$result = [];
 				while($row=$output->fetchRow()){
 						$result[] = $row;
-				}    
+				}
 				return $result;
-		}  
+		}
 
 
 		public static function getTagName($tagid) {
 				$sql = "SELECT descr,color FROM *PREFIX*meta_data_tags WHERE tagid = ?";
-				$args = array($tagid);                                                                                    
-				$query = \OCP\DB::prepare($sql);                                                                                       
-				$output = $query->execute($args);                                                                                     
+				$args = array($tagid);
+				$query = \OCP\DB::prepare($sql);
+				$output = $query->execute($args);
 
 				$row=$output->fetchRow();
 				return array($row['descr'],$row['color']);;
 		}
 
-		public static function updateTag($tagid, $tagname, $color, $visible) {
-
-				$sql = 'UPDATE *PREFIX*meta_data_tags SET descr=?, color=?, public=? WHERE tagid=?';
-				$args = array($tagname, $color, $visible, $tagid);
-				$query = \OCP\DB::prepare($sql);
-				$resRsrc = $query->execute($args);
-
-				return true;
+		private static function emptyTest($val) {
+			return !empty($val) || $val==="0";
 		}
 
-
-
-
-
-
+		public static function updateTag($tagid, $tagname, $color, $visible) {
+			$sql = 'UPDATE *PREFIX*meta_data_tags SET '.($tagname?'descr=?, ':'').($color?'color=?, ':'').($visible!=''?', public=? ':'').'WHERE tagid=?';
+			$sql = str_replace('=?, WHERE', '=? WHERE', $sql);
+			$sql = str_replace('SET ,', 'SET', $sql);
+			$args = array($tagname, $color, $visible, $tagid);
+			$args = array_values(array_filter($args, array(__CLASS__, 'emptyTest')));
+			\OCP\Util::writeLog('meta_data', 'SQL: '.$sql. ', ARGS: '.serialize($args).' --> '.count($args), \OC_Log::WARN);
+			$query = \OCP\DB::prepare($sql);
+			$resRsrc = $query->execute($args);
+			return $resRsrc?true:false;
+		}
 
 		public static function formatFileInfo($i) {
 				$entry = array();
