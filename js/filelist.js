@@ -28,16 +28,18 @@
 				this._selectionSummary.clear();
 				this.$el.find('.select-all').prop('checked', false);
 				this.showMask();
+				$('ul.nav-sidebar').find('.active').removeClass('active');
+				$('.nav-sidebar li[data-id=tag-'+this.tagid+'] a').addClass('active');
 				if (this._reloadCall) {
 					this._reloadCall.abort();
 				}
 				this._reloadCall = $.ajax({
 					url: this.getAjaxUrl('list'),
 					data: { 
-					dir : this.getCurrentDirectory(),
-					sort: this._sort,
-					sortdirection: this._sortDirection,
-					tagid: this.tagid
+						dir : this.getCurrentDirectory(),
+						sort: this._sort,
+						sortdirection: this._sortDirection,
+						tagid: this.tagid
 					}
 				}); 
 				var callBack = this.reloadCallback.bind(this);

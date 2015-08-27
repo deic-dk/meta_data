@@ -15,14 +15,14 @@ if (!OCA.Meta_data){
 
 OCA.Meta_data.App = {
 
-  _dummy: null,
+  _tagid: null,
   _FileList: null,
 
   initTaggedFiles: function($el, tagid) {
-		if(this._FileList && this._dummy==tagid) {
+		if(this._FileList && this._tagid==tagid) {
 			return this._FileList;
 		}
-		this._dummy = tagid;
+		this._tagid = tagid;
 		this._FileList = new OCA.Meta_data.FileList(
 			$el,
 			{
@@ -85,21 +85,21 @@ OCA.Meta_data.App = {
 			if(typeof fileData.tags !== 'undefined' && fileData.tags.length > 0){
 				$.each(fileData.tags, function(key,value) {
 					var color = colorTranslate(value.color);
-					if(tagwidth + value.descr.length <= 20){
+					if(tagwidth + value.name.length <= 20){
 						tr.find('div.filetags-wrap').append('\
-						<span data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+						<span data-tag=\''+value.id+'\' class=\'label outline label-'+color+'\'>\
 						<span class="deletetag" style="display:none">\
 						<i class=\'icon-cancel-circled\'></i>\
 						</span>\
 						<i class=\'icon-tag\'></i>\
-						<span class=\'tagtext\'>'+value.descr+'</span>\
+						<span class=\'tagtext\'>'+value.name+'</span>\
 						</span>\
 						');
 					}
 					else{
 						overflow += 1;
 					}
-					tagwidth += value.descr.length;
+					tagwidth += value.name.length;
 				});
 			}
 			if(overflow > 0){
@@ -117,35 +117,36 @@ OCA.Meta_data.App = {
   modifyFilelist: function() {
 		var oldnextPage = OCA.Files.FileList.prototype._nextPage;
 		OCA.Files.FileList.prototype._nextPage = function(animate) {
-			var test = function(data, dir, callback) {
+			var getfiletags = function(data, dir, callback) {
 				$.ajax({
 					async: false,
 					type: "POST",
-					url: OC.linkTo('meta_data','ajax/list_mod.php'),
+					url: OC.linkTo('meta_data','ajax/getFileTags.php'),
 					data: {
-					fileData: data,
-					dir: dir
+						files: data,
+						dir: dir
 					},
 					success: function(data){
-					callback(data);
+						callback(data);
 					}
 				});
 			}
-			var dummy;
+			var files;
 			var fileids = this.files.map(function(obj){return {id: obj.id };});
-			test(fileids, this.getCurrentDirectory(), function(data){
-				dummy = data.files;
+			getfiletags(fileids, this.getCurrentDirectory(), function(data){
+				files = data.files;
 			});
 			for(var i=0; i<this.files.length; i++){
-				var id=this.files[i].id;
-				var entry = $.grep(dummy, function(e){ return e.id==id});
-				if( typeof entry[0].tags !== 'undefined') {
+				var id = this.files[i].id;
+				var entry = $.grep(files, function(e){ return e.id==id});
+				if(typeof entry[0].tags!=='undefined') {
 					this.files[i]['tags'] = entry[0].tags;
-				} else {
+				}
+				else {
 					this.files[i]['tags'] = {};
 				}
 			}
-				return  oldnextPage.apply(this,arguments);
+			return  oldnextPage.apply(this,arguments);
 		}
 
 		var oldCreateRow = OCA.Files.FileList.prototype._createRow;
@@ -188,26 +189,24 @@ function updateSidebar(){
   $('.nav-sidebar li[data-id^=tag-]').remove();
   $('ul.nav-sidebar li#tags').hide();
   $.ajax({
-	url: OC.filePath('meta_data', 'ajax', 'temp.php'),
-	success: function(response)	{
+	url: OC.filePath('meta_data', 'ajax', 'getUserDisplayTags.php'),
+	success: function(response){
 	  if(response){
-		var tags = '';
-		$.each( response['tags'], function(key,value) {
-		  if(value.public==1){
-			$('ul.nav-sidebar li#tags').show();
-			tags = tags+'\
-				         <li data-id="tag-'+value.tagid+'">\
-						   <a href="#"><i class="icon icon-tag tag-'+colorTranslate(value.color)+'" data-tag="'+value.tagid+'"></i>\
-						     <span>'+value.descr+'</span>\
-						   </a>\
-						 </li>\
-						';
-		  }
-		});
-		$('ul.nav-sidebar li#tags').after(tags);
-		if($('ul.nav-sidebar li#tags span i.icon-angle-right').is(':visible')){
-		  $('ul.nav-sidebar li[data-id^="tag-"]').hide();
-		}
+			var tags = '';
+			$.each( response['tags'], function(key, value) {
+				$('ul.nav-sidebar li#tags').show();
+				tags = tags+'\
+				<li data-id="tag-'+value.id+'">\
+				<a href="#"><i class="icon icon-tag tag-'+colorTranslate(value.color)+'" data-tag="'+value.id+'"></i>\
+				<span>'+value.name+'</span>\
+				</a>\
+				</li>\
+				';
+			});
+			$('ul.nav-sidebar li#tags').after(tags);
+			if($('ul.nav-sidebar li#tags span i.icon-angle-right').is(':visible')){
+				$('ul.nav-sidebar li[data-id^="tag-"]').hide();
+			}
 	  }
 	}
   });
@@ -240,26 +239,26 @@ function updateFileListTags(tr, showall){
 					}
 					$.each(response['tags'], function(key,value) {
 						var color = colorTranslate(value.color);
-						if(tagwidth + value.descr.length <= width){
+						if(tagwidth + value.name.length <= width){
 							tr.find('div.filetags-wrap').append('\
-								<span data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+								<span data-tag=\''+value.id+'\' class=\'label outline label-'+color+'\'>\
 									<span class="deletetag" style="display:none">\
 										<i class=\'icon-cancel-circled\'></i>\
 									</span>\
 									<i class=\'icon-tag\'></i>\
-									<span class=\'tagtext\'>'+value.descr+'</span>\
+									<span class=\'tagtext\'>'+value.name+'</span>\
 								</span>\
 							');
 						}
 						else{
 							if(showall) {
 								tr.find('div.filetags-wrap').append('<br class="tags-space"/>\
-									<span data-tag=\''+value.tagid+'\' class=\'label outline label-'+color+'\'>\
+									<span data-tag=\''+value.id+'\' class=\'label outline label-'+color+'\'>\
 										<span class="deletetag" style="display:none">\
 											<i class=\'icon-cancel-circled\'></i>\
 										</span>\
 										<i class=\'icon-tag\'></i>\
-										<span style="padding-bottom:10px;" class=\'tagtext\'>'+value.descr+'</span>\
+										<span style="padding-bottom:10px;" class=\'tagtext\'>'+value.name+'</span>\
 									</span>\
 								');
 								width=42;
@@ -269,7 +268,7 @@ function updateFileListTags(tr, showall){
 								overflow += 1;
 							}
 						}
-						tagwidth += value.descr.length;
+						tagwidth += value.name.length;
 					});
 					if(overflow > 0){
 						tr.find('div.filetags-wrap').append('<span class=\'label outline label-default more-tags\' title="Show more tags"><span class="tagtext" >+'+overflow+' more</span></span>');
@@ -282,18 +281,18 @@ function updateFileListTags(tr, showall){
 }
 
 $(this).click(function(event) {
-	if ($('#dropdown').has(event.target).length===0 && $('#dropdown').hasClass('drop')) {
-		$('#dropdown').hide('blind', function() {
-			$('#dropdown').remove();
+	if ($('.row #dropdown').has(event.target).length===0 && $('#dropdown').hasClass('drop')) {
+		$('.row #dropdown').hide('blind', function() {
+			$('.row #dropdown').remove();
 			$('tr').removeClass('mouseOver');
 		});
 	}
 });
 
 $(this).click(function(event) {
-	if ($('.dropdown-menu').has(event.target).length===0) {
-		$('.dropdown-menu').hide('blind', function() {
-			$('.dropdown-menu').hide();
+	if ($('.row .dropdown-menu').has(event.target).length===0) {
+		$('.row .dropdown-menu').hide('blind', function() {
+			$('.row .dropdown-menu').hide();
 			$('tr').removeClass('mouseOver');
 		});
 	}
@@ -345,7 +344,7 @@ $(document).ready(function() {
 		var fileid= $(this).parent('span').parent('div').parent('div').parent('td').parent('tr').attr('data-id');
 		$.ajax({
 			async: false,
-			url: OC.filePath('meta_data', 'ajax', 'removefiletag.php'),
+			url: OC.filePath('meta_data', 'ajax', 'removeFileTag.php'),
 			data: {
 				fileid: fileid,
 				tagid:  tagid
@@ -364,7 +363,7 @@ $(document).ready(function() {
   /*
    * This next block of code is for entering the meta data editor
    */
-	$('tbody').on('click', 'filetags-wrap span.label:not(.more-tags)', function(e){
+	$('tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
 		e.preventDefault();
 		e.stopPropagation();
 		var title=$(this).children('span.tagtext').html();
@@ -381,7 +380,7 @@ $(document).ready(function() {
 										<div id=\"emptysearch\">No meta data defined</div>\
 							<ul id="meta_data_keys"></ul>\
 						</div>\
-						<div style="position:absolute;bottom:6px;right:6px;">\
+						<div class="editor_buttons">\
 							<button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
 							<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button>\
 						</div>\
@@ -414,16 +413,16 @@ $(document).ready(function() {
 			url:OC.filePath('meta_data', 'ajax', 'loadValues.php'),
 			async: false,
 			data: {
-			fileid: fileid,
-			tagid: tagid
+				fileid: fileid,
+				tagid: tagid
 			},
 			type: "POST",
 			success: function(result){
-			if(result['data']){
-				$.each(result['data'], function(i,item){
-				$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
-				});
-			}
+				if(result['data']){
+					$.each(result['data'], function(i,item){
+					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
+					});
+				}
 			}
 		});
   });
@@ -434,15 +433,16 @@ $(document).ready(function() {
   $('body').on('click', '#popup_ok', function(){
 		$('body').find('#meta_data_keys li').each(function() {
 			if($(this).children('input.value').val() != '' ){
-			$.ajax({
-				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
-				type: "POST",
-				data: {
-				tagOp: 'update_file_key',
-				keyId: $(this).children('input.value').attr('class').replace('value',''),
-				tagId: $('body').find('#tagid').attr('class'),
-				fileId:$('body').find('#fileid').attr('class'),
-				value: $('body').find('input.value').val()
+			$.ajax(
+				{
+					url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
+					type: "POST",
+					data: {
+					tagOp: 'update_file_key',
+					keyId: $(this).attr('id'),
+					tagId: $('#tagid').attr('class'),
+					fileId:$('#fileid').attr('class'),
+					value: $(this).find('input.value').val()
 				},
 				success: function(result) {
 				}

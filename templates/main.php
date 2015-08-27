@@ -34,26 +34,32 @@
 <thead class="panel-heading">
 <tr>
 	<th id="headerName" class="column-name">
-		<a class="name sort columntitle" data-sort="descr">
+		<a class="name sort columntitle" data-sort="name">
 			<span>Name</span>         
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerColor" class="column-color">
 		<a class="color sort columntitle" data-sort="color">
-			<span>Color</span>         
+			<span>Color</span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerDisplay" class="column-display">
+		<a class="display sort columntitle" data-sort="display">
+			<span>On left menu</span>
+			<span class="sort-indicator hidden icon-triangle-n"></span>
+		</a>
+	</th>
+	<th id="headerPublic" class="column-public">
 		<a class="display sort columntitle" data-sort="public">
-			<span>Visible in menu</span>
+			<span>Public</span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerSize" class="column-size">
 		<a class="size sort columntitle" data-sort="size">
-			<span>Tagged files</span>
+			<span>Files</span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>

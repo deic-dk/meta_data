@@ -6,56 +6,46 @@ OCP\User::checkLoggedIn();
 
 $owner = OC_User::getUser();
 
-$ctags = new \OCA\meta_data\tags();
-
 switch($_POST['tagOp']) {
     case 'new': {
-        $result = $ctags->newTag($_POST['tagName'], $owner, $_POST['tagState'], $_POST['tagColor']);
+        $result = \OCA\meta_data\Tags::newTag($_POST['tagName'], $owner, $_POST['tagVisibleState'], $_POST['tagColor'], $_POST['tagPublicState']);
         break;
     }
-    
     case 'new_key': {
-        $result = $ctags->newKey($_POST['tagId'], $_POST['keyName']);
+        $result = \OCA\meta_data\Tags::newKey($_POST['tagId'], $_POST['keyName']);
         break;
     }
-
-    case 'rename_tag': {
-        $result = $ctags->alterTag($_POST['tagId'], $_POST['tagName'], $owner, $_POST['tagState']);
-        break;
-    }
-    
     case 'rename_key': {
-        $result = $ctags->alterKey($_POST['tagId'],$_POST['keyId'], $_POST['newName'], $owner);
+        $result = \OCA\meta_data\Tags::alterKey($_POST['tagId'],$_POST['keyId'], $_POST['newName'], $owner);
         break;
     }
 
     case 'delete': {
-        $result = $ctags->deleteTag($_POST['tagId'], $owner);
+        $result = \OCA\meta_data\Tags::deleteTag($_POST['tagId'], $owner);
         break;
     }
-
     case 'delete_key': {
-        $result = $ctags->removeFileKey($_POST['tagId'],"%", $_POST['keyId']);
-        $result = $ctags->deleteKeys($_POST['tagId'], $_POST['keyId']);
+        $result = \OCA\meta_data\Tags::removeFileKey($_POST['tagId'],"%", $_POST['keyId']);
+        $result = \OCA\meta_data\Tags::deleteKeys($_POST['tagId'], $_POST['keyId']);
         break;
     }
-
     case 'update_file_key': {
-        $result = $ctags->updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['value']);
+        $result = \OCA\meta_data\Tags::updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['value']);
         break;
     }
 }
 
 // Publish the op result
-if($result === FALSE) {
+if(empty($result === false) {
     $result = array(
         'result' => 'KO, result is false',
     );
-} else {
+}
+else {
     $result = array(
         'result' => 'OK',
         'tagid' => $result[0]['tagid'],
-        'tagname' => $result[0]['descr'],
+        'tagname' => $result[0]['name'],
         'keyid' => isset($result[0]['keyid'])?$result[0]['keyid']:null,
         'result' => $result,
     );

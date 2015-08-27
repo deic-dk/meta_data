@@ -9,7 +9,7 @@
     <name>*dbprefix*meta_data_tags</name>
     <declaration>
       <field>
-        <name>tagid</name>
+        <name>id</name>
         <type>integer</type>
         <default>0</default>
         <notnull>true</notnull>
@@ -17,27 +17,26 @@
         <length>11</length>
       </field>
       <field>
-        <name>descr</name>
+        <name>name</name>
         <type>text</type>
         <notnull>true</notnull>
         <length>80</length>
-      </field>                
+      </field>
       <field>
         <name>owner</name>
         <type>text</type>
         <notnull>true</notnull>
         <length>80</length>
-      </field>     
-      <field>
+      </field>
+			<field>
         <name>public</name>
         <type>integer</type>
         <length>1</length>
-      </field>     
-      <field>
+      </field>
         <name>color</name>
         <type>text</type>
         <length>12</length>
-    </field>     
+    </field>
   </declaration>
   </table>
 
@@ -57,14 +56,14 @@
         <type>integer</type>
         <length>11</length>
       </field>
-      
+
       <field>
-        <name>descr</name>
+        <name>name</name>
         <type>text</type>
         <notnull>true</notnull>
         <length>80</length>
-      </field>                
-    
+      </field>
+
     </declaration>
   </table>
 

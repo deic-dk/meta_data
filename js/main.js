@@ -12,25 +12,25 @@ function updateTagsView(sortValue, direction){
   $('tbody#fileList').html('');
   $('tfoot').html('');
 
-  sortValue = typeof sortValue !== 'undefined' ? sortValue : 'color';
-  direction = typeof direction !== 'undefined' ? direction : 'asc';
+  // sortValue = typeof sortValue !== 'undefined' ? sortValue : 'color';
+  //direction = typeof direction !== 'undefined' ? direction : 'asc';
 
-  var total=0;
-  $.ajax({
-	url: OC.filePath('meta_data', 'ajax', 'temp.php'),
-	data: {sortValue: sortValue, direction: direction, fileCount: true},
+	var total=0;
+	$.ajax({
+	url: OC.filePath('meta_data', 'ajax', 'getTags.php'),
+	data: {sortValue: sortValue, direction: direction, fileCount: true, display: true},
 	success: function(response) {
-	  if(response) {
-		$.each(response['tags'], function(key,value) {
-		  total+=value.size;
-		  $('tbody#fileList').append(' \
-			  <tr data-id="'+value.tagid+'" data-name="'+value.descr+'">\
+		if(response) {
+		$.each(response['tags'], function(key, value) {
+			total+=value.size;
+			$('tbody#fileList').append(' \
+					<tr data-id="'+value.id+'" data-name="'+value.name+'">\
 					<td class="filename row meta_data_row">\
 						<span class="taginfo">\
 							<a class="action-meta_data" href="#" style="text-decoration:none">\
-								<span class="label outline label-'+colorTranslate(value.color)+'" data-tag="'+value.tagid+'">\
+								<span class="label outline label-'+colorTranslate(value.color)+'" data-tag="'+value.id+'">\
 								<i class="icon-tag" style="display: inline;"></i>\
-									<span class="tagtext">'+value.descr+'</span>\
+									<span class="tagtext">'+value.name+'</span>\
 								</span>\
 							</a>\
 						</span>\
@@ -45,59 +45,83 @@ function updateTagsView(sortValue, direction){
 							<div class="color-box color-6"></div>\
 						</span>\
 					</td>\
-					<td class="display">  <input type="checkbox" name="display"> </td>\
-					<td class="taggedfiles"><a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.tagid+'" style="text-decoration:none">'+value.size+'</a></td>\
+					<td class="display"><input type="checkbox" name="display"> </td>\
+					<td class="public"><input type="checkbox" name="public"> </td>\
+					<td class="taggedfiles"><a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.id+'" style="text-decoration:none">'+value.size+'</a></td>\
 					<td><a class="action action-delete icon icon-trash-empty" style="color:#c5c5c5;font-size:16px;background-image:none" data-action="Delete" href="#"></a>\
 					</td>\
-			  </tr>\
-			  ');
-		  $('tbody#fileList tr[data-id='+value.tagid+'] div.'+value.color).addClass('border');
-		  if(value.public==1){
-				$('tbody#fileList tr[data-id='+value.tagid+'] td.display input').prop('checked', true);
-		  }
-		  else {
-				$('tbody#fileList tr[data-id='+value.tagid+'] td.display input').prop('checked', false);
-		  }
+				</tr>\
+				');
+			$('tbody#fileList tr[data-id='+value.id+'] div.'+value.color).addClass('border');
+			if(value.display==1){
+				$('tbody#fileList tr[data-id='+value.id+'] td.display input').prop('checked', true);
+			}
+			else {
+				$('tbody#fileList tr[data-id='+value.id+'] td.display input').prop('checked', false);
+			}
+			if(value.public==1){
+				$('tbody#fileList tr[data-id='+value.id+'] td.public input').prop('checked', true);
+				if(value.owner!=$('head').attr('data-user')){
+					$('tbody#fileList tr[data-id='+value.id+']').attr('data-tag-owner', value.owner);
+					$('tbody#fileList tr[data-id='+value.id+'] td.public input').prop('disabled', true);
+					$('tbody#fileList tr[data-id='+value.id+'] td.color .editstuff .color-box').css('cursor', 'default');
+					$('tbody#fileList tr[data-id='+value.id+']').css('background-color', '#fffffb');
+					$('tbody#fileList tr[data-id='+value.id+'] td a.action').remove();
+				}
+			}
+			else {
+				$('tbody#fileList tr[data-id='+value.id+'] td.public input').prop('checked', false);
+			}
 		});
-	  }
-	  $('tbody#fileList tr td.color').hover(
+		}
+		$('tbody#fileList tr td.color').hover(
 			function(){
+				if($(this).parents('tr').attr('data-tag-owner')){
+					return false;
+				}
 				$(this).find('.color-box:not(.border)').css('display', 'inline-block');
 			},
 			function(){
 				$(this).find('.color-box:not(.border)').hide();
 			}
 		);
-	  if(response){
+		if(response){
 			var ntags = response['tags'].length;
-	  }
-	  else{
+		}
+		else{
 			var ntags = 0;
-	  }
-	  $('tfoot').append('\
-		  <tr class="summary text-sm">\
-		  <td><span class="info">'+ntags+' tags</span></td>\
-		  <td></td>\
-		  <td></td>\
-		  <td class="filesize">'+total+' files</td>\
-		  </tr>\
-		  ');
-	}
-  });
+		}
+		$('tfoot').append('\
+			<tr class="summary text-sm">\
+			<td><span class="info">'+ntags+' tags</span></td>\
+			<td></td>\
+			<td></td>\
+			<td class="filesize">'+total+' files</td>\
+			</tr>\
+			');
+		}
+	});
 }
 
 function resetInput(){
-  $('div#controls div.color-box').removeClass('border');
-  $('div#controls div.color-1').addClass('border');
-  $('div#controls input.edittag').val('');
-  $('div#newtag').toggle();
+	$('div#controls div.color-box').removeClass('border');
+	$('div#controls div.color-1').addClass('border');
+	$('div#controls input.edittag').val('');
+	$('div#newtag').toggle();
 }
 
 function setColor(){
 
-	var tagid   = $(this).parents('tr').attr('data-id');
+	var tagid  = $(this).parents('tr').attr('data-id');
+	
+	if($(this).parents('tr').attr('data-tag-owner')){
+		return false;
+	}
 
 	var oldColor = $('tr[data-id='+tagid+'] td .editstuff .border').attr('class');
+	if(typeof oldColor == 'undefined'){
+		oldColor = '';
+	}
 	oldColor = oldColor.replace('color-box','').replace('border','').replace(' ','');
 
 	var newColor = $(this).attr('class');
@@ -119,8 +143,8 @@ function setColor(){
 	}).addClass('tag-'+colorTranslate(newColor));
 
 	$.ajax({
-		url: OC.filePath('meta_data', 'ajax', 'update.php'),
-				 data: {tagid: tagid, color: newColor},
+		url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+				 data: {id: tagid, color: newColor},
 	});
 
 };
@@ -130,12 +154,10 @@ function setName(tagid, newname){
 		return false;
 	}
 	$.ajax({
-		url: OC.filePath('meta_data', 'ajax', 'update.php'),
-	  data: {tagid: tagid, tagname: newname},
+		url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+		data: {id: tagid, tagname: newname},
 		success: function(result){
-
 			$('tr[data-id='+tagid+'] td span.taginfo span').html('<i class="icon-tag" style="display: inline;"></i><span class="tagtext">'+newname+'</span>');
-
 			$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
 
 		}
@@ -153,23 +175,26 @@ function addTag(){
 		color = color.replace('color-box','').replace('border','').replace(' ','')
 		$.ajax({
 			url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
-											 type: "post",
-										data: {tagOp:'new',tagState:'1', tagName:$('div#controls input.edittag').val(), tagColor: color},
+										type: "post",
+										data: {tagOp:'new',tagVisibleState:'1', tagName:$('div#controls input.edittag').val(), tagColor: color, tagPublicState: '0'},
 		});
-		updateTagsView("color");
+		updateTagsView();
 		updateSidebar();
 	}
 	resetInput();
 }
 
 $(document).ready(function() {
-  updateTagsView("color");
+  updateTagsView();
 
   /*
    * Bind click to 'New tag' button and to 'Ok' and 'Cancel' buttons within
    */
   $('div#controls div#addtag a').on('click', function(){
 		$('div#newtag').toggle();
+		if($('div#newtag').is(":visible")){
+			$('div#newtag .newtag-edit .edittag').focus();
+		}
   });
 
   $('div#controls .newtag-clear').on('click', resetInput);
@@ -218,30 +243,49 @@ $(document).ready(function() {
 		var tagid = $(this).parents('tr').attr('data-id');
 		if($(this).is(":checked")){
 			$.ajax({
-				url: OC.filePath('meta_data', 'ajax', 'update.php'),
-				data: {tagid: tagid, visible: 1},
+				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+				data: {id: tagid, visible: 1},
 			});
 			updateSidebar();
 		}
 		else{
 			$('ul.nav-sidebar li[data-id="tag-'+tagid+'"]').remove();
 			$.ajax({
-				url: OC.filePath('meta_data', 'ajax', 'update.php'),
-				data: {tagid: tagid, visible: 0},
+				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+				data: {id: tagid, visible: 0},
+			});
+		}
+	});
+	
+	/*
+	 * Bind click to 'Toggle privacy state'
+	 */
+	$("tbody#fileList").on('change', 'tr td.public input', function() {
+		var tagid = $(this).parents('tr').attr('data-id');
+		if($(this).is(":checked")){
+			$.ajax({
+				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+				data: {id: tagid, public: 1},
+			});
+		}
+		else{
+			$.ajax({
+				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
+				data: {id: tagid, public: 0},
 			});
 		}
 	});
 
   $('tbody#fileList').on('click', 'tr a.action-delete', function(){
-	var tagid = $(this).parents('tr').attr('data-id');
-	$.ajax({
-	  url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
-	  type: "post",
-	  data: {tagOp:'delete',tagId:tagid},
+		var tagid = $(this).parents('tr').attr('data-id');
+		$.ajax({
+			url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
+			type: "post",
+			data: {tagOp:'delete', tagId:tagid},
+		});
+		updateTagsView();
+		updateSidebar();
 	});
-	updateTagsView();
-	updateSidebar();
-  });
 
   /*
    * Bind click to Edit meta data button
@@ -374,7 +418,6 @@ $(document).ready(function() {
   });
 
 
-  $('body').on('click', '.color-box', setColor);
-
+  $('body').on('click', '.editstuff .color-box', setColor);
 
 });

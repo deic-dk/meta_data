@@ -23,8 +23,8 @@ function newEntry(entry){
   } else {
 	return $('\
 				<li id="'+entry['keyid']+'">\
-					<span class="keyname hidden">'+entry['descr']+'</span>\
-					<input class="edit" type="text" value="'+entry['descr']+'" />\
+					<span class="keyname hidden">'+entry['name']+'</span>\
+					<input class="edit" type="text" value="'+entry['name']+'" />\
 					<span class="deletekey">&#10006;</span>\
 					<input class="'+entry['keyid']+' value hidden" type="text" value="" />\
 				</li>');
