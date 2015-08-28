@@ -24,7 +24,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('searchTags', array('name'=>$name,
-				'userid'=>$userid), null, 'meta_data');
+				'userid'=>$userid), false, true, null, 'meta_data');
 		}
 		return $result;
 	}
@@ -57,7 +57,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('searchKey', array('name'=>$name,
-				'tagid'=>$tagid, 'userid'=>$userid), null, 'meta_data');
+				'tagid'=>$tagid, 'userid'=>$userid),false, true, null, 'meta_data');
 		}
 		return $result;
 	}
@@ -77,7 +77,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('searchTagByID', array(
-					'tagid'=>$tagid), null, 'meta_data');
+					'tagid'=>$tagid),false, true, null, 'meta_data');
 		}
 		return $result;
 	}
@@ -97,7 +97,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('searchKeyByID', array(
-					'keyid'=>$keyid), null, 'meta_data');
+					'keyid'=>$keyid),false, true, null, 'meta_data');
 		}
 		return $result;
 	}
@@ -155,7 +155,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('deleteTag', array(
-					'tagid'=>$tagid, 'userid'=>$userid), null, 'meta_data');
+					'tagid'=>$tagid, 'userid'=>$userid),false, true, null, 'meta_data');
 		}
 		return $result;
 	}
