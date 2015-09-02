@@ -6,7 +6,7 @@ class Tags {
 	
 	/// Centralized stuff, i.e. called by ws/* on master: All queries pertaining to meta_data_tags
 
-	private static function dbSearchTags($name, $userid) {
+	public static function dbSearchTags($name, $userid) {
 		$sql = "SELECT id,name,color,owner,public FROM *PREFIX*meta_data_tags WHERE name LIKE ? AND owner LIKE ? OR public = 1 ORDER BY public ASC";
 		$args = array($name, $userid);
 		$query = \OCP\DB::prepare($sql);
