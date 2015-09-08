@@ -57,12 +57,12 @@ class Metadata extends \OC_Search_Provider {
 		$tags = Tags::searchMetadata($query."%", User::getUser());
 		$results = array();
 		foreach ($tags as $tagData) {
-			
 			$filepath = \OC\Files\Filesystem::getpath($tagData['fileid']);
 			$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
 			$tagInfo = Tags::searchTagByID($tagData['id']);
 			$keyInfo = Tags::searchKeyByID($tagData['keyid']);
 			
+			$result['fileid'] = $tagData['fileid'];
 			$result['type'] = 'metadata';
 			$result['name'] = $fileInfo['name'];
 			$result['text']  = "<span class='label outline'><i class='icon-tag'></i>". $tagInfo['name']."</span>".$keyInfo['name']."=".$tagData['value'];
