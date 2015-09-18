@@ -162,6 +162,7 @@ OCA.Meta_data.App = {
  * This function translates color code into color name
  */
 function colorTranslate(color){
+	if(typeof color === 'undefined')  return "default";
   if(color.indexOf('color-1') > -1)  return "default";
   if(color.indexOf('color-2') > -1)  return "primary";
   if(color.indexOf('color-3') > -1)  return "success";

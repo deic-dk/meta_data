@@ -36,7 +36,7 @@ class Tags {
 		$output = $query->execute($args);
 		if($output->rowCount() > 0){
 			while($row=$output->fetchRow()){
-				$tag = dbSearchTagByID($tagid);
+				$tag = self::dbSearchTagByID($tagid);
 				if($tag['owner']==$userid || $tag['public']==1){
 					$result[] = $row;
 				}
@@ -48,7 +48,10 @@ class Tags {
 		}
 	}
 	
-	public static function searchKey($tagid, $name, $userid) {
+	public static function searchKey($tagid, $name, $userid=null) {
+		if(empty($userid)){
+			$userid = \OCP\USER::getUser();
+		}
 		if(empty($name)){
 			return array();
 		}

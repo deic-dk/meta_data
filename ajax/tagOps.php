@@ -36,7 +36,7 @@ switch($_POST['tagOp']) {
 }
 
 // Publish the op result
-if(empty($result === false) {
+if(empty($result)) {
     $result = array(
         'result' => 'KO, result is false',
     );

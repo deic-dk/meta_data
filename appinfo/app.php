@@ -6,7 +6,7 @@ OC::$CLASSPATH['OCA\Search_meta_data\Tag'] = 'apps/meta_data/lib/searchTags.php'
 OC::$CLASSPATH['OCA\Search_meta_data\Metadata'] = 'apps/meta_data/lib/searchTags.php';
 
 OC_Search::registerProvider('OCA\Search_meta_data\Tag');
-OC_Search::registerProvider('OCA\Search_meta_data\Metadata');
+//OC_Search::registerProvider('OCA\Search_meta_data\Metadata');
 
 $order=3;
 
