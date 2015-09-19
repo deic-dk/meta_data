@@ -11,5 +11,5 @@ $public = isset( $_GET['public'] ) ? $_GET['public'] : '';
 $result = \OCA\Meta_data\Tags::updateTag($id, $name, $color, $visible, $public);
 
 if($result != null){
-	OCP\JSON::success($result);
+	OCP\JSON::success();
 }

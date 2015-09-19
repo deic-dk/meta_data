@@ -29,15 +29,12 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 	exit;
 }
 
-$id = isset($_GET['id'])?$_GET['id']:'';
-$name = isset($_GET['name'])?$_GET['name']:'';
-$color = isset($_GET['color'])?$_GET['color']:'';
-$visible = isset($_GET['visible'])?$_GET['visible']:'';
-$public = isset($_GET['public'])?$_GET['public']:'';
+$tagid = isset($_GET['tagid'])?$_GET['tagid']:'';
+$userid = isset($_GET['userid'])?$_GET['userid']:\OCP\User::getUser();
 
-$ret = \OCA\Meta_data\Tags::dbUpdateTag($id, $name, $color, $visible, $public);
+$files = \OCA\Meta_data\Tags::dbGetTaggedFiles($tagid, $userid);
 
-\OCP\Util::writeLog('meta_data', 'Update tag '.$ret, \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning files '.serialize($files), \OC_Log::WARN);
 
-OCP\JSON::encodedPrint($ret);
+OCP\JSON::encodedPrint($files);
 

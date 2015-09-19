@@ -11,9 +11,17 @@ class Tags {
 		$args = array($name, $userid);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
+		$rows = $output->fetchAll();
 		$result = array();
-		while($row=$output->fetchRow()){
-			$result[] = $row;
+		foreach($rows as $row){
+			if($row['owner']==$userid){
+				$result[] = $row;
+			}
+		}
+		foreach($rows as $row){
+			if($row['owner']!=$userid){
+				$result[] = $row;
+			}
 		}
 		return $result;
 	}
@@ -166,7 +174,9 @@ class Tags {
 	public static function dbUpdateTag($id, $name, $color, $display, $public) {
 		$resRsrc = true;
 		if($name || $color || $public){
-			$sql = 'UPDATE *PREFIX*meta_data_tags SET '.(empty($name)?'name=?, ':'').(empty($color)?'color=?, ':'').(empty($public)!=''?', public=? ':'').'WHERE id=?';
+			$sql = 'UPDATE *PREFIX*meta_data_tags SET '.
+			(!empty($name)?'name=?, ':'').(!empty($color)?'color=?, ':'').
+			(!empty($public)!=''?', public=? ':'').'WHERE id=?';
 			$sql = str_replace('=?, WHERE', '=? WHERE', $sql);
 			$sql = str_replace('SET ,', 'SET', $sql);
 			$args = array($name, $color, $public, $id);
@@ -178,13 +188,13 @@ class Tags {
 		return self::setTagDisplay($id, $display) && $resRsrc;
 	}
 	
-	public static function updateTag($id, $name, $color, $display, $public) {
+	public static function updateTag($id, $name, $color, $visible, $public) {
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			$result = self::dbUpdateTag($id, $name, $color, $display, $public);
+			$result = self::dbUpdateTag($id, $name, $color, $visible, $public);
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('updateTag', array('id'=>$id,
-					'name'=>$name, 'color'=>$color, 'display'=>$display, 'public'=>$public),
+					'name'=>$name, 'color'=>$color, 'visible'=>$visible, 'public'=>$public),
 					null, 'meta_data');
 		}
 		return $result;
@@ -240,6 +250,9 @@ class Tags {
 				break;
 			}
 		}
+		if(isset($user_id) && $user_id){
+			self::restoreUser($user_id);
+		}
 		return $ret;
 	}
 	
@@ -274,26 +287,81 @@ class Tags {
 		return $result;
 	}
 	
-	// This returnts the tagged files of the user.
-	// To get all tagged files, also files shared with the user, searching should be used.
-	public static function getTaggedFiles($tagid, $user, $sortAttribute = '', $sortDescending = false){
+	public static function dbGetTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
+		if(!empty($userid) && $userid!=\OCP\USER::getUser()){
+			$user_id = self::switchUser($userid);
+		}
 		$result = array();
 		$sql = "SELECT fileid FROM *PREFIX*meta_data_docTags WHERE tagid = ?";
 		$args = array($tagid);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
 		while($row=$output->fetchRow()){
-			if($row['owner']!==$userid){
+			$filepath = \OC\Files\Filesystem::getpath($row['fileid']);
+			if(empty($filepath)){
 				continue;
 			}
-			$filepath = \OC\Files\Filesystem::getpath($row['fileid']);
 			$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
 			$result[] = $fileInfo;
+		}
+		if(isset($user_id) && $user_id){
+			self::restoreUser($user_id);
 		}
 		if($sortAttribute !== '') {
 			return \OCA\Files\Helper::sortFiles($result, $sortAttribute, $sortDescending);
 		}
 		return $result;
+	}
+
+	public static function getTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
+		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+			return self::dbGetTaggedFiles($tagid, $userid, $sortAttribute, $sortDescending);
+		}
+		$sharedItems = \OCA\FilesSharding\Lib::getItemsSharedWithUser($userid);
+		$serverUsers = \OCA\FilesSharding\Lib::getServerUsers($sharedItems);
+		$allServers = \OCA\FilesSharding\Lib::getServersList();
+		$results = array();
+		foreach($allServers as $server){
+			if(!array_key_exists($server['id'], $serverUsers)){
+				continue;
+			}
+			if(!isset($server['internal_url']) && !empty($server['internal_url'])){
+				continue;
+			}
+			\OCP\Util::writeLog('search', 'Searching server '.$server['internal_url'], \OC_Log::WARN);
+			foreach($serverUsers[$server['id']] as $owner){
+				$matches = Lib::ws('getTaggedFiles', Array('userid'=>$owner, 'tagid'=>$tagid), true, true,
+						$server['internal_url']);
+				$res = array();
+				foreach($matches as $match){
+					foreach($sharedItems as $item){
+						if(in_array($match, $res)){
+							continue;
+						}
+						if(isset($item['fileid']) && isset($match['id']) && $item['fileid']==$match['id']){
+							$match['server'] = $server['internal_url'];
+							$match['owner'] = $owner;
+							$res[] = $match;
+							continue;
+						}
+						// Check if match is in a shared folder or subfolders thereof
+						if($cache->getMimetype($item['mimetype']) === 'httpd/unix-directory'){
+							$len = strlen($item['owner_path'])+1;
+							\OCP\Util::writeLog('search', 'Matching '.$match['link'].':'.$item['owner_path'].' --> '.$server['internal_url'].
+										' --> '.$owner, \OC_Log::WARN);
+							if(substr($match['link'], 0, $len)===$item['owner_path'].'/'){
+								$match['server'] = $server['internal_url'];
+								$match['owner'] = $owner;
+								$res[] = $match;
+								continue;
+							}
+						}
+					}
+				}
+				$results = array_merge($results, $res);
+			}
+		}
+		return $results;
 	}
 	
 	public static function getFileTags($fileid){
