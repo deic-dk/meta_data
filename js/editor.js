@@ -9,24 +9,24 @@
  */
  
 
-function newEntry(entry){
+function newEntry(entry, readonly){
   entry = typeof entry !== 'undefined' ? entry : null;
-
+ 
   if(!entry){
 	return $('\
 				<li class="new">\
 					<span class="keyname hidden"></span>\
-					<input class="edit" type="text" placeholder="New key name" value="" />\
-						<span class="deletekey">&#10006;</span>\
+					<input class="edit" type="text" placeholder="New key name" value="" />'+(readonly?'':'\
+					<span class="deletekey">&#10006;</span>')+'\
 					<input class="value hidden" type="text" value="" />\
 			  </li>');
   } else {
 	return $('\
-				<li id="'+entry['keyid']+'">\
+				<li id="'+entry['id']+'">\
 					<span class="keyname hidden">'+entry['name']+'</span>\
-					<input class="edit" type="text" value="'+entry['name']+'" />\
-					<span class="deletekey">&#10006;</span>\
-					<input class="'+entry['keyid']+' value hidden" type="text" value="" />\
+					<input class="edit" type="text" value="'+entry['name']+'" />'+(readonly?'':'\
+					<span class="deletekey">&#10006;</span>')+'\
+					<input class="value hidden" type="text" value="" />\
 				</li>');
   }
 }

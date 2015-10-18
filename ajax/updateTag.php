@@ -13,3 +13,6 @@ $result = \OCA\Meta_data\Tags::updateTag($id, $name, $color, $visible, $public);
 if($result != null){
 	OCP\JSON::success();
 }
+else{
+	OCP\JSON::error(array('result'=>$result));
+}

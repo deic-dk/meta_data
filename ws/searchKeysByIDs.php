@@ -29,11 +29,9 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 	exit;
 }
 
-$name = isset($_GET['name'])?$_GET['name']:'%';
-$tagid = isset($_GET['tagid'])?$_GET['tagid']:null;
-$userid = isset($_GET['userid'])?$_GET['userid']:\OCP\User::getUser();
+$keyids = isset($_POST['keyid'])?$_POST['keyid']:null;
 
-$keys = \OCA\Meta_data\Tags::dbSearchKey($tagid, $name, $userid);
+$keys = \OCA\Meta_data\Tags::dbSearchKeysByIDs($keyids);
 
 \OCP\Util::writeLog('meta_data', 'Returning keys '.serialize($keys), \OC_Log::WARN);
 

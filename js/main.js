@@ -24,7 +24,7 @@ function updateTagsView(sortValue, direction){
 		$.each(response['tags'], function(key, value) {
 			total+=value.size;
 			$('tbody#fileList').append(' \
-					<tr data-id="'+value.id+'" data-name="'+value.name+'">\
+					<tr data-id="'+value.id+'" data-name="'+value.name+'" data-color="'+value.color+'">\
 					<td class="filename row meta_data_row">\
 						<span class="taginfo">\
 							<a class="action-meta_data" href="#" style="text-decoration:none">\
@@ -141,6 +141,8 @@ function setColor(){
 	$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a i').removeClass(function (index, css) {
 		return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
 	}).addClass('tag-'+colorTranslate(newColor));
+	
+	$(this).parents('tr').attr('data-color', newColor);
 
 	$.ajax({
 		url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
@@ -246,7 +248,10 @@ $(document).ready(function() {
 				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
 				data: {id: tagid, visible: 1},
 			});
-			updateSidebar();
+			//updateSidebar();
+			var tagname = $(this).parents('tr').attr('data-name');
+			var tagcolor = $(this).parents('tr').attr('data-color');
+			addTagToSidebar(tagid, tagname, tagcolor);
 		}
 		else{
 			$('ul.nav-sidebar li[data-id="tag-'+tagid+'"]').remove();
@@ -291,12 +296,16 @@ $(document).ready(function() {
    * Bind click to Edit meta data button
    */
 	$("tbody#fileList").on('click', 'tr td.filename a.action-meta_data', function(){
+		if($('.ui-dialog').length>0){
+			return false;
+		}
 		var tagname = $(this).parents('.filename').find('.tagtext').html();
 		var tagid = $(this).parents('tr').attr('data-id');
+		var owner = $(this).parents('tr').attr('data-tag-owner');
 
 		var html = $('<div><span id="tagid" data-id="'+tagid+'" data-name="'+tagname+'"><h3 class="tagname">Tag name: <input class="edittag" type="text" value="'+tagname+'" /></h3></span><h3>Meta-data fields:</h3><a class="oc-dialog-close close svg"></a><div id="meta_data_container">\
-			<div id=\"emptysearch\">No metadata defined</div><ul id="meta_data_keys"></ul></div><div style="text-align:center;"><button id="add_key" class="btn btn-flat btn-default">Add meta-data field</button></div>\
-			<div style="position:absolute;bottom:6px;right:6px;"><button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button></div></div>');
+			<div id=\"emptysearch\">No metadata defined</div><ul id="meta_data_keys"></ul></div><div class="new_field"><button id="add_key" class="btn btn-flat btn-default">Add meta-data field</button></div>\
+			<div class="schema_editor_buttons"><button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button></div></div>');
 
 		$(html).dialog({
 			dialogClass: "oc-dialog notitle",
@@ -305,19 +314,29 @@ $(document).ready(function() {
 			//height: window.height,
 			width: "80%"
 		});
+		
+		var readonly = false;
+		if(typeof owner != 'undefined' && owner!=$('head').attr('data-user')){
+			$('#meta_data_container :input').prop('readonly', true);
+			$('.tagname :input').prop('readonly', true);
+			$('.schema_editor_buttons').hide();
+			$('.new_field').hide();
+			readonly = true;
+		}
 
 		$.ajax({
 			url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
 			async: false,
 			data: {
-				tagid: tagid
+				tagid: tagid,
+				readonly: readonly
 			},
 			type: "POST",
 			success: function(result) {
 				if(result['data']){
 					$('body').find('#emptysearch').toggleClass('hidden');
 					$.each(result['data'], function(i,item){
-						$('body').find('#meta_data_keys').append(newEntry(item));
+						$('body').find('#meta_data_keys').append(newEntry(item, readonly));
 					});
 				}
 			}

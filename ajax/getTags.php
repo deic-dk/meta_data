@@ -45,7 +45,7 @@ else{
 foreach($tags as $i => $tag){
 	if(isset( $_GET['fileCount'] )){
 		$total = 0; 
-		$result = \OCA\meta_data\Tags::getTaggedFiles($tag['id'], "");
+		$result = \OCA\meta_data\Tags::getTaggedFiles($tag['id'], \OCP\User::getUser());
 		if($result){
 			$tags[$i]['size'] = count($result);
 		}

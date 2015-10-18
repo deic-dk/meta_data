@@ -33,12 +33,30 @@ class Tag extends \OC_Search_Provider {
    * @return \OCP\Search\Result
    */
   function search($query) {
-		$tags = Tags::searchTags($query."%", User::getUser());
 		$results = array();
-		foreach ($tags as $tagData) {
+  	if(empty($query)){
+  		return $results;
+  	}
+  	\OCP\Util::writeLog('meta_data', 'Searching tags: '.$query, \OC_Log::WARN);
+		$tags = Tags::searchTags($query."%", User::getUser());
+		foreach($tags as $tagData) {
 			$result['type'] = 'tag';
 			$result['name'] = $tagData['name'];
 			$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
+			$result['owner'] = $tagData['owner'];
+			$result['public'] = $tagData['public'];
+			$results[] = $result;
+		}
+		$tags = Tags::searchKeys($query."%", User::getUser());
+		foreach($tags as $tagData) {
+			$result['type'] = 'tag';
+			$result['name'] = $tagData['name'];
+			$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
+			$result['owner'] = $tagData['owner'];
+			$result['public'] = $tagData['public'];
+			if(in_array($result, $results)){
+				continue;
+			}
 			$results[] = $result;
 		}
 		return $results;
@@ -55,13 +73,16 @@ class Metadata extends \OC_Search_Provider {
 
   function search($query) {
 		$tags = Tags::searchMetadata($query."%", User::getUser());
+		$tagids = array_map(function($x){ return $x['tagid']; }, $tags);
+		$keyids = array_map(function($x){ return $x['keyid']; }, $tags);
+		$tagInfos = Tags::searchTagsByIDs($tagids);
+		$keyInfos = Tags::searchKeysByIDs($keyids);
 		$results = array();
 		foreach ($tags as $tagData) {
 			$filepath = \OC\Files\Filesystem::getpath($tagData['fileid']);
 			$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
-			$tagInfo = Tags::searchTagByID($tagData['id']);
-			$keyInfo = Tags::searchKeyByID($tagData['keyid']);
-			
+			$tagInfo = $tagInfos[$tagData['tagid']];
+			$keyInfo = $keyInfos[$tagData['keyid']];
 			$result['fileid'] = $tagData['fileid'];
 			$result['type'] = 'metadata';
 			$result['name'] = $fileInfo['name'];

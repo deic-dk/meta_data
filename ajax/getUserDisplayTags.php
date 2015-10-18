@@ -7,19 +7,10 @@ function build_sorter_desc($key) {
   };
 }
 
-
 OCP\JSON::checkLoggedIn();
 \OC::$session->close();
 
 $tagids = \OCA\Meta_data\Tags::getUserDisplayTags();
-$tags=[];
-$i = 0;
-foreach ($tagids as $id){
-	$result = \OCA\Meta_data\Tags::getTagName($id);
-	$tags[$i]['id'] = $id;
-	$tags[$i]['name'] = $result[0];
-	$tags[$i]['color'] = $result[1];
-	++$i;
-}
+$tags = \OCA\Meta_data\Tags::getTags($tagids);
 
 OCP\JSON::success(array('tags' => $tags));

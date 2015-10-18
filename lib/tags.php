@@ -31,14 +31,14 @@ class Tags {
 			$result = self::dbSearchTags($name, $userid);
 		}
 		else{
-			$result = \OCA\FilesSharding\Lib::ws('searchTags', array('name'=>$name,
+			$result = \OCA\FilesSharding\Lib::ws('searchTags', array('name'=>urlencode($name),
 				'userid'=>$userid), false, true, null, 'meta_data');
 		}
 		return $result;
 	}
 	
-	private static function dbSearchKey($tagid, $name, $userid) {
-		$sql = "SELECT keyid,name FROM *PREFIX*meta_data_keys WHERE tagid=? AND name LIKE ? ORDER BY keyid";
+	public static function dbSearchKey($tagid, $name, $userid) {
+		$sql = "SELECT id,name FROM *PREFIX*meta_data_keys WHERE tagid=? AND name LIKE ? ORDER BY id";
 		$args = array($tagid,$name);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
@@ -73,28 +73,95 @@ class Tags {
 		return $result;
 	}
 
-	public static function dbSearchTagByID($tagid){
-		$sql = "SELECT name,color,owner,public FROM *PREFIX*meta_data_tags WHERE id=?";
-		$args = array($tagid);
+	public static function dbSearchKeys($name, $userid) {
+		$sql = "SELECT id,tagid,name FROM *PREFIX*meta_data_keys WHERE name LIKE ? ORDER BY id";
+		$args = array($name);
 		$query = \OCP\DB::prepare($sql);
-		$resRsrc = $query->execute($args);
-		$result=$resRsrc->fetchRow();
+		$output = $query->execute($args);
+		if($output->rowCount() > 0){
+			while($row=$output->fetchRow()){
+				$tag = self::dbSearchTagByID($row['tagid']);
+				if($tag['owner']==$userid || $tag['public']==1){
+					$result[] = $tag;
+				}
+			}
+			return $result;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	public static function searchKeys($name, $userid=null) {
+		if(empty($userid)){
+			$userid = \OCP\USER::getUser();
+		}
+		if(empty($name)){
+			return array();
+		}
+		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+			$result = self::dbSearchKeys($name, $userid);
+		}
+		else{
+			$result = \OCA\FilesSharding\Lib::ws('searchKeys', array('name'=>$name,
+					'userid'=>$userid),false, true, null, 'meta_data');
+		}
 		return $result;
 	}
 	
+	public static function dbSearchTagByID($tagid){
+		$sql = "SELECT id, name, color, owner, public FROM *PREFIX*meta_data_tags WHERE id=?";
+		$args = array($tagid);
+		$query = \OCP\DB::prepare($sql);
+		$resRsrc = $query->execute($args);
+		$result = $resRsrc->fetchRow();
+		return $result;
+	}
+	
+	// TODO: ditch this plus ws/searchTagByID.php
 	public static function searchTagByID($tagid){
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
 			$result = self::dbSearchTagByID($tagid);
 		}
 		else{
-			$result = \OCA\FilesSharding\Lib::ws('searchTagByID', array(
-					'tagid'=>$tagid),false, true, null, 'meta_data');
+			$result = \OCA\FilesSharding\Lib::ws('searchTagByID',
+					array('tagid'=>$tagid),false, true, null, 'meta_data');
+		}
+		return $result;
+	}
+	
+	public static function dbSearchTagsByIDs($tagids){
+		$tagids = array_values(array_filter($tagids, array(__CLASS__, 'isNonEmpty')));
+		$sql = "SELECT id, name, color, owner, public FROM *PREFIX*meta_data_tags WHERE FALSE";
+		foreach($tagids as $tagid){
+			$sql .= " OR id=?";
+		}
+		$query = \OCP\DB::prepare($sql);
+		$resRsrc = $query->execute($tagids);
+		$result = [];
+		while($row=$resRsrc->fetchRow()){
+			$result[$row['id']] = $row;
+		}
+		return $result;
+	}
+	
+	public static function searchTagsByIDs($tagids){
+		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+			$result = self::dbSearchTagsByIDs($tagids);
+		}
+		else{
+			$idarray = array();
+			foreach($tagids as $n=>$tagid){
+				$idarray['tagid['.$n.']'] = $tagid;
+			}
+			$result = \OCA\FilesSharding\Lib::ws('searchTagsByIDs',
+					$idarray,true, true, null, 'meta_data');
 		}
 		return $result;
 	}
 	
 	public static function dbSearchKeyByID($keyid){
-		$sql = "SELECT name FROM *PREFIX*meta_data_keys WHERE keyid=?";
+		$sql = "SELECT name FROM *PREFIX*meta_data_keys WHERE id=?";
 		$args = array($keyid);
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
@@ -103,7 +170,7 @@ class Tags {
 	}
 	
 	public static function searchKeyByID($keyid){
-		if(!OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
 			$result = self::dbSearchKeyByID($keyid);
 		}
 		else{
@@ -113,9 +180,39 @@ class Tags {
 		return $result;
 	}
 	
-	public static function getTagName($tagid) {
-		$tag = self::searchTagByID($tagid);
-		return array($tag['name'],$tag['color']);
+	public static function dbSearchKeysByIDs($keyids){
+		$keyids = array_values(array_filter($keyids, array(__CLASS__, 'isNonEmpty')));
+		$sql = "SELECT id, tagid, name FROM *PREFIX*meta_data_keys WHERE FALSE";
+		foreach($keyids as $keyid){
+			$sql .= " OR id=?";
+		}
+		$query = \OCP\DB::prepare($sql);
+		$resRsrc = $query->execute($keyids);
+		$result = [];
+		while($row=$resRsrc->fetchRow()){
+			$result[$row['id']] = $row;
+		}
+		return $result;
+	}
+	
+	public static function searchKeysByIDs($keyids){
+		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+			$result = self::dbSearchKeysByIDs($keyids);
+		}
+		else{
+			$idarray = array();
+			foreach($tagids as $n=>$keyid){
+				$idarray['keyid['.$n.']'] = $keyid;
+			}
+			$result = \OCA\FilesSharding\Lib::ws('searchKeysByIDs',
+					$idarray,true, true, null, 'meta_data');
+		}
+		return $result;
+	}
+	
+	public static function getTags($tagids) {
+		$tags = self::searchTagsByIDs($tagids);
+		return $tags;
 	}
 	
 	public static function dbNewTag($name, $userid, $display, $color, $public){
@@ -171,33 +268,34 @@ class Tags {
 		return $result;
 	}
 	
-	public static function dbUpdateTag($id, $name, $color, $display, $public) {
+	public static function dbUpdateTag($id, $name, $color, $public) {
 		$resRsrc = true;
-		if($name || $color || $public){
+		if(self::isNonEmpty($name) || self::isNonEmpty($color) || self::isNonEmpty($public)){
 			$sql = 'UPDATE *PREFIX*meta_data_tags SET '.
-			(!empty($name)?'name=?, ':'').(!empty($color)?'color=?, ':'').
-			(!empty($public)!=''?', public=? ':'').'WHERE id=?';
+			(self::isNonEmpty($name)?'name=?, ':'').(self::isNonEmpty($color)?'color=?, ':'').
+			(self::isNonEmpty($public)?', public=? ':'').'WHERE id=?';
 			$sql = str_replace('=?, WHERE', '=? WHERE', $sql);
 			$sql = str_replace('SET ,', 'SET', $sql);
 			$args = array($name, $color, $public, $id);
-			$args = array_values(array_filter($args, array(__CLASS__, 'emptyTest')));
+			$args = array_values(array_filter($args, array(__CLASS__, 'isNonEmpty')));
 			\OCP\Util::writeLog('meta_data', 'SQL: '.$sql. ', ARGS: '.serialize($args).' --> '.count($args), \OC_Log::WARN);
 			$query = \OCP\DB::prepare($sql);
 			$resRsrc = $query->execute($args);
 		}
-		return self::setTagDisplay($id, $display) && $resRsrc;
+		return $resRsrc;
 	}
 	
 	public static function updateTag($id, $name, $color, $visible, $public) {
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			$result = self::dbUpdateTag($id, $name, $color, $visible, $public);
+			$result = self::dbUpdateTag($id, $name, $color, $public);
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('updateTag', array('id'=>$id,
-					'name'=>$name, 'color'=>$color, 'visible'=>$visible, 'public'=>$public),
-					null, 'meta_data');
+					'name'=>$name, 'color'=>$color, 'public'=>$public),
+					false, true, null, 'meta_data');
 		}
-		return $result;
+		\OCP\Util::writeLog('meta_data', 'RESULT: '.serialize($result).':'.\OCP\DB::isError($result), \OC_Log::WARN);
+		return $result && self::setTagDisplay($id, $visible);
 	}
 	
 	/// Distributed stuff: Searching file meta-data has to happen on each slave server.
@@ -257,7 +355,7 @@ class Tags {
 	}
 	
 	public static function searchMetadata($query, $userid) {
-		$sql = "SELECT fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
+		$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
 		$args = array($query);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
@@ -274,7 +372,7 @@ class Tags {
 		}
 	}
 	
-	public static function loadFileKeys($fileid, $tagid){
+	public static function dbLoadFileKeys($fileid, $tagid){
 		$result = array();
 		$sql = "SELECT keyid,value FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=?";
 		$args = array($fileid, $tagid);
@@ -287,40 +385,75 @@ class Tags {
 		return $result;
 	}
 	
-	public static function dbGetTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
+	public static function loadFileKeys($fileid, $tagid, $owner) {
+		if(empty($owner) || !\OCP\App::isEnabled('files_sharding')){
+			return self::dbLoadFileKeys($fileid, $tagid);
+		}
+		$server = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
+		$result = \OCA\FilesSharding\Lib::ws('loadFileKeys', array('fileid'=>$fileid,
+			'tagid'=>$tagid), false, true, $server, 'meta_data');
+		return $result;
+	}
+	
+	public static function dbGetTaggedFiles($tagid, $userid = null){
 		if(!empty($userid) && $userid!=\OCP\USER::getUser()){
 			$user_id = self::switchUser($userid);
 		}
-		$result = array();
+		$files = array();
 		$sql = "SELECT fileid FROM *PREFIX*meta_data_docTags WHERE tagid = ?";
 		$args = array($tagid);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
+		$data = null;
 		while($row=$output->fetchRow()){
 			$filepath = \OC\Files\Filesystem::getpath($row['fileid']);
 			if(empty($filepath)){
 				continue;
 			}
 			$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
-			$result[] = $fileInfo;
+			if(empty($fileInfo)){
+				continue;
+			}
+			//$files[] = $fileInfo;
+			\OCP\Util::writeLog('meta_data', 'Adding file '.$row['fileid'].'-->'.$filepath, \OC_Log::WARN);
+			$data = $fileInfo->getData();
+			$data['type'] = $fileInfo->getType();
+			//$data['storage'] = $fileInfo->getStorage();
+			$data['path'] = $fileInfo->getpath();
+			$data['internalPath'] = $fileInfo->getInternalPath();
+			$data['tags'] = self::dbGetFileTags($row['fileid']);
+			$files[] = $data;
 		}
+		//$result = \OCA\Files\Helper::formatFileInfos($files);
 		if(isset($user_id) && $user_id){
 			self::restoreUser($user_id);
 		}
-		if($sortAttribute !== '') {
-			return \OCA\Files\Helper::sortFiles($result, $sortAttribute, $sortDescending);
-		}
-		return $result;
+		\OCP\Util::writeLog('meta_data', 'Returning '.serialize($data), \OC_Log::WARN);
+		//return $result;
+		return $files;
 	}
 
 	public static function getTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
-		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			return self::dbGetTaggedFiles($tagid, $userid, $sortAttribute, $sortDescending);
+		$storage = \OC\Files\Filesystem::getStorage('/');
+		$results = array();
+		$data = self::dbGetTaggedFiles($tagid, $userid);
+		foreach($data as $row){
+			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
+			$results[] = $info;
 		}
+		if($sortAttribute !== '') {
+			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
+		}
+		
+		if(!\OCP\App::isEnabled('files_sharding')){
+			return $results;
+		}
+		
 		$sharedItems = \OCA\FilesSharding\Lib::getItemsSharedWithUser($userid);
 		$serverUsers = \OCA\FilesSharding\Lib::getServerUsers($sharedItems);
+		\OCP\Util::writeLog('meta_data', 'Server users '.serialize($serverUsers), \OC_Log::WARN);
 		$allServers = \OCA\FilesSharding\Lib::getServersList();
-		$results = array();
+		$cache = $storage->getCache();
 		foreach($allServers as $server){
 			if(!array_key_exists($server['id'], $serverUsers)){
 				continue;
@@ -328,31 +461,37 @@ class Tags {
 			if(!isset($server['internal_url']) && !empty($server['internal_url'])){
 				continue;
 			}
-			\OCP\Util::writeLog('search', 'Searching server '.$server['internal_url'], \OC_Log::WARN);
+			\OCP\Util::writeLog('meta_data', 'Searching server '.$server['internal_url'], \OC_Log::WARN);
 			foreach($serverUsers[$server['id']] as $owner){
-				$matches = Lib::ws('getTaggedFiles', Array('userid'=>$owner, 'tagid'=>$tagid), true, true,
-						$server['internal_url']);
+				$matches = \OCA\FilesSharding\Lib::ws('getTaggedFiles', Array('userid'=>$owner, 'tagid'=>$tagid),
+						false, true, $server['internal_url'], 'meta_data');
 				$res = array();
 				foreach($matches as $match){
 					foreach($sharedItems as $item){
-						if(in_array($match, $res)){
-							continue;
-						}
-						if(isset($item['fileid']) && isset($match['id']) && $item['fileid']==$match['id']){
+						if(isset($item['fileid']) && isset($match['fileid']) && $item['fileid']==$match['fileid']){
+							\OCP\Util::writeLog('meta_data', 'Matched '.$match['path'].':'.$item['owner_path'].' --> '.$server['internal_url'].
+								' --> '.$owner, \OC_Log::WARN);
 							$match['server'] = $server['internal_url'];
 							$match['owner'] = $owner;
-							$res[] = $match;
+							$info = new \OC\Files\FileInfo($match['path'], $storage, $match['internalPath'], $match);
+							if(!in_array($info, $res)){
+								$res[] = $info;
+							}
 							continue;
 						}
 						// Check if match is in a shared folder or subfolders thereof
-						if($cache->getMimetype($item['mimetype']) === 'httpd/unix-directory'){
-							$len = strlen($item['owner_path'])+1;
-							\OCP\Util::writeLog('search', 'Matching '.$match['link'].':'.$item['owner_path'].' --> '.$server['internal_url'].
+						if($cache->getMimetype($item['mimetype'])==='httpd/unix-directory' && isset($item['owner_path'])){
+							$fullpath = '/'.$owner.'/files'.$item['owner_path'].'/';
+							$len = strlen($fullpath);
+							if(substr($match['path'], 0, $len)===$fullpath){
+								\OCP\Util::writeLog('meta_data', 'Matching '.substr($match['path'], 0, $len).':'.$fullpath.' --> '.$server['internal_url'].
 										' --> '.$owner, \OC_Log::WARN);
-							if(substr($match['link'], 0, $len)===$item['owner_path'].'/'){
 								$match['server'] = $server['internal_url'];
 								$match['owner'] = $owner;
-								$res[] = $match;
+								$info = new \OC\Files\FileInfo($match['path'], $storage, $match['internalPath'], $match);
+								if(!in_array($info, $res)){
+									$res[] = $info;
+								}
 								continue;
 							}
 						}
@@ -361,10 +500,31 @@ class Tags {
 				$results = array_merge($results, $res);
 			}
 		}
+		if($sortAttribute !== '') {
+			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
+		}
 		return $results;
 	}
 	
-	public static function getFileTags($fileid){
+	// TODO: this should operate on a list of fileids
+	public static function getFileTags($fileid, $owner=null){
+		$result = self::dbGetFileTags($fileid);
+		if(empty($owner) || !\OCP\App::isEnabled('files_sharding')){
+			return $result;
+		}
+		\OCP\Util::writeLog('meta_data', 'DB file tags: '.$fileid.'-->'.serialize($result), \OC_Log::WARN);
+		//$sharedItem = \OCA\FilesSharding\Lib::ws('getItemSharedWithBySource', Array('itemType' => 'file',
+		//		'user_id'=>\OCP\USER::getUser(), 'itemSource'=>$fileid));
+		//\OCP\Util::writeLog('meta_data', 'Shared item '.serialize($sharedItem), \OC_Log::WARN);
+		$server = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
+		$tags = \OCA\FilesSharding\Lib::ws('getFileTags', Array('userid'=>$owner, 'fileid'=>$fileid),
+				false, true, $server, 'meta_data');
+		\OCP\Util::writeLog('meta_data', 'WS file tags: '.$fileid.'-->'.serialize($tags), \OC_Log::WARN);
+		$result = array_unique(array_merge($result, $tags));
+		return $result;
+	}
+	
+	public static function dbGetFileTags($fileid){
 		$result = array();
 		$sql = "SELECT tagid FROM *PREFIX*meta_data_docTags WHERE fileid = ?";
 		$args = array($fileid);
@@ -394,7 +554,7 @@ class Tags {
 	}
 
 	public static function alterKey($tagid,$keyid, $keyname, $userid) {
-		$sql = 'UPDATE *PREFIX*meta_data_keys SET name=? WHERE tagid=? AND keyid=?';
+		$sql = 'UPDATE *PREFIX*meta_data_keys SET name=? WHERE tagid=? AND id=?';
 		$args = array($keyname, $tagid,$keyid);
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
@@ -402,7 +562,7 @@ class Tags {
 	}
 
 	public static function deleteKeys($tagid, $keyid){
-		$sql = 'DELETE FROM *PREFIX*meta_data_keys WHERE tagid=? AND keyid LIKE ?';
+		$sql = 'DELETE FROM *PREFIX*meta_data_keys WHERE tagid=? AND id LIKE ?';
 		$args = array($tagid, $keyid);
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
@@ -453,16 +613,22 @@ class Tags {
 			$args = array($fileid, $tagid, $keyid ,$value);
 			$query = \OCP\DB::prepare($sql);
 			$resRsrc = $query->execute($args);
+			if($resRsrc){
+				$res[0] = array('tagid'=>$tagid, 'keyid'=>$keyid, 'fileid'=>$fileid, 'value'=>value);
+				return $res;
+			}
 		}
 		else if (count($result) == 1 ) {
 			$sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=? AND tagid=?';
 			$args = array($value, $fileid, $keyid, $tagid);
 			$query = \OCP\DB::prepare($sql);
 			$resRsrc = $query->execute($args);
+			if($resRsrc){
+				$res[0] = array('tagid'=>$tagid, 'keyid'=>$keyid, 'fileid'=>$fileid, 'value'=>$value);
+				return $res;
+			}
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
 
 	public static function getMimeType($mtype){
@@ -473,8 +639,8 @@ class Tags {
 		return $output->fetchRow();
 	}
 
-	private static function emptyTest($val) {
-		return !empty($val) || $val==="0";
+	private static function isNonEmpty($val) {
+		return isset($val) && (!empty($val) || $val==='0' || $val===0);
 	}
 
 	public static function formatFileInfo($i) {
@@ -498,6 +664,9 @@ class Tags {
 		$entry['size'] = $i['size'];
 		$entry['type'] = $i['type'];
 		$entry['etag'] = $i['etag'];
+			if (isset($i['owner'])) {
+				$entry['owner'] = $i['owner'];
+		}
 		if (isset($i['displayname_owner'])) {
 				$entry['shareOwner'] = $i['displayname_owner'];
 		}
@@ -542,6 +711,11 @@ class Tags {
 	}
 
 	public static function setTagDisplay($tagid, $value) {
+		if(!self::isNonEmpty($value)){
+			\OCP\Util::writeLog('meta_data', 'No value for '.$tagid, \OC_Log::WARN);
+			return true;
+		}
+		\OCP\Util::writeLog('meta_data', 'Setting '.$tagid.' --> '.$value, \OC_Log::WARN);
 		if($value != 1 && $value != 0){
 			throw new \Exception("Must be 1 or 0: $value");
 		}

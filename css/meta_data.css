@@ -27,6 +27,8 @@ input.edittag {
 		left: 5px;
 		top: 5px;
 		border-radius: 2px;
+		/*Sorry Ashoka - I prefer the sharp edges... /F*/
+		/*border-radius: 50%;*/
 		cursor: pointer;
 }
 
@@ -102,6 +104,8 @@ span.deletekey {
 
 .taginfo .label {
 	line-height: 0.8;
+	/*Sorry Ashoka - I prefer the sharp edges... /F*/
+    /*border-radius: 15px;*/
 }
 
 .taginfo  {
@@ -194,3 +198,10 @@ span[data-tag]:last-of-type{
 .editor_buttons {
 	text-align: right;
 }
+
+.schema_editor_buttons {
+	position:absolute;
+	bottom:6px;
+	right:6px;
+}
+

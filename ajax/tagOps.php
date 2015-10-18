@@ -44,10 +44,9 @@ if(empty($result)) {
 else {
     $result = array(
         'result' => 'OK',
-        'tagid' => $result[0]['tagid'],
-        'tagname' => $result[0]['name'],
-        'keyid' => isset($result[0]['keyid'])?$result[0]['keyid']:null,
-        'result' => $result,
+        'tagid' => isset($result[0]['tagid'])?$result[0]['tagid']:$_POST['tagId'],
+        'tagname' => isset($result[0]['name'])?$result[0]['name']:'',
+        'keyid' => isset($result[0]['keyid'])?$result[0]['keyid']:'',
     );
 }
 

@@ -17,7 +17,6 @@ OCA.Meta_data.App = {
 
   _tagid: null,
   _FileList: null,
-
   initTaggedFiles: function($el, tagid) {
 		if(this._FileList && this._tagid==tagid) {
 			return this._FileList;
@@ -76,7 +75,7 @@ OCA.Meta_data.App = {
 		fileActions.merge(OCA.Files.fileActions);
 		return fileActions;
   },
-	
+
 	newCreateRow: function(fileData, tr) {
 		if(fileData.type == 'file'){
 			var tagwidth = 0;
@@ -111,20 +110,36 @@ OCA.Meta_data.App = {
 			tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));
 	}
 	tr.find('.more-tags').tipsy({gravity:'s',fade:true});
+	// Support sharding
+	if(typeof fileData.owner != 'undefined'){
+		tr.attr('data-share-owner', fileData.owner);
+		tr.attr('data-share-permissions', '0');
+		tr.find('td.filename a').click({
+			owner: fileData.owner,
+			id: fileData.id
+		}, function (event) {
+			event.stopPropagation();
+			event.preventDefault();
+			(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, ''));
+	});
+	}
 	return tr;
 	},
 
   modifyFilelist: function() {
+		OCA.Meta_data.App.tag_semaphore = true;
 		var oldnextPage = OCA.Files.FileList.prototype._nextPage;
 		OCA.Files.FileList.prototype._nextPage = function(animate) {
-			var getfiletags = function(data, dir, callback) {
+			var getfiletags = function(data, dir, dirowner, fileowners, callback) {
 				$.ajax({
 					async: false,
 					type: "POST",
 					url: OC.linkTo('meta_data','ajax/getFileTags.php'),
 					data: {
 						files: data,
-						dir: dir
+						dir: dir,
+						owner: dirowner,
+						fileowners: fileowners
 					},
 					success: function(data){
 						callback(data);
@@ -132,8 +147,13 @@ OCA.Meta_data.App = {
 				});
 			}
 			var files;
-			var fileids = this.files.map(function(obj){return {id: obj.id };});
-			getfiletags(fileids, this.getCurrentDirectory(), function(data){
+			var fileids = this.files.map(function(obj){ return {id: obj.id};});
+			var owner = $('.crumb.last a').length>0?OC.Upload.getParam($('.crumb.last a').attr('href'), 'owner'):'';
+			var fileowners = '';
+			if(typeof owner=='undefined' || owner==''){
+				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
+			}
+			getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '',fileowners, function(data){
 				files = data.files;
 			});
 			for(var i=0; i<this.files.length; i++){
@@ -162,7 +182,7 @@ OCA.Meta_data.App = {
  * This function translates color code into color name
  */
 function colorTranslate(color){
-	if(typeof color === 'undefined')  return "default";
+	if(typeof color == 'undefined' || color == null)  return "default";
   if(color.indexOf('color-1') > -1)  return "default";
   if(color.indexOf('color-2') > -1)  return "primary";
   if(color.indexOf('color-3') > -1)  return "success";
@@ -213,6 +233,18 @@ function updateSidebar(){
   });
 }
 
+function addTagToSidebar(id, name, color){
+	$('ul.nav-sidebar li#tags').show();
+	tag = '\
+	<li data-id="tag-'+id+'">\
+	<a href="#"><i class="icon icon-tag tag-'+colorTranslate(color)+'" data-tag="'+id+'"></i>\
+	<span>'+name+'</span>\
+	</a>\
+	</li>\
+	';
+	$('ul.nav-sidebar li#tags').after(tag);
+}
+
 /*
  * This function updates the tags on a single file
  */
@@ -227,10 +259,14 @@ function updateFileListTags(tr, showall){
 		tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
 	}
 	var tags = '';
+	var owner = tr.attr('data-share-owner');
 	$.ajax({
 		async: false,
 		url: OC.filePath('meta_data', 'ajax', 'single.php'),
-		data: {fileid: tr.attr('data-id')},
+		data: {
+			fileid: tr.attr('data-id'),
+			owner: typeof owner != 'undefined'?owner:''
+			},
 		success: function( response ){
 			if(response){
 					var tagwidth = 0;
@@ -324,7 +360,7 @@ $(document).ready(function() {
 		OCA.Meta_data.App.removeTaggedFiles();
 	});
 
-	if(OCA.Files){
+	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files){
 		OCA.Meta_data.App.modifyFilelist();
 	}
 
@@ -365,6 +401,9 @@ $(document).ready(function() {
    * This next block of code is for entering the meta data editor
    */
 	$('tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
+		if($('.ui-dialog').length>0){
+			return false;
+		}
 		e.preventDefault();
 		e.stopPropagation();
 		var title=$(this).children('span.tagtext').html();
@@ -373,8 +412,8 @@ $(document).ready(function() {
 		var tagid=$(this).attr('data-tag');
 		var html = $('\
 							<div>\
-							<span id="tagid" class="'+tagid+'">\
-							<h3 class="oc-dialog-title"><span id="fileid" class="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
+							<span>\
+							<h3 class="oc-dialog-title"><span  id="metadata" tagid="'+tagid+'" fileid="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
 						</span>\
 						<a class="oc-dialog-close close svg"></a>\
 						<div id="meta_data_container">\
@@ -393,6 +432,15 @@ $(document).ready(function() {
 			//height: window.height,
 			width: "80%"
 		});
+		var owner = $(this).parents('tr[data-id='+fileid+']').attr('data-share-owner-uid');
+		if(typeof owner == 'undefined'){
+			owner = '';
+		}
+		else{
+			// Disable editing meta-data of files shared with me
+			$('#meta_data_container :input').prop('readonly', true);
+			$('.editor_buttons').hide();
+		}
 		$.ajax({
 			url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
 			async: false,
@@ -415,13 +463,14 @@ $(document).ready(function() {
 			async: false,
 			data: {
 				fileid: fileid,
-				tagid: tagid
+				tagid: tagid,
+				fileowner: owner
 			},
 			type: "POST",
 			success: function(result){
 				if(result['data']){
 					$.each(result['data'], function(i,item){
-					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
+						$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
 					});
 				}
 			}
@@ -441,8 +490,8 @@ $(document).ready(function() {
 					data: {
 					tagOp: 'update_file_key',
 					keyId: $(this).attr('id'),
-					tagId: $('#tagid').attr('class'),
-					fileId:$('#fileid').attr('class'),
+					tagId: $('#metadata').attr('tagid'),
+					fileId:$('#metadata').attr('fileid'),
 					value: $(this).find('input.value').val()
 				},
 				success: function(result) {
@@ -469,7 +518,7 @@ $(document).ready(function() {
 		$('.tipsy:last').remove();
 		updateFileListTags($(this).parents('tr'), true);
   });
-	
+
 	$('tbody').on('click', 'a.less-tags', function(e){
 		e.stopPropagation();
 		$('.tipsy:last').remove();

@@ -44,7 +44,7 @@
     <name>*dbprefix*meta_data_keys</name>
     <declaration>
       <field>
-        <name>keyid</name>
+        <name>id</name>
         <type>integer</type>
         <default>0</default>
         <notnull>true</notnull>

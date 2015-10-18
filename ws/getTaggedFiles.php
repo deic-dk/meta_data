@@ -34,7 +34,7 @@ $userid = isset($_GET['userid'])?$_GET['userid']:\OCP\User::getUser();
 
 $files = \OCA\Meta_data\Tags::dbGetTaggedFiles($tagid, $userid);
 
-\OCP\Util::writeLog('meta_data', 'Returning files '.serialize($files), \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning files', \OC_Log::WARN);
 
 OCP\JSON::encodedPrint($files);
 

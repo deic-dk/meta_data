@@ -33,7 +33,7 @@ $tagid = isset($_GET['tagid'])?$_GET['tagid']:null;
 
 $tags = \OCA\Meta_data\Tags::dbSearchTagByID($tagid);
 
-\OCP\Util::writeLog('meta_data', 'Returning tags '.serialize($tags), \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning tags '.serialize($tags), \OC_Log::DEBUG);
 
 OCP\JSON::encodedPrint($tags);
 

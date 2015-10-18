@@ -29,13 +29,12 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 	exit;
 }
 
-$name = isset($_GET['name'])?$_GET['name']:'%';
-$tagid = isset($_GET['tagid'])?$_GET['tagid']:null;
-$userid = isset($_GET['userid'])?$_GET['userid']:\OCP\User::getUser();
+$fileid = isset($_GET['fileid'])?$_GET['fileid']:'';
+$owner = isset($_GET['owner'])?$_GET['owner']:\OCP\User::getUser();
 
-$keys = \OCA\Meta_data\Tags::dbSearchKey($tagid, $name, $userid);
+$tags = \OCA\Meta_data\Tags::dbGetFileTags($fileid, $owner);
 
-\OCP\Util::writeLog('meta_data', 'Returning keys '.serialize($keys), \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning tags', \OC_Log::DEBUG);
 
-OCP\JSON::encodedPrint($keys);
+OCP\JSON::encodedPrint($tags);
 

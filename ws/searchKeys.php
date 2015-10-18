@@ -30,12 +30,11 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 }
 
 $name = isset($_GET['name'])?$_GET['name']:'%';
-$tagid = isset($_GET['tagid'])?$_GET['tagid']:null;
 $userid = isset($_GET['userid'])?$_GET['userid']:\OCP\User::getUser();
 
-$keys = \OCA\Meta_data\Tags::dbSearchKey($tagid, $name, $userid);
+$tags = \OCA\Meta_data\Tags::dbSearchKeys($name, $userid);
 
-\OCP\Util::writeLog('meta_data', 'Returning keys '.serialize($keys), \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning keys '.serialize($tags), \OC_Log::WARN);
 
-OCP\JSON::encodedPrint($keys);
+OCP\JSON::encodedPrint($tags);
 

@@ -4,18 +4,18 @@
 \OCP\JSON::checkAppEnabled('meta_data');
 
 // Read post data
-$fileID   = $_POST['fileid'];
-$tagID    = $_POST['tagid'];
-$keyID    = $_POST['keyid'];
-$value    = $_POST['val'];
+$fileID   = isset($_POST['fileid'])?$_POST['fileid']:'';
+$tagID    = isset($_POST['tagid'])?$_POST['tagid']:'';
+$keyID    = isset($_POST['keyid'])?$_POST['keyid']:'';
+$val      = isset($_POST['val'])?$_POST['val']:'';
 
-// if $value and $keyid is set, this call needs to update keys 
+// if $val and $keyid is set, this call needs to update keys 
 if(!empty($keyID)){
-  $result = \OCA\meta_data\Tags::updateFileKeys($fileID,$tagID,$keyID,$value);
+  $result = \OCA\meta_data\Tags::updateFileKeys($fileID, $tagID, $keyID, $val);
 }
 else {
 // otherwise it should update tags
-  $result = \OCA\meta_data\Tags::updateFileTags($tagID,OC_User::getUser(),$fileID);
+  $result = \OCA\meta_data\Tags::updateFileTags($tagID, OC_User::getUser(), $fileID);
 }
 
 // In either case, return $result

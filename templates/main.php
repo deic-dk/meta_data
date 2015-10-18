@@ -15,14 +15,14 @@
   </div>
   <div id="newtag" class="panel-heading">
     <span class="newtag-edit">
-	  <input class="edittag" type="text" placeholder="New tag"> 
+	  <input class="edittag" type="text" placeholder="New tag">
 	  <div class="color-box color-1 border"></div>
 	  <div class="color-box color-2"></div>
 	  <div class="color-box color-3"></div>
 	  <div class="color-box color-4"></div>
 	  <div class="color-box color-5"></div>
 	  <div class="color-box color-6"></div>
-	    <span class="newtag-buttons">	
+	    <span class="newtag-buttons">
 					<a class="newtag-add btn btn-default btn-flat" href="#">Add</a>&nbsp;
 					<a class="newtag-clear btn btn-default btn-flat" href="#">Cancel</a>
 	    </span>
@@ -35,7 +35,7 @@
 <tr>
 	<th id="headerName" class="column-name">
 		<a class="name sort columntitle" data-sort="name">
-			<span>Name</span>         
+			<span>Name</span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
@@ -76,7 +76,7 @@
 </div>
 </div>
 
-<div class="hidden" id="deleteConfirm" title="<?php p($l->t('Delete tag')) ?>"> 
+<div class="hidden" id="deleteConfirm" title="<?php p($l->t('Delete tag')) ?>">
     <div>
         <span id="deleteType"></span>
         <?php p($l->t('Are you sure you want to delete the tag:')) ?><br />

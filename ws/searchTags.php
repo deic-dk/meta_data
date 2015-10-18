@@ -34,7 +34,7 @@ $user = isset($_GET['user'])?$_GET['user']:\OCP\User::getUser();
 
 $tags = \OCA\Meta_data\Tags::dbSearchTags($name, $user);
 
-\OCP\Util::writeLog('meta_data', 'Returning tags '.serialize($tags), \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'Returning tags '.serialize($tags), \OC_Log::DEBUG);
 
 OCP\JSON::encodedPrint($tags);
 
