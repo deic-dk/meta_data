@@ -239,7 +239,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('newTag', array('userid'=>$userid,
-					'name'=>$name, 'color'=>$color, 'display'=>$display, 'public'=>$public),
+					'name'=>urlencode($name), 'color'=>$color, 'display'=>$display, 'public'=>$public),
 					null, 'meta_data');
 		}
 		return $result;
@@ -291,7 +291,7 @@ class Tags {
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('updateTag', array('id'=>$id,
-					'name'=>$name, 'color'=>$color, 'public'=>$public),
+					'name'=>urlencode($name), 'color'=>$color, 'public'=>$public),
 					false, true, null, 'meta_data');
 		}
 		\OCP\Util::writeLog('meta_data', 'RESULT: '.serialize($result).':'.\OCP\DB::isError($result), \OC_Log::WARN);
