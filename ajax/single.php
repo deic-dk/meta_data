@@ -12,11 +12,14 @@ $fileid = isset( $_GET['fileid'] ) ? $_GET['fileid'] : '';
 $owner = isset( $_GET['owner'] ) ? $_GET['owner'] : '';
 $user = \OCP\USER::getUser();
 
-$tagids = \OCA\Meta_data\Tags::getFileTags($fileid, $owner);
+// Get file tags from the server of the file-owner
+$tagidsArr = \OCA\Meta_data\Tags::getFileTags(array($fileid), $owner);
+$tagids = isset($tagidsArr[$fileid])?$tagidsArr[$fileid]:[];
+// Now get full tags from master
 $alltags = \OCA\Meta_data\Tags::getTags($tagids);
-$tags=[];
-foreach ($alltags as $tag){
-	if($owner!=$user && $tag['public']==0){
+$tags = [];
+foreach($alltags as $tag){
+	if($tag['owner']!=$user && $tag['public']==0){
 		continue;
 	}
 	$tags[] = $tag;

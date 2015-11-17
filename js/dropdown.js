@@ -11,31 +11,31 @@
 
 
 function addNewDropDown(file){
+	var files = (file+'').split(':');
 	$.ajax({
 		url: OC.filePath('meta_data', 'ajax', 'getTags.php'),
 		data: {sortValue: 'color', direction: 'asc', fileId: file},
 		success: function(response) {
-			$('#test').html('<div id="newTag"><input type=\"text\" value=\"\" placeholder=\"new tag\"></div><p>');
+			$('#tag_action').html('<div id="newTag"><input type=\"text\" value=\"\" placeholder=\"new tag\"></div><p>');
 			if(response){
-				var containerWidth = $('#test').width();
+				var containerWidth = $('#tag_action').width();
 				var tagWidth = 0;
 				$.each( response['tags'], function(key, value){
 				var $tag = $('<span data-id="tag-'+value.id+'" style="opacity: 0;"><span class="label outline label-'+colorTranslate(value.color)+'"><i class="icon-tag"></i> '+value.name+'</span></span>');
-				$('#test').append($tag);
-				var temp = $('#test span[data-id="tag-'+value.id+'"]').width();
+				$('#tag_action').append($tag);
+				var temp = $('#tag_action span[data-id="tag-'+value.id+'"]').width();
 				if(tagWidth + temp >= containerWidth){
-					$('#test span[data-id="tag-'+value.id+'"]').remove();
-					$('#test').append('<p>');
+					$('#tag_action span[data-id="tag-'+value.id+'"]').remove();
+					$('#tag_action').append('<p>');
 					tagWidth = 0;
-					$('#test').append($tag);
-					$('#test span[data-id="tag-'+value.id+'"]').css('opacity','1');
+					$('#tag_action').append($tag);
+					$('#tag_action span[data-id="tag-'+value.id+'"]').css('opacity','1');
 				}
 				tagWidth = tagWidth + temp;
-				$('#test span[data-id="tag-'+value.id+'"]').css('opacity','1');
-
+				$('#tag_action span[data-id="tag-'+value.id+'"]').css('opacity','1');
 				});
 			}
-			$('#test').show();
+			$('#tag_action').show();
 		},
 	});
 	$('div#dropdown').on("click", function(e) {
@@ -63,22 +63,24 @@ function addNewDropDown(file){
 					url: OC.filePath('meta_data', 'ajax', 'updateFileInfo.php'),
 					data: {
 						fileid: file,
-						tagid: $.parseJSON(result)['tagid']
+						tagid: $.parseJSON(result)['id']
 					},
 					type: "POST",
 					success: function(result) {
 						$("#dropdown").remove();
 						$('tr').removeClass('mouseOver');
-						updateSidebar();
-						updateFileListTags($('tr[data-id='+file+']'));
+						//updateSidebar();
+						for (var i = 0; i < files.length; i++) {
+							updateFileListTags($('tr[data-id='+files[i]+']'));
+						}
 					},
 					});
 				},
 			});
 		};
 	});
-	$('div#dropdown').on("click", "div#test span.label" , function() {
-		if( $(this).attr('id') != "newTag"){
+	$('div#dropdown').on("click", "div#tag_action span.label" , function() {
+		if($(this).attr('id') != "newTag"){
 			var tagid = $(this).parent('span').attr('data-id').split('-');
 			$.ajax({
 				url: OC.filePath('meta_data', 'ajax', 'updateFileInfo.php'),
@@ -92,7 +94,10 @@ function addNewDropDown(file){
 				success: function(result) {
 					$("#dropdown").remove();
 					$('tr').removeClass('mouseOver');
-					updateFileListTags($('tr[data-id='+file+']'));
+					$('a#tag.tag').removeClass('mouseOver');
+					for (var i = 0; i < files.length; i++) {
+						updateFileListTags($('tr[data-id='+files[i]+']'));
+					}
 				},
 			});
 		}

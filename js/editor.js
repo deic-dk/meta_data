@@ -9,7 +9,7 @@
  */
  
 
-function newEntry(entry, readonly){
+function newEntry(entry, readonly, newkey){
   entry = typeof entry !== 'undefined' ? entry : null;
  
   if(!entry){
@@ -22,7 +22,7 @@ function newEntry(entry, readonly){
 			  </li>');
   } else {
 	return $('\
-				<li id="'+entry['id']+'">\
+				<li '+(newkey?'class="new"':'id="'+entry['id'])+'">\
 					<span class="keyname hidden">'+entry['name']+'</span>\
 					<input class="edit" type="text" value="'+entry['name']+'" />'+(readonly?'':'\
 					<span class="deletekey">&#10006;</span>')+'\

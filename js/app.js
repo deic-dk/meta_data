@@ -47,6 +47,52 @@ OCA.Meta_data.App = {
 		delete this._globalActionsInitialized;
   },
 
+  tagMultipleDropdown: function(event){
+  	event.stopPropagation();
+		if(scanFiles.scanning) {
+			return false;// Workaround to prevent additional http request block scanning feedback
+		}
+  	if($('#dropdown').length>0){
+			$("#dropdown").slideUp(200, function(){ $(this).remove();});
+			$('tr').removeClass('mouseOver');
+			$('a#tag.tag').removeClass('mouseOver');
+		return false;
+  	}
+  	var files = FileList.getSelectedFiles();
+  	var fileIds = [];
+  	var dirIds = [];
+  	var type = 'file';
+  	for( var i=0;i<files.length;++i){
+  		if(fileIds.indexOf(files[i].id)==-1){
+    		if(files[i].type=='dir'){
+    			dirIds.push(files[i].id);
+    			}
+    			else{
+        		fileIds.push(files[i].id);
+    			}
+  		}
+  	}
+  	if(dirIds.length>0){
+  		type = 'folder';
+    	// TODO: Consider allowing tagging directories and directory content recursively
+  		OC.dialogs.alert('You cannot tag directories', 'Tagging not possible', function(res){}, true);
+  		return false;
+  	}
+		var html = '\
+			<div id="dropdown" class="drop" data-item-type="'+type+'" data-item-source="'+fileIds.join(':')+'">\
+			<div id="tag_action"></div>\
+		</div>\
+		';
+		$('a#tag.tag').parent().append(html);
+		$('a#tag.tag').addClass('mouseOver');
+  	if(dirIds.length==1){
+  		addNewDropDown(dirIds[0]);
+  	}
+  	else{
+  		addNewDropDown(fileIds.join(':'));
+  	}
+  	return false;
+  },
 
   _createFileActions: function() {
 		var fileActions = new OCA.Files.FileActions();
@@ -60,7 +106,7 @@ OCA.Meta_data.App = {
 				var itemSource = $(tr).data('id');
 				var html = '\
 								<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'">\
-								<div id="test"></div>\
+								<div id="tag_action"></div>\
 							</div>\
 							';
 				$(html).appendTo($(tr).find('td.filename') );
@@ -157,7 +203,7 @@ OCA.Meta_data.App = {
 				files = data.files;
 			});
 			for(var i=0; i<this.files.length; i++){
-				var id = this.files[i].id;
+				var id = this.files[i]['id'];
 				var entry = $.grep(files, function(e){ return e.id==id});
 				if(typeof entry[0].tags!=='undefined') {
 					this.files[i]['tags'] = entry[0].tags;
@@ -317,6 +363,107 @@ function updateFileListTags(tr, showall){
 	return tr;
 }
 
+function removeTag(fileIds, tagid){
+	$.ajax({
+		async: false,
+		url: OC.filePath('meta_data', 'ajax', 'removeFileTag.php'),
+		data: {
+			fileid: fileIds.join(':'),
+			tagid:  tagid
+		},
+		success: function(response){
+		}
+	});
+	for( var i=0;i<fileIds.length;++i){
+		if($('tr[data-id="'+fileIds[i]+'"] span.more-tags').length !== 0 ){
+			updateFileListTags($('tr[data-id="'+fileIds[i]+'"]'));
+		}
+		else{
+			$('tr[data-id="'+fileIds[i]+'"]').find('span[data-tag="'+tagid+'"]').remove();
+		}
+	}
+}
+
+function loadKeys(fileid, tagid, owner){
+	$.ajax({
+		url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
+		async: false,
+		data: {
+		tagid: tagid
+		},
+		type: "POST",
+		success: function(result) {
+			if(result['data']){
+				$('body').find('#emptysearch').toggleClass('hidden');
+				$.each(result['data'], function(i,item){
+					$('body').find('#meta_data_keys').append(newEntry(item));
+				});
+				$('body').find('#meta_data_keys').children('li').children().toggleClass('hidden');
+			}
+		}
+	});
+}
+function loadValues(fileid, tagid, owner){
+	$.ajax({
+		url:OC.filePath('meta_data', 'ajax', 'loadValues.php'),
+		async: false,
+		data: {
+			fileid: fileid,
+			tagid: tagid,
+			fileowner: owner
+		},
+		type: "POST",
+		success: function(result){
+			if(result['data']){
+				$.each(result['data'], function(i,item){
+					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
+				});
+			}
+		}
+	});
+}
+
+function showMetaPopup(fileid, tagid, file, title){
+	var html = $('\
+			<div>\
+			<span>\
+			<h3 class="oc-dialog-title"><span  id="metadata" tagid="'+tagid+'" fileid="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
+		</span>\
+		<a class="oc-dialog-close close svg"></a>\
+		<div id="meta_data_container">\
+						<div id=\"emptysearch\">No meta data defined</div>\
+			<ul id="meta_data_keys"></ul>\
+		</div>\
+		<div class="editor_buttons">\
+			<button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
+			<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button>\
+		</div>\
+		</div>');
+	$(html).dialog({
+		dialogClass: "oc-dialog notitle",
+		resizable: true,
+		overflow: scroll,
+		draggable: true,
+		maxHeight:0.9*$(window).height(),
+		minHeight: 240,
+		/*create: function() {
+		  $(this).css("maxHeight", 0.9*$(window).height()); 
+		},*/
+		position:{my: 'top',at: 'top+'+0.1*$(window).height()},
+		width: "80%"
+	});
+	var owner = fileid.indexOf(':')>-1?'':$(this).parents('tr[data-id='+fileid+']').attr('data-share-owner-uid');
+	if(typeof owner=='undefined' || owner==''){
+		owner = '';
+	}
+	else{
+		// Disable editing meta-data of files shared with me
+		$('#meta_data_container :input').prop('readonly', true);
+		$('.editor_buttons').hide();
+	}
+	return owner;
+}
+
 $(this).click(function(event) {
 	if ($('.row #dropdown').has(event.target).length===0 && $('#dropdown').hasClass('drop')) {
 		$('.row #dropdown').hide('blind', function() {
@@ -378,27 +525,30 @@ $(document).ready(function() {
   $('tbody').on('click', 'span.deletetag', function(e){
 		e.stopPropagation();
 		var tagid = $(this).parent('span').attr('data-tag');
-		var fileid= $(this).parent('span').parent('div').parent('div').parent('td').parent('tr').attr('data-id');
-		$.ajax({
-			async: false,
-			url: OC.filePath('meta_data', 'ajax', 'removeFileTag.php'),
-			data: {
-				fileid: fileid,
-				tagid:  tagid
-			},
-			success: function(response){
-			}
-		});
-		if($(this).parent('span').siblings('span[data-tag="more-tags"]').length !== 0 ){
-			updateFileListTags($(this).parents('tr'))
-		}
-		else{
-			$('tr[data-id="'+fileid+'"]').find('span[data-tag="'+tagid+'"]').remove();
-		}
+		var fileid = $(this).parent('span').parent('div').parent('div').parent('td').parent('tr').attr('data-id');
+  	var selectedFiles = FileList.getSelectedFiles();
+  	var fileIds = [parseInt(fileid)];
+  	for( var i=0;i<selectedFiles.length;++i){
+  		if(fileIds.indexOf(selectedFiles[i].id)==-1){
+    		fileIds.push(selectedFiles[i].id);
+  		}
+  	}
+  	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
+  		OC.dialogs.confirm('Are you sure you want to delete a tag from multiple files?', 'Deletion confirm',
+          function(res){
+	  				if(res){
+	  					removeTag(fileIds, tagid);
+	  				}
+          }
+       );
+  	}
+  	else{
+  		removeTag(fileIds, tagid);
+  	}
   });
 
   /*
-   * This next block of code is for entering the meta data editor
+   * This next block of code is for entering the meta-data editor
    */
 	$('tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
 		if($('.ui-dialog').length>0){
@@ -410,71 +560,29 @@ $(document).ready(function() {
 		var file =$(this).parents('tr').attr('data-file');
 		var fileid=$(this).parents('tr').attr('data-id');
 		var tagid=$(this).attr('data-tag');
-		var html = $('\
-							<div>\
-							<span>\
-							<h3 class="oc-dialog-title"><span  id="metadata" tagid="'+tagid+'" fileid="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
-						</span>\
-						<a class="oc-dialog-close close svg"></a>\
-						<div id="meta_data_container">\
-										<div id=\"emptysearch\">No meta data defined</div>\
-							<ul id="meta_data_keys"></ul>\
-						</div>\
-						<div class="editor_buttons">\
-							<button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
-							<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button>\
-						</div>\
-						</div>');
-		$(html).dialog({
-			dialogClass: "oc-dialog notitle",
-			resizable: false,
-			//draggable: true,
-			//height: window.height,
-			width: "80%"
-		});
-		var owner = $(this).parents('tr[data-id='+fileid+']').attr('data-share-owner-uid');
-		if(typeof owner == 'undefined'){
-			owner = '';
-		}
-		else{
-			// Disable editing meta-data of files shared with me
-			$('#meta_data_container :input').prop('readonly', true);
-			$('.editor_buttons').hide();
-		}
-		$.ajax({
-			url: OC.filePath('meta_data', 'ajax', 'loadKeys.php'),
-			async: false,
-			data: {
-			tagid: tagid
-			},
-			type: "POST",
-			success: function(result) {
-				if(result['data']){
-					$('body').find('#emptysearch').toggleClass('hidden');
-					$.each(result['data'], function(i,item){
-						$('body').find('#meta_data_keys').append(newEntry(item));
-					});
-					$('body').find('#meta_data_keys').children('li').children().toggleClass('hidden');
-				}
-			}
-		});
-		$.ajax({
-			url:OC.filePath('meta_data', 'ajax', 'loadValues.php'),
-			async: false,
-			data: {
-				fileid: fileid,
-				tagid: tagid,
-				fileowner: owner
-			},
-			type: "POST",
-			success: function(result){
-				if(result['data']){
-					$.each(result['data'], function(i,item){
-						$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
-					});
-				}
-			}
-		});
+  	var selectedFiles = FileList.getSelectedFiles();
+  	var fileIds = [parseInt(fileid)];
+  	for( var i=0;i<selectedFiles.length;++i){
+  		if(fileIds.indexOf(selectedFiles[i].id)==-1){
+  			fileIds.push(selectedFiles[i].id);
+  		}
+  	}
+  	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
+  		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Overwrite confirm',
+          function(res){
+	  				if(res){
+	  					$(this).hide();
+	  					showMetaPopup(fileIds.join(':'), tagid, fileIds.length + ' files', title);
+	  		  		loadKeys(fileid, tagid, owner);
+	  				}
+          }
+       );
+  	}
+  	else{
+  		var owner = showMetaPopup(fileid, tagid, file, title);
+  		loadKeys(fileid, tagid, owner);
+  		loadValues(fileid, tagid, owner);
+  	}
   });
 
   /*
@@ -492,6 +600,7 @@ $(document).ready(function() {
 					keyId: $(this).attr('id'),
 					tagId: $('#metadata').attr('tagid'),
 					fileId:$('#metadata').attr('fileid'),
+					type:$('#metadata').attr('type'),
 					value: $(this).find('input.value').val()
 				},
 				success: function(result) {
@@ -528,5 +637,10 @@ $(document).ready(function() {
   /* Additional search result types */
   OC.search.resultTypes.tag = "Tag" ;
   OC.search.resultTypes.metadata = "Metadata" ;
+  
+	// Add action to top bar (visible when files are selected)
+	$('#headerName .selectedActions').prepend(
+			'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
+	$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
 
 });

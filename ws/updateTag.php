@@ -31,10 +31,11 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 
 $id = isset($_GET['id'])?$_GET['id']:'';
 $name = isset($_GET['name'])?$_GET['name']:'';
+$description = isset($_GET['description'])?$_GET['description']:'';
 $color = isset($_GET['color'])?$_GET['color']:'';
 $public = isset($_GET['public'])?$_GET['public']:'';
 
-$ret = \OCA\Meta_data\Tags::dbUpdateTag($id, $name, $color, $public);
+$ret = \OCA\Meta_data\Tags::dbUpdateTag($id, $name, $description, $color, $public);
 
 \OCP\Util::writeLog('meta_data', 'Update tag '.$ret, \OC_Log::WARN);
 

@@ -16,15 +16,15 @@ $data = array();
 
 $user = \OCP\USER::getUser();
 // make filelist
-try {
+try{
 	$files = \OCA\Meta_data\Tags::getTaggedFiles($tagid, $user, $sortAttribute, $sortDescending);	
 }
-catch (Exception $e) {
+catch(Exception $e){
 	header("HTTP/1.0 404 Not Found");
 	exit();
 }
 
-$encodedDir = \OCP\Util::encodePath($dir);
+//$encodedDir = \OCP\Util::encodePath($dir);
 //$data['permissions'] = 0;
 $data['directory'] = $dir;
 $data['files'] = \OCA\Meta_data\Tags::formatFileInfos($files);
@@ -34,7 +34,7 @@ foreach ($data['files'] as $i => $file){
 	$tagids = $file['tags'];
 	$alltags = \OCA\Meta_data\Tags::getTags($tagids);
 	$tags = [];
-	foreach($alltags as $tag){
+	foreach($alltags as $tagid=>$tag){
 		if($tag['owner']!=$user && $tag['public']==0){
 			continue;
 		}

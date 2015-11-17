@@ -14,7 +14,7 @@
 			<input type="checkbox" id="select_all_files" class="select-all"/>
 			<label for="select_all_files"></label>
 		  </div>
-		  <div class="col-xs-3 col-sm-6">
+		  <div class="col-xs-3">
 			<a class="name sort columntitle" data-sort="name"><span class="text-semibold"><?php p($l->t( 'Name' )); ?></span><span class="sort-indicator"></span></a>
 		  </div>
 		  <div class="col-xs-5 col-sm-5 text-right">

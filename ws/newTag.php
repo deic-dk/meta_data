@@ -37,7 +37,7 @@ $public = isset($_GET['public'])?$_GET['public']:'';
 
 $ret = \OCA\Meta_data\Tags::dbNewTag($name, $userid, $display, $color, $public);
 
-\OCP\Util::writeLog('meta_data', 'New tag '.$ret, \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'New tag '.serialize($ret), \OC_Log::WARN);
 
 OCP\JSON::encodedPrint($ret);
 

@@ -25,7 +25,7 @@
 					var tr = FileList.findFileEl(filename);
 					var itemType = 'file';
 					var itemSource = $(tr).data('id');
-					var html = '<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="test"></div></div>';
+					var html = '<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="tag_action"></div></div>';
 					$(html).appendTo( $(tr).find('td.filename') );
 					$(tr).addClass('mouseOver');
 					addNewDropDown(itemSource);
