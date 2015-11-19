@@ -32,7 +32,7 @@ if($fileId){
 	}
 	$fileTagsArr = \OCA\meta_data\Tags::getFileTags($fileIds);
 	foreach($fileIds as $fileid){
-		\OCP\Util::writeLog('meta_data', 'File tags: '.serialize($fileTagsArr[$fileid]), \OC_Log::WARN);
+		\OCP\Util::writeLog('meta_data', 'File tags: '.serialize(', ', $fileTagsArr[$fileid]), \OC_Log::WARN);
 		$fileTags = isset($fileTagsArr[$fileid])?$fileTagsArr[$fileid]:[];
 		if(empty($filesTags)){
 			$filesTags = $fileTags;

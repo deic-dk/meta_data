@@ -452,14 +452,10 @@ function showMetaPopup(fileid, tagid, file, title){
 		position:{my: 'top',at: 'top+'+0.1*$(window).height()},
 		width: "80%"
 	});
-	var owner = fileid.indexOf(':')>-1?'':$(this).parents('tr[data-id='+fileid+']').attr('data-share-owner-uid');
+	var fileids = fileid.split(':');
+	var owner = $('tr[data-id='+fileids[0]+']').attr('data-share-owner-uid');
 	if(typeof owner=='undefined' || owner==''){
 		owner = '';
-	}
-	else{
-		// Disable editing meta-data of files shared with me
-		$('#meta_data_container :input').prop('readonly', true);
-		$('.editor_buttons').hide();
 	}
 	return owner;
 }
@@ -582,6 +578,11 @@ $(document).ready(function() {
   		var owner = showMetaPopup(fileid, tagid, file, title);
   		loadKeys(fileid, tagid, owner);
   		loadValues(fileid, tagid, owner);
+  		// Disable editing meta-data of files shared with me
+  		if(owner!=''){
+    		$('#meta_data_keys input').prop('readonly', true);
+    		$('.editor_buttons').hide();
+  		}
   	}
   });
 

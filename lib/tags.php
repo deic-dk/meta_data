@@ -506,7 +506,7 @@ class Tags {
 							$len = strlen($fullpath);
 							if(substr($match['path'], 0, $len)===$fullpath){
 								\OCP\Util::writeLog('meta_data', 'Matching '.substr($match['path'], 0, $len).':'.$fullpath.' --> '.$server['internal_url'].
-										' --> '.$owner, \OC_Log::WARN);
+										' --> '.$owner, \OC_Log::DEBUG);
 								$match['server'] = $server['internal_url'];
 								$match['owner'] = $owner;
 								$info = new \OC\Files\FileInfo($match['path'], $storage, $match['internalPath'], $match);
@@ -527,26 +527,34 @@ class Tags {
 		return $results;
 	}
 	
-	// TODO: this should operate on a list of fileids
-	public static function getFileTags($fileids, $owner=null){
+	public static function getFileTags($fileids, $owner=null, $fileowners=null){
 		$result = self::dbGetFileTags($fileids);
-		if(empty($owner) || !\OCP\App::isEnabled('files_sharding')){
+		\OCP\Util::writeLog('meta_data', 'DB file tags: '.$owner.':'.serialize($fileowners).'-->'.
+				implode(', ', $fileids).'-->'.serialize($result), \OC_Log::DEBUG);
+		if(empty($owner) && empty($fileowners) || !\OCP\App::isEnabled('files_sharding')){
 			return $result;
 		}
-		\OCP\Util::writeLog('meta_data', 'DB file tags: '.implode(', ', $fileids).'-->'.serialize($result), \OC_Log::WARN);
 		//$sharedItem = \OCA\FilesSharding\Lib::ws('getItemSharedWithBySource', Array('itemType' => 'file',
 		//		'user_id'=>\OCP\USER::getUser(), 'itemSource'=>$fileid));
 		//\OCP\Util::writeLog('meta_data', 'Shared item '.serialize($sharedItem), \OC_Log::WARN);
-		$server = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
-		$idarray = array();
+		if(!empty($owner) && empty($fileowners)){
+			$fileowners = array_fill(0, sizeof($fileids)-1, $owner);
+		}
 		foreach($fileids as $n=>$fileid){
 			$idarray['fileid['.$n.']'] = $fileid;
 		}
-		$args = array_merge(array('userid'=>$owner), $idarray);
-		$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $args,
-				false, true, $server, 'meta_data');
-		\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($tags), \OC_Log::WARN);
-		$result = array_unique(array_merge($result, $tags));
+		$servers = array();
+		foreach($fileowners as $owner){
+			$servers[] = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
+		}
+		$servers = array_unique($servers);
+		foreach($servers as $server){
+			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, false, true, $server, 'meta_data');
+			\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($tags),
+					\OC_Log::DEBUG);
+			$result = array_unique($result + $tags);
+		}
+		\OCP\Util::writeLog('meta_data', 'All file tags: '.serialize($result), \OC_Log::DEBUG);
 		return $result;
 	}
 	

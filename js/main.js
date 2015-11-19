@@ -427,9 +427,9 @@ $(document).ready(function() {
 		
 		var readonly = false;
 		if(typeof owner !== 'undefined' && owner!=$('head').attr('data-user')){
-			$('#meta_data_container :input').prop('readonly', true);
-			$('.tagname :input').prop('readonly', true);
-			$('.tagdesc :input').prop('readonly', true);
+			$('#meta_data_keys input').prop('readonly', true);
+			$('.tagname .edittag').prop('readonly', true);
+			$('.editdesc').prop('readonly', true);
 			$('.schema_editor_buttons').hide();
 			$('.new_field').hide();
 			readonly = true;

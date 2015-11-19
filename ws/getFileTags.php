@@ -30,9 +30,8 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 }
 
 $fileids = isset($_GET['fileid'])?$_GET['fileid']:'';
-$owner = isset($_GET['owner'])?$_GET['owner']:\OCP\User::getUser();
 
-$tags = \OCA\Meta_data\Tags::dbGetFileTags($fileids, $owner);
+$tags = \OCA\Meta_data\Tags::dbGetFileTags($fileids);
 
 \OCP\Util::writeLog('meta_data', 'Returning tags', \OC_Log::DEBUG);
 
