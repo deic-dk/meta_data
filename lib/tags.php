@@ -550,9 +550,13 @@ class Tags {
 		$servers = array_unique($servers);
 		foreach($servers as $server){
 			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, false, true, $server, 'meta_data');
-			\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($tags),
-					\OC_Log::DEBUG);
-			$result = array_unique($result + $tags);
+			\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($result).
+					'-->'.serialize($tags),
+					\OC_Log::INFO);
+			if(empty($tags)){
+				continue;
+			}
+			$result = empty($result)?$tags:array_unique($result + $tags);
 		}
 		\OCP\Util::writeLog('meta_data', 'All file tags: '.serialize($result), \OC_Log::DEBUG);
 		return $result;
@@ -567,7 +571,6 @@ class Tags {
 		}
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($fileids);
-		$result = [];
 		while($row=$output->fetchRow()){
 			if(isset($result[$row['fileid']])){
 				array_push($result[$row['fileid']], $row['tagid']);
