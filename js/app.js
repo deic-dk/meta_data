@@ -158,6 +158,7 @@ OCA.Meta_data.App = {
 	tr.find('.more-tags').tipsy({gravity:'s',fade:true});
 	// Support sharding
 	if(typeof fileData.owner != 'undefined'){
+		tr.find('.filename .name').prepend('<span class="fileicon extraicon"><i class="icon-share invert-image">&nbsp;</i></span>');
 		tr.attr('data-share-owner', fileData.owner);
 		tr.attr('data-share-permissions', '0');
 		tr.find('td.filename a').click({
@@ -640,7 +641,7 @@ $(document).ready(function() {
   OC.search.resultTypes.metadata = "Metadata" ;
   
 	// Add action to top bar (visible when files are selected)
-	$('#headerName .selectedActions').prepend(
+	$('#app-content-files #headerName .selectedActions').prepend(
 			'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
 	$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
 

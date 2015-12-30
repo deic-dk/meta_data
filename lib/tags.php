@@ -552,7 +552,7 @@ class Tags {
 			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, false, true, $server, 'meta_data');
 			\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($result).
 					'-->'.serialize($tags),
-					\OC_Log::INFO);
+					\OC_Log::WARN);
 			if(empty($tags)){
 				continue;
 			}
