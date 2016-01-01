@@ -556,7 +556,7 @@ class Tags {
 			if(empty($tags)){
 				continue;
 			}
-			$result = empty($result)?$tags:array_unique($result + $tags);
+			$result = empty($result)?$tags:array_unique($result + $tags, SORT_REGULAR);
 		}
 		\OCP\Util::writeLog('meta_data', 'All file tags: '.serialize($result), \OC_Log::DEBUG);
 		return $result;
