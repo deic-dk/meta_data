@@ -10,13 +10,13 @@ function build_sorter_desc($key) {
 
 OCP\JSON::checkLoggedIn();
 \OC::$session->close();
-$files = isset($_POST['files']) ? $_POST['files'] : '';
+$files = isset($_POST['files']) ? $_POST['files'] : [];
 $dirowner = isset($_POST['owner']) ? $_POST['owner'] : '';
 $owners = isset($_POST['fileowners']) ? $_POST['fileowners'] : '';
 $user = \OCP\USER::getUser();
 
 // Get file tags from the server of the file-owner
-$fileids = array_map(function($file){ return $file['id']; }, $files);
+$fileids = empty($files)?[]:array_map(function($file){ return $file['id']; }, $files);
 $fileowners = empty($owners)?'':array_map(function($owner){ return $owner['owner']; }, $owners);
 $tagidsArr = \OCA\Meta_data\Tags::getFileTags($fileids, $dirowner, $fileowners);
 $tagids = array();
