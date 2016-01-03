@@ -6,7 +6,7 @@ OC::$CLASSPATH['OCA\meta_data\hooks']      = 'apps/meta_data/lib/hooks.php';
 OC::$CLASSPATH['OCA\Search_meta_data\Tag'] = 'apps/meta_data/lib/searchTags.php';
 OC::$CLASSPATH['OCA\Search_meta_data\Metadata'] = 'apps/meta_data/lib/searchTags.php';
 
-if(strpos($_SERVER['REQUEST_URI'], "/ajax/")<=0){
+if(strpos($_SERVER['REQUEST_URI'], "/ajax/")<=0 && strpos($_SERVER['REQUEST_URI'], "/js/")<=0){
 	OC_Search::registerProvider('OCA\Search_meta_data\Tag');
 	OC_Search::registerProvider('OCA\Search_meta_data\Metadata');
 	
@@ -23,7 +23,6 @@ if(strpos($_SERVER['REQUEST_URI'], "/ajax/")<=0){
 	);
 	
 	$tags = \OCA\Meta_data\Tags::searchTags('%',\OCP\User::getUser()); 
-	
 	foreach ($tags as $tag){
 		$order+=1./100;
 		\OCA\Files\App::getNavigationManager()->add(
@@ -45,5 +44,6 @@ if(strpos($_SERVER['REQUEST_URI'], "/ajax/")<=0){
 	}
 	
 	\OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\meta_data\hooks', 'deleteFile');
+	\OCP\Util::connectHook('OC_User', 'post_deleteUser', 'OCA\meta_data\Hooks', 'deleteUser');
 }
 

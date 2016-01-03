@@ -287,16 +287,20 @@ class Tags {
 		return $result;
 	}
 	
-	public static function dbUpdateTag($id, $name, $description, $color, $public) {
+	public static function dbUpdateTag($id, $name, $description, $color, $public, $owner) {
 		$resRsrc = true;
-		if(self::isNonEmpty($name) || self::isNonEmpty($description) || self::isNonEmpty($color) || self::isNonEmpty($public)){
+		if(self::isNonEmpty($name) || self::isNonEmpty($description) || self::isNonEmpty($color) ||
+				self::isNonEmpty($public) || self::isNonEmpty($owner)){
 			$sql = 'UPDATE *PREFIX*meta_data_tags SET '.
-			(self::isNonEmpty($name)?'name=?, ':'').(self::isNonEmpty($description)?'description=?, ':'').
+			(self::isNonEmpty($name)?'name=?, ':'').
+			(self::isNonEmpty($description)?'description=?, ':'').
 			(self::isNonEmpty($color)?'color=?, ':'').
-			(self::isNonEmpty($public)?'public=?, ':'').'WHERE id=?';
+			(self::isNonEmpty($public)?'public=?, ':'').
+			(self::isNonEmpty($owner)?'owner=?, ':'').
+			'WHERE id=?';
 			$sql = str_replace('=?, WHERE', '=? WHERE', $sql);
 			$sql = str_replace('SET ,', 'SET', $sql);
-			$args = array($name, $description, $color, $public, $id);
+			$args = array($name, $description, $color, $public, $owner, $id);
 			$args = array_values(array_filter($args, array(__CLASS__, 'isNonEmpty')));
 			\OCP\Util::writeLog('meta_data', 'SQL: '.$sql. ', ARGS: '.serialize($args).' --> '.count($args), \OC_Log::WARN);
 			$query = \OCP\DB::prepare($sql);
@@ -305,13 +309,14 @@ class Tags {
 		return $resRsrc;
 	}
 	
-	public static function updateTag($id, $name, $description, $color, $public, $visible) {
+	public static function updateTag($id, $name, $description, $color, $public, $owner, $visible) {
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			$result = self::dbUpdateTag($id, $name, $description, $color, $public);
+			$result = self::dbUpdateTag($id, $name, $description, $color, $public, $owner);
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('updateTag', array('id'=>$id,
-					'name'=>urlencode($name), 'description'=>urlencode($description), 'color'=>$color, 'public'=>$public),
+					'name'=>urlencode($name), 'description'=>urlencode($description), 'color'=>$color,
+					'public'=>$public, 'owner'=>$owner),
 					false, true, null, 'meta_data');
 		}
 		\OCP\Util::writeLog('meta_data', 'RESULT: '.serialize($result).':'.\OCP\DB::isError($result), \OC_Log::WARN);

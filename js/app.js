@@ -487,7 +487,7 @@ $(document).ready(function() {
 	$('ul.nav-sidebar').on('click', 'li[data-id^="tag-"]', function(e) {
 		$('ul.nav-sidebar').find('.active').removeClass('active');
 		$(this).children('a').addClass('active');
-		if($('#app-navigation').length !== 0){
+		if($('#app-content-'+$(this).attr('data-id')).length !== 0){
 			$('#app-navigation ul li[data-id="'+$(this).attr('data-id')+'"] a').click();
 		}
 		else{
