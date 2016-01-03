@@ -70,6 +70,10 @@ function removeTagRow(tagid){
 }
 
 function addTagRow(value){
+	if(typeof value.error !== 'undefined' ){
+		alert("Cannot create tag!");
+		return false;
+	}
 	$('tbody#fileList').prepend(' \
 			<tr data-id="'+value.id+'" data-name="'+value.name+'" data-color="'+value.color+'">\
 			<td class="filename row meta_data_row">\

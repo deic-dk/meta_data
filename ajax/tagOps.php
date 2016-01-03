@@ -39,6 +39,7 @@ switch($_POST['tagOp']) {
 if(empty($result)) {
     $result = array(
         'result' => 'KO, result is false',
+    		'error' => true
     );
 }
 else {
