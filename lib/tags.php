@@ -2,6 +2,59 @@
 
 namespace OCA\meta_data;
 
+class FileTag {
+	public $fileid;
+	public $tagid;
+	private $keyvals;
+	public function __construct($fileid, $tagid) {
+		$this->fileid = $fileid;
+		$this->tagid = $tagid;
+	}
+	public function setFileID($fileid){
+		$this->fileid = $fileid;
+	}
+	public function addKeyVal($keyid, $val) {
+		$this->keyvals[$keyid] = $val;
+	}
+	public function removeKeyVal($keyid){
+		unset($this->keyvals[$keyid]);
+	}
+	public function getKeys(){
+		return array_keys($this->keyvals);
+	}
+	public function getValue($keyid) {
+		return $this->keyvals[$keyid];
+	}
+}
+
+class FileTags {
+	public $fileid;
+	public $filetags;
+	public function __construct($fileid) {
+		$this->fileid = $fileid;
+		$this->filetags = array();
+	}
+	public function addFileTag(\OCA\meta_data\FileTag $fileTag){
+		$this->filetags[$fileTag->tagid] = $fileTag;
+	}
+	public function getFileTag($tagID) {
+		return $this->filetags[$tagID];
+	}
+	public function removeFileTag($tagID){
+		unset($this->filetags[$tagID]);
+	}
+	public function getFileTags() {
+		return $this->filetags;
+	}
+	public function setFileID($fileid){
+		$this->fileid = $fileid;
+		foreach($filetags as $tagID=>$fileTag){
+			$fileTag->setFileID($fileid);
+		}
+	}
+}
+
+
 class Tags {
 	
 	/// Centralized stuff, i.e. called by ws/* on master: All queries pertaining to meta_data_tags
@@ -585,6 +638,83 @@ class Tags {
 			}
 		}
 		return $result;
+	}
+	
+	// Duplicated from files_sharding
+	private static function getFilePath($id, $owner=null) {
+		if(isset($owner) && $owner!=\OCP\USER::getUser()){
+			$user_id = self::switchUser($owner);
+		}
+		$ret = \OC\Files\Filesystem::getpath($id);
+		if(isset($user_id) && $user_id){
+			self::restoreUser($user_id);
+		}
+		return $ret;
+	}
+	
+	/**
+	 * Object version - to allow returning all file/tag/key info for a user
+	 */
+	public static function dbGetUserFileTags($user_id, $fileids=null){
+		if(empty($user_id)){
+			return array();
+		}
+		if(!empty($fileids)){
+			$fileids = array_values(array_filter($fileids, array(__CLASS__, 'isNonEmpty')));
+			$sql = "SELECT fileid, tagid FROM *PREFIX*meta_data_docTags WHERE FALSE";
+			foreach($fileids as $fileid){
+				$sql .= " OR fileid=?";
+			}
+		}
+		else{
+			$fileids = array();
+			$sql = "SELECT fileid, tagid FROM *PREFIX*meta_data_docTags";
+		}
+		$query = \OCP\DB::prepare($sql);
+		$output = $query->execute($fileids);
+		// A list of FileTags objects, one object for each tagged file.
+		// Each object in the list contains all tag/key/value info for the given file
+		$fileTagsArr = array();
+		while($row=$output->fetchRow()){
+			// Check if file is owned by user
+			$path = self::getFilePath($row['fileid'], $user_id);
+			if(empty($path)){
+				continue;
+			}
+			// Create new FileTag object
+			$fileTag = new \OCA\meta_data\FileTag($row['fileid'], $row['tagid']);
+			// Add key/values to the FileTag object
+			$keyVals = self::dbLoadFileKeys($row['fileid'], $row['tagid']);
+			foreach($keyVals as $keyVal){
+				$fileTag->addKeyVal($keyVal['keyid'], $keyVal['value']);
+			}
+			if(empty($fileTagsArr[$row['fileid']])){
+				// Add new FileTags object to the result list
+				$fileTagsArr[$row['fileid']] = new \OCA\meta_data\FileTags($row['fileid']);
+			}
+			// Add the FileTag object to the FileTags object
+			$fileTagsArr[$row['fileid']]->addFileTag($fileTag);
+		}
+		return $fileTagsArr;
+	}
+	
+	/**
+	 * Insert array of FileTags objects in the local database.
+	 * @param $user_id
+	 * @param $fileTagsArr
+	 */
+	public static function dbInsertUserFileTags($user_id, $fileTagsArr){
+		$results = array();
+		foreach($fileTagsArr as $fileID=>$fileTags){
+			foreach($fileTags->getFileTags() as $fileTag){
+				self::updateFileTags($fileTag->tagid, $user_id, $fileTag->fileid);
+				foreach($fileTag->getKeys() as $keyID){
+					$res = self::updateFileKeys($fileTag->fileid, $fileTag->tagid, $keyID, $fileTag->getValue($keyID));
+					$results = array_merge($results, $res);
+				}
+			}
+		}
+		return $results;
 	}
 	
 	public static function dbNewKey($tagid, $keyname) {
