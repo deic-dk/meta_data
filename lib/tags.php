@@ -976,5 +976,44 @@ class Tags {
 			return $output;
 		}
 	}
+	
+	private static function getRow($array, $key, $val) {
+		foreach($array as $row){
+			if($row[$key]===$val){
+				return $row;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Update tags for a user from his primary server after getting his files.
+	 * Only used by files_sharding cron job.
+	 * @param unknown $user_id
+	 * @param unknown $baseurl
+	 * @return multitype:
+	 */
+	public static function updateUserFileTags($user_id, $baseurl){
+		// Get map fileID->[tag1, tag2, ...] with file owned by user
+		$fileTagsArr = \OCA\FilesSharding\Lib::ws('getUserFileTags', array('user_id'=>$user_id), false, false,
+				$baseurl, 'meta_data');
+		// Get all files owned by user from old server
+		$oldUserFiles = \OCA\FilesSharding\Lib::ws('get_user_files', array('user_id'=>$user_id), false, true, $baseurl);
+		// Get all files owned by user locally/on new server
+		$newUserFiles = \OCA\FilesSharding\Lib::dbGetUserFiles($user_id);
+		// Fix up file tags with new fileid instead of old one
+		foreach($fileTagsArr as $fileTags){
+			$oldFileID = $fileTags->fileid;
+			$oldFile = getRow($oldUserFiles, 'fileid', $fileID);
+			$path = $oldFile['path']; // starts with "files/"
+			$newFile = getRow($newUserFiles, 'path', $path);
+			$newFileID = $newFile['fileid'];
+			\OCP\Util::writeLog('meta_data', 'Inserting tags for '.$path.': '.$fileID.'-->'.$newID, \OC_Log::WARN);
+			$fileTags->setFileID($newFileID);
+		}
+		// Now insert file tags in the local DB
+		$ret = \OCA\meta_data\Tags::dbInsertUserFileTags($user_id, $fileTagsArr);
+		return $ret;
+	}
 
 }

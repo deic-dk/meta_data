@@ -319,7 +319,7 @@ function updateFileListTags(tr, showall){
 					var tagwidth = 0;
 					var overflow = 0;
 					if(showall){
-						tr.find('div.filetags-wrap').append('<a class="less-tags action" href="#" title="Show less tags"><i class="icon icon-resize-small"></i></a>').tipsy({gravity:'s',fade:true});
+						tr.find('div.filetags-wrap').append('<a class="less-tags action" href="#" title="Show fewer tags"><i class="icon icon-resize-small"></i></a>').tipsy({gravity:'s',fade:true});
 					}
 					$.each(response['tags'], function(key,value) {
 						var color = colorTranslate(value.color);
