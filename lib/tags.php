@@ -995,7 +995,7 @@ class Tags {
 	 */
 	public static function updateUserFileTags($user_id, $baseurl){
 		// Get map fileID->[tag1, tag2, ...] with file owned by user
-		$fileTagsArr = \OCA\FilesSharding\Lib::ws('getUserFileTags', array('user_id'=>$user_id), false, false,
+		$fileTagsArr = \OCA\FilesSharding\Lib::ws('getUserFileTags', array('user_id'=>$user_id), false, true,
 				$baseurl, 'meta_data');
 		// Get all files owned by user from old server
 		$oldUserFiles = \OCA\FilesSharding\Lib::ws('get_user_files', array('user_id'=>$user_id), false, true, $baseurl);
