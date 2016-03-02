@@ -531,7 +531,7 @@ $(document).ready(function() {
   		}
   	}
   	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
-  		OC.dialogs.confirm('Are you sure you want to delete a tag from multiple files?', 'Deletion confirm',
+  		OC.dialogs.confirm('Are you sure you want to delete a tag from multiple files?', 'Confirm deletion',
           function(res){
 	  				if(res){
 	  					removeTag(fileIds, tagid);
@@ -565,7 +565,7 @@ $(document).ready(function() {
   		}
   	}
   	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
-  		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Overwrite confirm',
+  		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Confirm overwrite',
           function(res){
 	  				if(res){
 	  					$(this).hide();
