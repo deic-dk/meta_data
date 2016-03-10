@@ -1003,10 +1003,10 @@ class Tags {
 		$newUserFiles = \OCA\FilesSharding\Lib::dbGetUserFiles($user_id);
 		// Fix up file tags with new fileid instead of old one
 		foreach($fileTagsArr as $fileTags){
-			$oldFileID = $fileTags->fileid;
-			$oldFile = getRow($oldUserFiles, 'fileid', $fileID);
+			$oldFileID = $fileTags['fileid'];
+			$oldFile = self::getRow($oldUserFiles, 'fileid', $fileID);
 			$path = $oldFile['path']; // starts with "files/"
-			$newFile = getRow($newUserFiles, 'path', $path);
+			$newFile = self::getRow($newUserFiles, 'path', $path);
 			$newFileID = $newFile['fileid'];
 			\OCP\Util::writeLog('meta_data', 'Inserting tags for '.$path.': '.$fileID.'-->'.$newID, \OC_Log::WARN);
 			$fileTags->setFileID($newFileID);
