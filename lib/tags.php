@@ -2,19 +2,22 @@
 
 namespace OCA\meta_data;
 
-class FileTag {
+class FileTag implements \JsonSerializable {
 	public $fileid;
 	public $tagid;
-	private $keyvals;
-	public function __construct($fileid, $tagid) {
+	public $keyvals;
+	public function __construct($fileid, $tagid, $keyvals=array()) {
 		$this->fileid = $fileid;
 		$this->tagid = $tagid;
+		$this->keyvals = $keyvals;
 	}
 	public function setFileID($fileid){
 		$this->fileid = $fileid;
 	}
 	public function addKeyVal($keyid, $val) {
-		$this->keyvals[$keyid] = $val;
+		if(!empty($keyid)){
+			$this->keyvals[$keyid] = $val;
+		}
 	}
 	public function removeKeyVal($keyid){
 		unset($this->keyvals[$keyid]);
@@ -25,17 +28,32 @@ class FileTag {
 	public function getValue($keyid) {
 		return $this->keyvals[$keyid];
 	}
+	
+	public function jsonSerialize(){
+		return empty($this->keyvals) ?
+			[
+			'fileid' => $this->fileid,
+			'tagid' => $this->tagid
+			] :
+			[
+			'fileid' => $this->fileid,
+			'tagid' => $this->tagid,
+			'keyvals' => $this->keyvals
+			];
+	}
 }
 
-class FileTags {
+class FileTags implements \JsonSerializable {
 	public $fileid;
 	public $filetags;
-	public function __construct($fileid) {
+	public function __construct($fileid, $filetags = array()) {
 		$this->fileid = $fileid;
-		$this->filetags = array();
+		$this->filetags = $filetags;
 	}
 	public function addFileTag(\OCA\meta_data\FileTag $fileTag){
-		$this->filetags[$fileTag->tagid] = $fileTag;
+		if(!empty($fileTag)){
+			$this->filetags[$fileTag->tagid] = $fileTag;
+		}
 	}
 	public function getFileTag($tagID) {
 		return $this->filetags[$tagID];
@@ -48,9 +66,28 @@ class FileTags {
 	}
 	public function setFileID($fileid){
 		$this->fileid = $fileid;
-		foreach($filetags as $tagID=>$fileTag){
+		foreach($this->filetags as &$fileTag){
 			$fileTag->setFileID($fileid);
 		}
+	}
+	public function jsonSerialize(){
+		return [
+		'fileid' => $this->fileid,
+		'filetags' => $this->filetags,
+		];
+	}
+}
+
+class FilesTags implements \JsonSerializable {
+	public $filestags;
+	public function __construct($filesTags) {
+		$this->filestags = $filesTags;
+	}
+	public function addFileTags(\OCA\meta_data\FileTags $fileTags){
+		$this->filestags[$fileTags->fileid] = $fileTags;
+	}
+	public function jsonSerialize(){
+		return empty($this->filestags)?new \ArrayObject([]):$this->filestags;
 	}
 }
 
@@ -657,7 +694,7 @@ class Tags {
 	 */
 	public static function dbGetUserFileTags($user_id, $fileids=null){
 		if(empty($user_id)){
-			return array();
+			return new \OCA\meta_data\FilesTags();
 		}
 		if(!empty($fileids)){
 			$fileids = array_values(array_filter($fileids, array(__CLASS__, 'isNonEmpty')));
@@ -695,7 +732,7 @@ class Tags {
 			// Add the FileTag object to the FileTags object
 			$fileTagsArr[$row['fileid']]->addFileTag($fileTag);
 		}
-		return $fileTagsArr;
+		return new \OCA\meta_data\FilesTags($fileTagsArr);
 	}
 	
 	/**
@@ -703,14 +740,17 @@ class Tags {
 	 * @param $user_id
 	 * @param $fileTagsArr
 	 */
-	public static function dbInsertUserFileTags($user_id, $fileTagsArr){
+	private static function dbInsertUserFileTags($user_id, $fileTagsArr){
 		$results = array();
-		foreach($fileTagsArr as $fileID=>$fileTags){
-			foreach($fileTags->getFileTags() as $fileTag){
-				self::updateFileTags($fileTag->tagid, $user_id, $fileTag->fileid);
-				foreach($fileTag->getKeys() as $keyID){
-					$res = self::updateFileKeys($fileTag->fileid, $fileTag->tagid, $keyID, $fileTag->getValue($keyID));
-					$results = array_merge($results, $res);
+		foreach($fileTagsArr as $fileTags){
+			foreach($fileTags->filetags as $fileTag){
+				\OCP\Util::writeLog('meta_data', 'Updating tag: '.serialize($fileTag), \OC_Log::WARN);
+				self::updateFileTag($fileTag->{'tagid'}, $user_id, $fileTag->{'fileid'});
+				if(!empty($fileTag->keyvals)){
+					foreach((Array) $fileTag->keyvals as $keyID=>$val){
+						$res = self::updateFileKeyVal($fileTag->fileid, $fileTag->tagid, $keyID, $val);
+						$results = array_merge($results, $res);
+					}
 				}
 			}
 		}
@@ -786,7 +826,7 @@ class Tags {
 	///              on the user's slave server the.
 	
 	
-	public static function updateFileTags($tagid, $userid, $fileids){
+	public static function updateFileTag($tagid, $userid, $fileids){
 		// We allow $fileid to be a colon-separated list of ids
 		if($fileids && strpos($fileids, ':')>0){
 			$fileidArr = explode(':', $fileids);
@@ -797,7 +837,7 @@ class Tags {
 		$res = array();
 		foreach($fileidArr as $fileid){
 			$result = array();
-			$sql = 'SELECT tagid FROM *PREFIX*meta_data_docTags WHERE fileid=? AND tagid=?';
+			$sql = 'SELECT * FROM *PREFIX*meta_data_docTags WHERE fileid=? AND tagid=?';
 			$args = array($fileid, $tagid);
 			$query = \OCP\DB::prepare($sql);
 			$output = $query->execute($args);
@@ -805,6 +845,7 @@ class Tags {
 				$result[] = $row;
 			}
 			if(count($result) == 0){
+				\OCP\Util::writeLog('meta_data', 'Updating tag: '.$fileid.':'.$tagid, \OC_Log::WARN);
 				$sql = 'INSERT INTO *PREFIX*meta_data_docTags (fileid, tagid) VALUES (?,?)';
 				$args = array($fileid, $tagid);
 				$query = \OCP\DB::prepare($sql);
@@ -840,12 +881,12 @@ class Tags {
 			$output = $query->execute($args);
 	}
 
-	public static function updateFileKeys ($fileids, $tagid, $keyid, $value){
+	public static function updateFileKeyVal($fileids, $tagid, $keyid, $value){
 		// We allow $fileid to be a colon-separated list of ids
 		$fileidArr = explode(':', $fileids);
 		$res = array();
-		foreach($fileidArr as $fileid){
-			$sql = 'SELECT tagid FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=? and keyid=?';
+		foreach($fileidArr as $i => $fileid){
+			$sql = 'SELECT * FROM *PREFIX*meta_data_docKeys WHERE fileid=? AND tagid=? and keyid=?';
 			$result = array();
 			$args = array($fileid, $tagid, $keyid);
 			$query = \OCP\DB::prepare($sql);
@@ -853,7 +894,7 @@ class Tags {
 			while($row=$output->fetchRow()){
 				$result[] = $row;
 			}
-			if(count($result) == 0 ) {
+			if(count($result) == 0 ){
 				$sql = 'INSERT INTO *PREFIX*meta_data_docKeys (fileid,tagid,keyid,value) VALUES (?,?,?,?)';
 				$args = array($fileid, $tagid, $keyid, $value);
 				$query = \OCP\DB::prepare($sql);
@@ -863,7 +904,7 @@ class Tags {
 					$res[] = array('tagid'=>$tagid, 'keyid'=>$keyid, 'fileid'=>$fileid, 'value'=>$value);
 				}
 			}
-			else if (count($result) == 1 ) {
+			else if(count($result)==1){
 				$sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=? AND tagid=?';
 				$args = array($value, (int) $fileid, $keyid, $tagid);
 				$query = \OCP\DB::prepare($sql);
@@ -995,25 +1036,49 @@ class Tags {
 	 */
 	public static function updateUserFileTags($user_id, $baseurl){
 		// Get map fileID->[tag1, tag2, ...] with file owned by user
-		$fileTagsArr = \OCA\FilesSharding\Lib::ws('getUserFileTags', array('user_id'=>$user_id), false, true,
+		$fileTagsArr = \OCA\FilesSharding\Lib::ws('getUserFileTags', array('user_id'=>$user_id), false, false,
 				$baseurl, 'meta_data');
 		// Get all files owned by user from old server
 		$oldUserFiles = \OCA\FilesSharding\Lib::ws('get_user_files', array('user_id'=>$user_id), false, true, $baseurl);
 		// Get all files owned by user locally/on new server
 		$newUserFiles = \OCA\FilesSharding\Lib::dbGetUserFiles($user_id);
 		// Fix up file tags with new fileid instead of old one
-		foreach($fileTagsArr as $fileTags){
-			$oldFileID = $fileTags['fileid'];
-			$oldFile = self::getRow($oldUserFiles, 'fileid', $fileID);
+		\OCP\Util::writeLog('meta_data', 'Inserting TAGS '.serialize($fileTagsArr), \OC_Log::WARN);
+		$newFileTagsArr = array();
+		foreach($fileTagsArr as $fileTagsStd){
+			$fileTags = self::decodeStdClassToFileTags($fileTagsStd);
+			$oldFileID = $fileTags->fileid;
+			$oldFile = self::getRow($oldUserFiles, 'fileid', $oldFileID);
 			$path = $oldFile['path']; // starts with "files/"
 			$newFile = self::getRow($newUserFiles, 'path', $path);
 			$newFileID = $newFile['fileid'];
-			\OCP\Util::writeLog('meta_data', 'Inserting tags for '.$path.': '.$fileID.'-->'.$newID, \OC_Log::WARN);
+			\OCP\Util::writeLog('meta_data', 'Inserting tags for '.$path.': '.$oldFileID.'-->'.$newFileID.'-->'.serialize($fileTags), \OC_Log::WARN);
 			$fileTags->setFileID($newFileID);
+			$newFileTagsArr[] = $fileTags;
 		}
+		\OCP\Util::writeLog('meta_data', 'Inserting TAGS1 '.serialize($newFileTagsArr), \OC_Log::WARN);
 		// Now insert file tags in the local DB
-		$ret = \OCA\meta_data\Tags::dbInsertUserFileTags($user_id, $fileTagsArr);
+		$ret = \OCA\meta_data\Tags::dbInsertUserFileTags($user_id, $newFileTagsArr);
 		return $ret;
+	}
+
+	
+	public static function decodeStdClassToFileTags($fileTags){
+		\OCP\Util::writeLog('meta_data', 'FILETAGS: '.serialize($fileTags), \OC_Log::WARN);
+		$fileTags1 = new FileTags($fileTags->fileid);
+		foreach($fileTags->filetags as $fileTag){
+			$temp = serialize($fileTag);
+			\OCP\Util::writeLog('meta_data', 'TEMP: '.$temp, \OC_Log::WARN);
+			if(!preg_match('@^O:8:"stdClass":@', $temp)){
+				continue;
+			}
+			$temp = preg_replace('@^O:8:"stdClass":@','O:8:"FileTags":', $temp);
+			$temp = preg_replace('@O:8:"stdClass":@','O:7:"FileTag":', $temp);
+			$fileTag1 = unserialize(stripslashes($temp));
+			$fileTags1->addFileTag(new FileTag($fileTags->{'fileid'}, $fileTag->{'tagid'},
+				(isset($fileTag->{'keyvals'})?$fileTag->{'keyvals'}:array())));
+		}
+		return $fileTags1;
 	}
 
 }

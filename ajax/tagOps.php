@@ -30,7 +30,7 @@ switch($_POST['tagOp']) {
         break;
     }
     case 'update_file_key': {
-        $result = \OCA\meta_data\Tags::updateFileKeys($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['value']);
+        $result = \OCA\meta_data\Tags::updateFileKeyVal($_POST['fileId'], $_POST['tagId'], $_POST['keyId'], $_POST['value']);
         break;
     }
 }
