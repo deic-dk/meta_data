@@ -741,20 +741,19 @@ class Tags {
 	 * @param $fileTagsArr
 	 */
 	private static function dbInsertUserFileTags($user_id, $fileTagsArr){
-		$results = array();
+		$ret = true;
 		foreach($fileTagsArr as $fileTags){
 			foreach($fileTags->filetags as $fileTag){
 				\OCP\Util::writeLog('meta_data', 'Updating tag: '.serialize($fileTag), \OC_Log::WARN);
-				self::updateFileTag($fileTag->{'tagid'}, $user_id, $fileTag->{'fileid'});
+				$ret = self::updateFileTag($fileTag->{'tagid'}, $user_id, $fileTag->{'fileid'}) && $ret;
 				if(!empty($fileTag->keyvals)){
 					foreach((Array) $fileTag->keyvals as $keyID=>$val){
-						$res = self::updateFileKeyVal($fileTag->fileid, $fileTag->tagid, $keyID, $val);
-						$results = array_merge($results, $res);
+						$ret = self::updateFileKeyVal($fileTag->fileid, $fileTag->tagid, $keyID, $val) && $ret;
 					}
 				}
 			}
 		}
-		return $results;
+		return $ret;
 	}
 	
 	public static function dbNewKey($tagid, $keyname) {
@@ -834,7 +833,7 @@ class Tags {
 		else{
 			$fileidArr = array($fileids);
 		}
-		$res = array();
+		$ret = true;
 		foreach($fileidArr as $fileid){
 			$result = array();
 			$sql = 'SELECT * FROM *PREFIX*meta_data_docTags WHERE fileid=? AND tagid=?';
@@ -844,16 +843,21 @@ class Tags {
 			while($row=$output->fetchRow()){
 				$result[] = $row;
 			}
-			if(count($result) == 0){
-				\OCP\Util::writeLog('meta_data', 'Updating tag: '.$fileid.':'.$tagid, \OC_Log::WARN);
+			if(count($result)==0){
+				\OCP\Util::writeLog('meta_data', 'Inserting tag: '.$fileid.':'.$tagid, \OC_Log::WARN);
 				$sql = 'INSERT INTO *PREFIX*meta_data_docTags (fileid, tagid) VALUES (?,?)';
 				$args = array($fileid, $tagid);
-				$query = \OCP\DB::prepare($sql);
-				$output = $query->execute($args);
-				$res = array_merge($res, $result);
 			}
+			else{
+				\OCP\Util::writeLog('meta_data', 'Updating tag: '.$fileid.':'.$tagid, \OC_Log::WARN);
+				$sql = 'UPDATE *PREFIX*meta_data_docTags SET tagid=? WHERE fileid=?';
+				$args = array($tagid, $fileid);
+			}
+			$query = \OCP\DB::prepare($sql);
+			$output = $query->execute($args);
+			$ret && !\OCP\DB::isError($output);
 		}
-		return $result;
+		return $ret;
 	}
 
 	public static function removeFileTag($tagid, $fileids){
@@ -1061,7 +1065,7 @@ class Tags {
 		}
 		\OCP\Util::writeLog('meta_data', 'Inserting TAGS1 '.serialize($newFileTagsArr), \OC_Log::WARN);
 		// Now insert file tags in the local DB
-		$ret = \OCA\meta_data\Tags::dbInsertUserFileTags($user_id, $newFileTagsArr);
+		$ret = self::dbInsertUserFileTags($user_id, $newFileTagsArr);
 		return $ret;
 	}
 
