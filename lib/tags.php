@@ -1053,8 +1053,11 @@ class Tags {
 			$newFile = self::getRow($newUserFiles, 'path', $path);
 			$newFileID = $newFile['fileid'];
 			\OCP\Util::writeLog('meta_data', 'Inserting tags for '.$path.': '.$oldFileID.'-->'.$newFileID.'-->'.serialize($fileTags), \OC_Log::WARN);
-			$fileTags->setFileID($newFileID);
-			$newFileTagsArr[] = $fileTags;
+			// If no local file was found, syncing files probably failed - back off.
+			if(!empty($newFile)){
+				$fileTags->setFileID($newFileID);
+				$newFileTagsArr[] = $fileTags;
+			}
 		}
 		\OCP\Util::writeLog('meta_data', 'Inserting TAGS1 '.serialize($newFileTagsArr), \OC_Log::WARN);
 		// Now insert file tags in the local DB
