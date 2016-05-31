@@ -30,18 +30,20 @@
 				this.showMask();
 				$('ul.nav-sidebar').find('.active').removeClass('active');
 				$('.nav-sidebar li[data-id=tag-'+this.tagid+'] a').addClass('active');
-				if (this._reloadCall) {
+				/*if (this._reloadCall) {
 					this._reloadCall.abort();
+				}*/
+				if(!this._reloadCall){
+					this._reloadCall = $.ajax({
+						url: this.getAjaxUrl('list'),
+						data: { 
+							dir : this.getCurrentDirectory(),
+							sort: this._sort,
+							sortdirection: this._sortDirection,
+							tagid: this.tagid
+						}
+					});
 				}
-				this._reloadCall = $.ajax({
-					url: this.getAjaxUrl('list'),
-					data: { 
-						dir : this.getCurrentDirectory(),
-						sort: this._sort,
-						sortdirection: this._sortDirection,
-						tagid: this.tagid
-					}
-				}); 
 				var callBack = this.reloadCallback.bind(this);
 				return this._reloadCall.then(callBack, callBack);
 			}

@@ -173,6 +173,16 @@ OCA.Meta_data.App = {
 	return tr;
 	},
 
+	getParam: function(href, key) {
+    var results = new RegExp('[\?&]' + key + '=([^&#]*)').exec(href);
+    if (results==null){
+       return '';//null;
+    }
+    else{
+       return results[1] || 0;
+    }
+},
+
   modifyFilelist: function() {
 		OCA.Meta_data.App.tag_semaphore = true;
 		var oldnextPage = OCA.Files.FileList.prototype._nextPage;
@@ -195,7 +205,7 @@ OCA.Meta_data.App = {
 			}
 			var files;
 			var fileids = this.files.map(function(obj){ return {id: obj.id};});
-			var owner = $('.crumb.last a').length>0?OC.Upload.getParam($('.crumb.last a').attr('href'), 'owner'):'';
+			var owner = $('.crumb.last a').length>0?OCA.Meta_data.App.getParam($('.crumb.last a').attr('href'), 'owner'):'';
 			var fileowners = '';
 			if(typeof owner=='undefined' || owner==''){
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
@@ -206,7 +216,7 @@ OCA.Meta_data.App = {
 			for(var i=0; i<this.files.length; i++){
 				var id = this.files[i]['id'];
 				var entry = $.grep(files, function(e){ return e.id==id});
-				if(typeof entry[0].tags!=='undefined') {
+				if(entry.length>0 && typeof entry[0].tags!=='undefined') {
 					this.files[i]['tags'] = entry[0].tags;
 				}
 				else {

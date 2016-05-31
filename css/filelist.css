@@ -7,14 +7,14 @@ div.filetags-wrap {
 		display: inline-block;
 		height: auto;
 		line-height: 1.94;
-		padding: 0 15px 4px 0;
-		position: relative;	  
+		padding: 0 0 4px 0;
+		position: absolute;
 		top: 2px;
 }
 
 /*div.filetags-wrap*/ 
 span.tagtext {
-		padding-left: 4px;
+		/*padding-left: 4px;*/
 		height: auto;
 		padding: 10px 0 2px 0;
 		display: inline-block;
