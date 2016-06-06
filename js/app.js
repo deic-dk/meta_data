@@ -480,6 +480,28 @@ $(this).click(function(event) {
 	}
 });
 
+function newEntry(entry, readonly, newkey){
+  entry = typeof entry !== 'undefined' ? entry : null;
+ 
+  if(!entry){
+	return $('\
+				<li class="new">\
+					<span class="keyname hidden"></span>\
+					<input class="edit" type="text" placeholder="New key name" value="" />'+(readonly?'':'\
+					<span class="deletekey">&#10006;</span>')+'\
+					<input class="value hidden" type="text" value="" />\
+			  </li>');
+  } else {
+	return $('\
+				<li '+(newkey?'class="new"':'id="'+entry['id'])+'">\
+					<span class="keyname hidden">'+entry['name']+'</span>\
+					<input class="edit" type="text" value="'+entry['name']+'" />'+(readonly?'':'\
+					<span class="deletekey">&#10006;</span>')+'\
+					<input class="value hidden" type="text" value="" />\
+				</li>');
+  }
+}
+
 $(this).click(function(event) {
 	if ($('.row .dropdown-menu').has(event.target).length===0) {
 		$('.row .dropdown-menu').hide('blind', function() {
@@ -514,7 +536,7 @@ $(document).ready(function() {
 		OCA.Meta_data.App.removeTaggedFiles();
 	});
 
-	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files){
+	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files && OCA.Files.FileList){
 		OCA.Meta_data.App.modifyFilelist();
 	}
 

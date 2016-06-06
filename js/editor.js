@@ -7,30 +7,6 @@
  * THIS FILE contains the script for the meta data editor
  *  
  */
- 
-
-function newEntry(entry, readonly, newkey){
-  entry = typeof entry !== 'undefined' ? entry : null;
- 
-  if(!entry){
-	return $('\
-				<li class="new">\
-					<span class="keyname hidden"></span>\
-					<input class="edit" type="text" placeholder="New key name" value="" />'+(readonly?'':'\
-					<span class="deletekey">&#10006;</span>')+'\
-					<input class="value hidden" type="text" value="" />\
-			  </li>');
-  } else {
-	return $('\
-				<li '+(newkey?'class="new"':'id="'+entry['id'])+'">\
-					<span class="keyname hidden">'+entry['name']+'</span>\
-					<input class="edit" type="text" value="'+entry['name']+'" />'+(readonly?'':'\
-					<span class="deletekey">&#10006;</span>')+'\
-					<input class="value hidden" type="text" value="" />\
-				</li>');
-  }
-}
-
 
 $(document).ready(function() {
   $('body').on('click', '.oc-dialog-close', function(){
