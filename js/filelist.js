@@ -30,9 +30,10 @@
 				this.showMask();
 				$('ul.nav-sidebar').find('.active').removeClass('active');
 				$('.nav-sidebar li[data-id=tag-'+this.tagid+'] a').addClass('active');
-				/*if (this._reloadCall) {
+				// This causes abort and reload. Dropping it causes double calls... FO
+				if (this._reloadCall) {
 					this._reloadCall.abort();
-				}*/
+				}
 				if(!this._reloadCall){
 					this._reloadCall = $.ajax({
 						url: this.getAjaxUrl('list'),
