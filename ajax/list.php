@@ -45,6 +45,12 @@ foreach ($data['files'] as $i => $file){
 		usort($tags,build_sorter_desc('color')); 
 		$data['files'][$i]['tags'] = $tags;
 	}
+	
+	$fileData = $files[$i]->getData();
+	if(!empty($fileData['group'])){
+		\OCP\Util::writeLog('meta_data', 'Group: '.$fileData['group'], \OC_Log::WARN);
+		$data['files'][$i]['group'] = $fileData['group'];
+	}
 }
 
 OCP\JSON::success(array('data' => $data));

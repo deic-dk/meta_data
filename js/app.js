@@ -123,6 +123,17 @@ OCA.Meta_data.App = {
   },
 
 	newCreateRow: function(fileData, tr) {
+		// Group folder support - Not necessary - group is now set directly in fileData, by list.php
+		/*fileData.group =  '';
+		if(fileData.path){
+			var firstSlashIndex = fileData.path.indexOf('/');
+			if(firstSlashIndex === fileData.path.indexOf('/user_group_admin/')){
+				var secondSlashIndex =  fileData.path.indexOf('/', firstSlashIndex+1);
+				var thirdSlashIndex =  fileData.path.indexOf('/', secondSlashIndex+1);
+				fileData.group =  thirdSlashIndex>0?fileData.path.substring(secondSlashIndex+1, thirdSlashIndex-1):
+					fileData.path.substring(secondSlashIndex+1);
+			}
+		}*/
 		if(fileData.type == 'file'){
 			var tagwidth = 0;
 			var overflow = 0;
@@ -163,11 +174,12 @@ OCA.Meta_data.App = {
 		tr.attr('data-share-permissions', '0');
 		tr.find('td.filename a').click({
 			owner: fileData.owner,
-			id: fileData.id
+			id: fileData.id,
+			group: fileData.group
 		}, function (event) {
 			event.stopPropagation();
 			event.preventDefault();
-			(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, ''));
+			(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, fileData.group));
 	});
 	}
 	return tr;
@@ -183,10 +195,17 @@ OCA.Meta_data.App = {
     }
 },
 
-  modifyFilelist: function() {
+  modifyFilelist: function(_filelist) {
+  	var filelist;
+  	if(typeof _filelist === 'undefined'){
+  		filelist = OCA.Files.FileList;
+  	}
+  	else{
+  		filelist = _filelist;
+  	}
 		OCA.Meta_data.App.tag_semaphore = true;
-		var oldnextPage = OCA.Files.FileList.prototype._nextPage;
-		OCA.Files.FileList.prototype._nextPage = function(animate) {
+		var oldnextPage = filelist.prototype._nextPage;
+		filelist.prototype._nextPage = function(animate) {
 			var getfiletags = function(data, dir, dirowner, fileowners, callback) {
 				$.ajax({
 					async: false,
@@ -226,9 +245,9 @@ OCA.Meta_data.App = {
 			return  oldnextPage.apply(this,arguments);
 		}
 
-		var oldCreateRow = OCA.Files.FileList.prototype._createRow;
+		var oldCreateRow = filelist.prototype._createRow;
 
-		OCA.Files.FileList.prototype._createRow = function(fileData) {
+		filelist.prototype._createRow = function(fileData) {
 			var tr = oldCreateRow.apply(this, arguments);
 			return OCA.Meta_data.App.newCreateRow(fileData, tr);
 		}

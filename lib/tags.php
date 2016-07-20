@@ -520,17 +520,38 @@ class Tags {
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
 		$data = null;
+		$fs = null;
 		while($row=$output->fetchRow()){
 			$filepath = \OC\Files\Filesystem::getpath($row['fileid']);
+			$group = null;
+			if(empty($filepath) && \OCP\App::isEnabled('user_group_admin')){
+				// Not found in files/, try user_group_admin/
+				if(empty($fs)){
+					$fs = \OCP\Files::getStorage('user_group_admin');
+				}
+				$filepath = $fs->getPath($row['fileid']);
+				// Now get the group name
+				if(!empty($filepath)){
+					$gIndex = strpos($filepath, '/', 1);
+					$group = $gIndex>0?substr($filepath, 1, $gIndex-1):'';
+					\OCP\Util::writeLog('meta_data', 'Group: '.$row['fileid'].'-->'.$filepath.'-->'.$group, \OC_Log::INFO);
+				}
+			}
 			if(empty($filepath)){
+				\OCP\Util::writeLog('meta_data', 'No path info for '.$row['fileid'].'-->'.$filepath, \OC_Log::INFO);
 				continue;
 			}
-			$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
+			if(!empty($group)){
+				$fileInfo = $fs->getFileInfo($filepath);
+			}
+			else{
+				$fileInfo = \OC\Files\Filesystem::getFileInfo($filepath);
+			}
 			if(empty($fileInfo)){
 				continue;
 			}
 			//$files[] = $fileInfo;
-			\OCP\Util::writeLog('meta_data', 'Adding file '.$row['fileid'].'-->'.$filepath, \OC_Log::WARN);
+			\OCP\Util::writeLog('meta_data', 'Adding file '.$row['fileid'].'-->'.$filepath, \OC_Log::INFO);
 			$data = $fileInfo->getData();
 			$data['type'] = $fileInfo->getType();
 			//$data['storage'] = $fileInfo->getStorage();
@@ -538,6 +559,10 @@ class Tags {
 			$data['internalPath'] = $fileInfo->getInternalPath();
 			$tagArr = self::dbGetFileTags(array($row['fileid']));
 			$data['tags'] = $tagArr[$row['fileid']];
+			if(!empty($group)){
+				$data['group'] = $group;
+				\OCP\Util::writeLog('meta_data', 'GROUP: '.$filepath.'-->'.$group, \OC_Log::WARN);
+			}
 			$files[] = $data;
 		}
 		//$result = \OCA\Files\Helper::formatFileInfos($files);
