@@ -692,7 +692,7 @@ $(document).ready(function() {
   OC.search.resultTypes.metadata = "Metadata" ;
   
 	// Add action to top bar (visible when files are selected)
-	$('#app-content-files #headerName .selectedActions').prepend(
+	$('#headerName .selectedActions').prepend(
 			'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
 	$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
 
