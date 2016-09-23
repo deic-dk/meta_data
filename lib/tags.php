@@ -658,7 +658,7 @@ class Tags {
 		//		'user_id'=>\OCP\USER::getUser(), 'itemSource'=>$fileid));
 		//\OCP\Util::writeLog('meta_data', 'Shared item '.serialize($sharedItem), \OC_Log::WARN);
 		if(!empty($owner) && empty($fileowners)){
-			$fileowners = array_fill(0, sizeof($fileids)-1, $owner);
+			$fileowners = array_fill(0, sizeof($fileids), $owner);
 		}
 		foreach($fileids as $n=>$fileid){
 			$idarray['fileid['.$n.']'] = $fileid;
@@ -667,6 +667,7 @@ class Tags {
 		foreach($fileowners as $owner){
 			$servers[] = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
 		}
+		\OCP\Util::writeLog('meta_data', 'SERVERS: '.serialize($fileowners).'-->'.serialize($servers), \OC_Log::WARN);
 		$servers = array_unique($servers);
 		foreach($servers as $server){
 			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, false, true, $server, 'meta_data');

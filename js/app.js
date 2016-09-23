@@ -563,6 +563,9 @@ $(document).ready(function() {
    * This next block of code is for deleting tags from a file
    */
   $('tbody').on('mouseenter', 'tr td div.row div.filetags-wrap span[class^=label]', function(){
+  	if($('.nav-sidebar li[data-id="sharing_in"] a.active').length){
+  		return false;
+  	}
 		$(this).children('i').hide();
 		$(this).children('span.deletetag').show();
   }).on('mouseleave', 'tr td div.row div.filetags-wrap span[class^=label]', function(){
