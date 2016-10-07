@@ -695,8 +695,11 @@ $(document).ready(function() {
   OC.search.resultTypes.metadata = "Metadata" ;
   
 	// Add action to top bar (visible when files are selected)
-	$('#headerName .selectedActions').prepend(
-			'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
-	$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
-
+	if(!$('.nav-sidebar li[data-id="sharing_in"] a.active').length &&
+			!$('.nav-sidebar li[data-id="trash"] a.active').length &&
+			(typeof OCA.Files !== 'undefined' && OCA.Files.FileList.prototype.getGetParam('view')!='trashbin')){
+		$('#headerName .selectedActions').prepend(
+				'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
+		$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
+	}
 });
