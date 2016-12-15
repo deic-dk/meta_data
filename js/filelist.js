@@ -29,7 +29,7 @@
 				this.$el.find('.select-all').prop('checked', false);
 				this.showMask();
 				$('ul.nav-sidebar').find('.active').removeClass('active');
-				$('.nav-sidebar li[data-id=tag-'+this.tagid+'] a').addClass('active');
+				$('.nav-sidebar li[data-id=tag-'+this.tagid.replace( /(:|\.|\[|\]|,|=)/g, "\\$1" )+'] a').addClass('active');
 				// This causes abort and reload. Dropping it causes double calls... FO
 				if (this._reloadCall) {
 					this._reloadCall.abort();

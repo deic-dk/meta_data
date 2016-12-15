@@ -539,7 +539,7 @@ $(document).ready(function() {
 		$('ul.nav-sidebar').find('.active').removeClass('active');
 		$(this).children('a').addClass('active');
 		if($('#app-content-'+$(this).attr('data-id')).length !== 0){
-			$('#app-navigation ul li[data-id="'+$(this).attr('data-id')+'"] a').click();
+			$('#app-navigation ul li[data-id="'+$(this).attr('data-id').replace( /(:|\.|\[|\]|,|=)/g, "\\$1" )+'"] a').click();
 		}
 		else{
 			window.location.href = "/index.php/apps/files?dir=%2F&view=" + $(this).attr('data-id');
@@ -697,7 +697,7 @@ $(document).ready(function() {
 	// Add action to top bar (visible when files are selected)
 	if(!$('.nav-sidebar li[data-id="sharing_in"] a.active').length &&
 			!$('.nav-sidebar li[data-id="trash"] a.active').length &&
-			(typeof OCA.Files !== 'undefined' && OCA.Files.FileList.prototype.getGetParam('view')!='trashbin')){
+			(typeof OCA.Files !== 'undefined' && typeof OCA.Files.FileList.prototype.getGetParam !== 'undefined' && OCA.Files.FileList.prototype.getGetParam('view')!='trashbin')){
 		$('#headerName .selectedActions').prepend(
 				'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
 		$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);

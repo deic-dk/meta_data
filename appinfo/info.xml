@@ -8,4 +8,7 @@
 	<author>Christian Brinch, DeIC (cbri@dtu.dk)</author>
 	<require>6</require>
 	<shipped>true</shipped>
+  <remote>
+    <metadata>appinfo/remote.php</metadata>
+  </remote>
 </info>

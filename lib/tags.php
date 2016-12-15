@@ -127,6 +127,20 @@ class Tags {
 		return $result;
 	}
 	
+	public static function getTagID($name, $userid){
+		$tags = self::searchTags($name, $userid);
+		if(empty($tags)){
+			return '';
+		}
+		elseif(sizeof($tags)>1){
+			\OCP\Util::writeLog('meta_data', 'More than one tag with name '.$name.' for user '.$userid, \OC_Log::ERROR);
+			return '';
+		}
+		else{
+			return $tags[0]['id'];
+		}
+	}
+	
 	public static function dbSearchKey($tagid, $name, $userid) {
 		$sql = "SELECT id,name FROM *PREFIX*meta_data_keys WHERE tagid=? AND name LIKE ? ORDER BY id";
 		$args = array($tagid,$name);
@@ -180,6 +194,20 @@ class Tags {
 		}
 		else{
 			return false;
+		}
+	}
+	
+	public static function getKeyID($tagid, $name, $userid){
+		$keys = self::searchKey($tagid, $name, $userid);
+		if(empty($keys)){
+			return '';
+		}
+		elseif(sizeof($keys)>1){
+			\OCP\Util::writeLog('meta_data', 'More than one key with name '.$name.' for tag '.$tagid, \OC_Log::ERROR);
+			return '';
+		}
+		else{
+			return $keys[0]['id'];
 		}
 	}
 	
@@ -307,7 +335,7 @@ class Tags {
 		return $tags;
 	}
 	
-	public static function dbNewTag($name, $userid, $display, $color, $public){
+	public static function dbNewTag($name, $userid, $display=0, $color="color-1", $public=0){
 		if(trim($name) === '') {
 			\OCP\Util::writeLog('meta_data', 'Need tag name', \OC_Log::ERROR);
 			return false;
@@ -317,7 +345,7 @@ class Tags {
 			return false;
 		}
 		$sql = "INSERT INTO *PREFIX*meta_data_tags (name,owner,public,color) VALUES (?,?,?,?)";
-		$args = array($name,$userid,$public,$color);
+		$args = array($name, $userid, $public, $color);
 		\OCP\DB::beginTransaction();
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
@@ -469,9 +497,23 @@ class Tags {
 		return $ret;
 	}
 	
-	public static function searchMetadata($query, $userid) {
-		$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
-		$args = array($query);
+	public static function searchMetadata($val, $userid, $tagid='', $keyid='') {
+		if(empty($tagid) && empty($keyid)){
+			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
+			$args = array($val);
+		}
+		elseif(!empty($tagid) && empty($keyid)){
+			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND tagid = ?";
+			$args = array($val, $tagid);
+		}
+		elseif(empty($tagid) &&! empty($keyid)){
+			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND keyid = ?";
+			$args = array($val, $keyid);
+		}
+		else{
+			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND tagid = ? AND keyid = ?";
+			$args = array($val, $tagid, $keyid);
+		}
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
 		if($output->rowCount() > 0){
@@ -485,6 +527,26 @@ class Tags {
 		else {
 			return array();
 		}
+	}
+	
+	public static function getFilesWithMetadata($val, $userid, $tagid='', $keyid=''){
+		$data = self::searchMetadata($val, $userid, $tagid, $keyid);
+		foreach($data as $row){
+			$storage = \OC\Files\Filesystem::getStorage('/');
+			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
+			if(empty($info)){
+				// TODO: test that this works
+				$storage = \OCP\Files::getStorage('user_group_admin');
+				$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
+			}
+			if(!empty($info)){
+				$results[] = $info;
+			}
+		}
+		if($sortAttribute !== '') {
+			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
+		}
+		return $results;
 	}
 	
 	public static function dbLoadFileKeys($fileid, $tagid){
@@ -575,12 +637,19 @@ class Tags {
 	}
 
 	public static function getTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
-		$storage = \OC\Files\Filesystem::getStorage('/');
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
 		foreach($data as $row){
+			$storage = \OC\Files\Filesystem::getStorage('/');
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
-			$results[] = $info;
+			if(empty($info)){
+				// TODO: test that this works
+				$storage = \OCP\Files::getStorage('user_group_admin');
+				$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
+			}
+			if(!empty($info)){
+				$results[] = $info;
+			}
 		}
 		if($sortAttribute !== '') {
 			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);

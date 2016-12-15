@@ -162,7 +162,7 @@ function setColor(){
 		return (css.match (/(^|\s)label-\S+/g) || []).join(' ');
 	}).addClass('label-'+colorTranslate(newColor));
 
-	$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a i').removeClass(function (index, css) {
+	$('ul.nav-sidebar li[data-id="tag-'+tagid.replace( /(:|\.|\[|\]|,|=)/g, "\\$1" )+'"] a i').removeClass(function (index, css) {
 		return (css.match (/(^|\s)tag-\S+/g) || []).join(' ');
 	}).addClass('tag-'+colorTranslate(newColor));
 	
@@ -184,7 +184,7 @@ function setName(tagid, newname){
 		data: {id: tagid, name: newname},
 		success: function(result){
 			$('tr[data-id='+tagid+'] td span.taginfo span').html('<i class="icon-tag" style="display: inline;"></i><span class="tagname">'+newname+'</span>');
-			$('ul.nav-sidebar li[data-id="tag-'+tagid+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
+			$('ul.nav-sidebar li[data-id="tag-'+tagid.replace( /(:|\.|\[|\]|,|=)/g, "\\$1" )+'"] a').html('<i class="icon icon-tag" style="display: inline;"></i><span>'+newname+'</span>');
 
 		}
 	});
@@ -349,7 +349,7 @@ $(document).ready(function() {
 			addTagToSidebar(tagid, tagname, tagcolor);
 		}
 		else{
-			$('ul.nav-sidebar li[data-id="tag-'+tagid+'"]').remove();
+			$('ul.nav-sidebar li[data-id="tag-'+tagid.replace( /(:|\.|\[|\]|,|=)/g, "\\$1" )+'"]').remove();
 			$.ajax({
 				url: OC.filePath('meta_data', 'ajax', 'updateTag.php'),
 				data: {id: tagid, visible: 0},
