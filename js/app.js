@@ -530,6 +530,20 @@ $(this).click(function(event) {
 	}
 });
 
+function getParam(href, key) {
+  var results = new RegExp('[\?&]' + key + '=([^&#]*)').exec(href);
+  if (results==null){
+     return '';// null;
+  }
+  else{
+     return results[1] || 0;
+  }
+}
+
+function getGetParam(key) {
+  return this.getParam(window.location.href, key);
+}
+
 $(document).ready(function() {
 	/* Always update menu on reload */
 	updateSidebar();
@@ -696,8 +710,7 @@ $(document).ready(function() {
   
 	// Add action to top bar (visible when files are selected)
 	if(!$('.nav-sidebar li[data-id="sharing_in"] a.active').length &&
-			!$('.nav-sidebar li[data-id="trash"] a.active').length &&
-			(typeof OCA.Files !== 'undefined' && typeof OCA.Files.FileList.prototype.getGetParam !== 'undefined' && OCA.Files.FileList.prototype.getGetParam('view')!='trashbin')){
+			!$('.nav-sidebar li[data-id="trash"] a.active').length && getGetParam('view')!='trashbin'){
 		$('#headerName .selectedActions').prepend(
 				'<a class="tag btn btn-xs btn-default" id="tag" href=""><i class="icon icon-tag"></i>'+t('meta_data',' Tag')+'</a>&nbsp;');
 		$('#headerName .selectedActions .tag').click(OCA.Meta_data.App.tagMultipleDropdown);
