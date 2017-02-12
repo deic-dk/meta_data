@@ -229,7 +229,7 @@ OCA.Meta_data.App = {
 			if(typeof owner=='undefined' || owner==''){
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
 			}
-			getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '',fileowners, function(data){
+			getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(data){
 				files = data.files;
 			});
 			for(var i=0; i<this.files.length; i++){
@@ -446,27 +446,23 @@ function loadValues(fileid, tagid, owner){
 		success: function(result){
 			if(result['data']){
 				$.each(result['data'], function(i,item){
-					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('input.value').val(item['value']);
+					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('.value').val(item['value']);
 				});
 			}
 		}
 	});
 }
 
-function showMetaPopup(fileid, tagid, file, title){
+function showMetaPopup(fileid, tagid, file, title, callback){
 	var html = $('\
 			<div>\
 			<span>\
-			<h3 class="oc-dialog-title"><span  id="metadata" tagid="'+tagid+'" fileid="'+fileid+'">'+file+'</span>, tagged with: '+title+'</h3>\
+			<h3 class="oc-dialog-title"><span  id="metadata" tagid="'+tagid+'" fileid="'+fileid+'">'+title+'</span></h3>\
 		</span>\
 		<a class="oc-dialog-close close svg"></a>\
 		<div id="meta_data_container">\
 						<div id=\"emptysearch\">No meta data defined</div>\
 			<ul id="meta_data_keys"></ul>\
-		</div>\
-		<div class="editor_buttons">\
-			<button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
-			<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button>\
 		</div>\
 		</div>');
 	$(html).dialog({
@@ -480,9 +476,14 @@ function showMetaPopup(fileid, tagid, file, title){
 		  $(this).css("maxHeight", 0.9*$(window).height()); 
 		},*/
 		position:{my: 'top',at: 'top+'+0.1*$(window).height()},
-		width: "80%"
+		width: "80%",
+		buttons: [
+		{"id": "ok-"+fileid+"-"+tagid, "text": "OK", "class": "popup_ok btn btn-flat btn-primary",
+			 "click": function(){saveMeta(); if(typeof callback!= 'undefined'){callback(fileid);}}},
+			{"id": "cancel-"+fileid+"-"+tagid, "text": "Cancel", "class": "popup_cancel btn btn-flat btn-default",
+				 "click": function() {$('body').find('.ui-dialog').remove();}}]
 	});
-	var fileids = fileid.split(':');
+	var fileids = (''+fileid).split(':');
 	var owner = $('tr[data-id='+fileids[0]+']').attr('data-share-owner-uid');
 	if(typeof owner=='undefined' || owner==''){
 		owner = '';
@@ -500,26 +501,66 @@ $(this).click(function(event) {
 });
 
 function newEntry(entry, readonly, newkey){
-  entry = typeof entry !== 'undefined' ? entry : null;
- 
-  if(!entry){
-	return $('\
+	entry = typeof entry !== 'undefined' ? entry : null;
+	optionSelect = '<select title="Special options (usually leave empty)" class="type"><option selected value="">Select option</option>\
+		<option value="controlled">controlled</option><option value="json">json</option></select>\
+	<input placeholder="value1, value2, ..." title="Comma separated list of allowed values" class="controlled_values" type="text" value="" />'
+	if(!entry){
+		var ret = $('\
 				<li class="new">\
 					<span class="keyname hidden"></span>\
-					<input class="edit" type="text" placeholder="New key name" value="" />'+(readonly?'':'\
-					<span class="deletekey">&#10006;</span>')+'\
-					<input class="value hidden" type="text" value="" />\
-			  </li>');
-  } else {
-	return $('\
+					<input class="edit" type="text" placeholder="New key name" value="" />'+
+					'<input class="value hidden" type="text" value="" />'+
+					optionSelect+
+					(readonly?'':'<span class="deletekey">&#10006;</span>')+
+				'</li>');
+	}
+	else {
+		var valueInputField;
+		if(entry['allowed_values']){
+			valueInputField = '<select class="value hidden">';
+			valueInputField+= '<option value="" disabled></option>';
+			var allowedValues = JSON.parse(entry['allowed_values']);
+			valueInputField+= '<option value=""></option>';
+			for(var i=0; i<allowedValues.length; ++i){
+				valueInputField+= '<option value="'+allowedValues[i]+'">'+allowedValues[i]+'</option>';
+			}
+			valueInputField+= '</select>';
+		}
+		else{
+			valueInputField = '<input class="value hidden" type="text" value="" />';
+		}
+		ret = $('\
 				<li '+(newkey?'class="new"':'id="'+entry['id'])+'">\
 					<span class="keyname hidden">'+entry['name']+'</span>\
-					<input class="edit" type="text" value="'+entry['name']+'" />'+(readonly?'':'\
-					<span class="deletekey">&#10006;</span>')+'\
-					<input class="value hidden" type="text" value="" />\
-				</li>');
-  }
-}
+					<input class="edit" type="text" value="'+entry['name']+'"'+(readonly?' readonly':'')+' />'+
+					(readonly?'':optionSelect+'<span class="deletekey">&#10006;</span>')+
+						valueInputField+
+				'</li>');
+		}
+		if(entry && entry['allowed_values']){
+			ret.find('select.type').val('controlled');
+			ret.find('.controlled_values').val(JSON.parse(entry['allowed_values']).join(', '));
+		}
+		else{
+			if(entry && entry['type']){
+				ret.find('select.type').val( entry['type']);
+			}
+			ret.find('.controlled_values').hide();
+		}
+
+		ret.find('select.type').tipsy({gravity:'s',fade:true});
+		ret.find('select.type').change(function(ev){
+			$(this).parent('li').addClass('alt');
+			if($(this).val()=='controlled'){
+				$(this).parent().find('.controlled_values').show();
+			}
+			else{
+				$(this).parent().find('.controlled_values').hide();
+			}
+		});
+		return ret;
+	}
 
 $(this).click(function(event) {
 	if ($('.row .dropdown-menu').has(event.target).length===0) {
@@ -542,6 +583,63 @@ function getParam(href, key) {
 
 function getGetParam(key) {
   return this.getParam(window.location.href, key);
+}
+
+function editMeta(title, file, fileid, tagid, callback){
+	var selectedFiles = FileList.getSelectedFiles();
+	var fileIds = [parseInt(fileid)];
+	for( var i=0;i<selectedFiles.length;++i){
+		if(fileIds.indexOf(selectedFiles[i].id)==-1){
+			fileIds.push(selectedFiles[i].id);
+		}
+	}
+	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
+		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Confirm overwrite',
+        function(res){
+  				if(res){
+  					$(this).hide();
+  					showMetaPopup(fileIds.join(':'), tagid, fileIds.length + ' files', title, callback);
+  		  		loadKeys(fileid, tagid, owner);
+  				}
+        }
+     );
+	}
+	else{
+		var owner = showMetaPopup(fileid, tagid, file, title, callback);
+		loadKeys(fileid, tagid, owner);
+		loadValues(fileid, tagid, owner);
+		// Disable editing meta-data of files shared with me
+		if(owner!=''){
+  		$('#meta_data_keys input').prop('readonly', true);
+  		$('.ui-dialog-buttonpane').hide();
+		}
+	}
+}
+
+/*
+ * This block of code is for leaving the meta data editor
+ */
+function saveMeta(){
+	$('body').find('#meta_data_keys li').each(function() {
+		//if($(this).children('.value').val() != '' ){
+		$.ajax(
+			{
+				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
+				type: "POST",
+				data: {
+				tagOp: 'update_file_key',
+				keyId: $(this).attr('id'),
+				tagId: $('#metadata').attr('tagid'),
+				fileId:$('#metadata').attr('fileid'),
+				type:$('#metadata').attr('type'),
+				value: $(this).find('.value').val()
+			},
+			success: function(result) {
+			}
+		});
+		//}
+	});
+	$('body').find('.ui-dialog').remove();
 }
 
 $(document).ready(function() {
@@ -621,70 +719,17 @@ $(document).ready(function() {
 		}
 		e.preventDefault();
 		e.stopPropagation();
-		var title=$(this).children('span.tagtext').html();
-		var file =$(this).parents('tr').attr('data-file');
-		var fileid=$(this).parents('tr').attr('data-id');
-		var tagid=$(this).attr('data-tag');
-  	var selectedFiles = FileList.getSelectedFiles();
-  	var fileIds = [parseInt(fileid)];
-  	for( var i=0;i<selectedFiles.length;++i){
-  		if(fileIds.indexOf(selectedFiles[i].id)==-1){
-  			fileIds.push(selectedFiles[i].id);
-  		}
-  	}
-  	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
-  		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Confirm overwrite',
-          function(res){
-	  				if(res){
-	  					$(this).hide();
-	  					showMetaPopup(fileIds.join(':'), tagid, fileIds.length + ' files', title);
-	  		  		loadKeys(fileid, tagid, owner);
-	  				}
-          }
-       );
-  	}
-  	else{
-  		var owner = showMetaPopup(fileid, tagid, file, title);
-  		loadKeys(fileid, tagid, owner);
-  		loadValues(fileid, tagid, owner);
-  		// Disable editing meta-data of files shared with me
-  		if(owner!=''){
-    		$('#meta_data_keys input').prop('readonly', true);
-    		$('.editor_buttons').hide();
-  		}
-  	}
-  });
+		var title= $(this).children('span.tagtext').html();
+		var file = $(this).parents('tr').attr('data-file');
+		var fileid= $(this).parents('tr').attr('data-id');
+		var tagid= $(this).attr('data-tag');
+		editMeta(title, file, fileid, tagid);
+	});
 
-  /*
-   * This block of code is for leaving the meta data editor
-   */
-  $('body').on('click', '#popup_ok', function(){
-		$('body').find('#meta_data_keys li').each(function() {
-			if($(this).children('input.value').val() != '' ){
-			$.ajax(
-				{
-					url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
-					type: "POST",
-					data: {
-					tagOp: 'update_file_key',
-					keyId: $(this).attr('id'),
-					tagId: $('#metadata').attr('tagid'),
-					fileId:$('#metadata').attr('fileid'),
-					type:$('#metadata').attr('type'),
-					value: $(this).find('input.value').val()
-				},
-				success: function(result) {
-				}
-			});
-			}
-		});
-		$('body').find('.ui-dialog').remove();
-  });
-
-	$('body').on('keypress', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.value', function (e) {
+	$('body').on('keypress', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li .value', function (e) {
 		var key = e.which;
 		if(key == 13)  {
-			$('body').find('#popup_ok').focus();
+			$('body').find('.popup_ok').focus();
 			return false;
 		}
   });
@@ -694,13 +739,13 @@ $(document).ready(function() {
    */
   $('tbody').on('click', 'span.more-tags', function(e){
 		e.stopPropagation();
-		$('.tipsy:last').remove();
+		$('.tipsy').last().remove();
 		updateFileListTags($(this).parents('tr'), true);
   });
 
 	$('tbody').on('click', 'a.less-tags', function(e){
 		e.stopPropagation();
-		$('.tipsy:last').remove();
+		$('.tipsy').last().remove();
 		updateFileListTags($(this).parents('tr'), false);
 	});
 

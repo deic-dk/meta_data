@@ -12,11 +12,16 @@ switch($_POST['tagOp']) {
         break;
     }
     case 'new_key': {
-        $result = \OCA\meta_data\Tags::newKey($_POST['tagId'], $_POST['keyName']);
+        $result = \OCA\meta_data\Tags::newKey($_POST['tagId'], $_POST['keyName'],
+        		empty($_POST['type'])?null:$_POST['type'],
+        		empty($_POST['controlledValues'])?null:$_POST['controlledValues']);
         break;
     }
-    case 'rename_key': {
-        $result = \OCA\meta_data\Tags::alterKey($_POST['tagId'],$_POST['keyId'], $_POST['newName'], $owner);
+    case 'alter_key': {
+        $result = \OCA\meta_data\Tags::alterKey($_POST['tagId'],$_POST['keyId'],
+        		$_POST['newName'], $owner,
+        		empty($_POST['type'])?null:$_POST['type'],
+        		empty($_POST['controlledValues'])?null:$_POST['controlledValues']);
         break;
     }
 

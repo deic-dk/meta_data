@@ -38,10 +38,11 @@
         <type>integer</type>
         <length>1</length>
       </field>
+      <field>
         <name>color</name>
         <type>text</type>
         <length>12</length>
-    </field>
+    	</field>
   </declaration>
   </table>
 
@@ -61,9 +62,19 @@
         <type>integer</type>
         <length>11</length>
       </field>
-
       <field>
         <name>name</name>
+        <type>text</type>
+        <notnull>true</notnull>
+        <length>80</length>
+      </field>
+      <field>
+        <name>allowed_values</name>
+        <type>text</type>
+        <notnull>true</notnull>
+      </field>
+      <field>
+        <name>type</name>
         <type>text</type>
         <notnull>true</notnull>
         <length>80</length>

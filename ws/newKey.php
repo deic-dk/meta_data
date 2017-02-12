@@ -31,8 +31,10 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 
 $tagid = isset($_GET['tagid'])?$_GET['tagid']:'';
 $keyname = isset($_GET['keyname'])?$_GET['keyname']:'';
+$type = !empty($_GET['type'])?$_GET['type']:null;
+$controlledvalues = !empty($_GET['controlledvalues'])?$_GET['controlledvalues']:null;
 
-$ret = \OCA\Meta_data\Tags::dbNewkey($tagid, $keyname);
+$ret = \OCA\Meta_data\Tags::dbNewkey($tagid, $keyname, $type, $controlledvalues);
 
 \OCP\Util::writeLog('meta_data', 'New key '.$ret, \OC_Log::WARN);
 

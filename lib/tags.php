@@ -2,9 +2,46 @@
 
 namespace OCA\meta_data;
 
+class MetaData implements \JsonSerializable {
+	public $metadata;
+	public $keyvals;
+	public function __construct($keyvals=array()) {
+		$this->keyvals = $keyvals;
+		if(!empty($keyvals)){
+			$this->metadata = array();
+			foreach($keyvals as $keyID=>$val){
+				$key = \OCA\meta_data\Tags::searchKeyByID($keyID);
+				\OCP\Util::writeLog('meta_data', 'KEY: '.$keyID.'-->'.$key['name'], \OC_Log::WARN);
+				if(!empty($key)){
+					if($key['type']=='json'){
+						if(json_decode($val, false)!=null){
+							$this->metadata[$key['name']] = json_decode($val, false);
+							\OCP\Util::writeLog('meta_data', 'Key type JSON. Encoded '.
+									$val.' --> '.serialize($this->metadata[$key['name']]), \OC_Log::WARN);
+						}
+					}
+					elseif(!empty($val)){
+						$this->metadata[$key['name']] = $val;
+					}
+				}
+			}
+		}
+	}
+	public function getValue($keyName){
+		return empty($this->metadata[$keyName])?null:$this->metadata[$keyName];
+	}
+	public function jsonSerialize(){
+		return $this->metadata;
+	}
+}
+
 class FileTag implements \JsonSerializable {
 	public $fileid;
+	/*optional and volatile*/
+	public $filename;
 	public $tagid;
+	/*optional and volatile*/
+	public $tagname;
 	public $keyvals;
 	public function __construct($fileid, $tagid, $keyvals=array()) {
 		$this->fileid = $fileid;
@@ -13,6 +50,15 @@ class FileTag implements \JsonSerializable {
 	}
 	public function setFileID($fileid){
 		$this->fileid = $fileid;
+	}
+	public function setFileName($filename){
+		$this->filename = $filename;
+	}
+	public function setTagID($tagid){
+		$this->tagid = $tagid;
+	}
+	public function setTagName($tagname){
+		$this->tagname = $tagname;
 	}
 	public function addKeyVal($keyid, $val) {
 		if(!empty($keyid)){
@@ -29,17 +75,25 @@ class FileTag implements \JsonSerializable {
 		return $this->keyvals[$keyid];
 	}
 	
+	public function getMetadata(){
+		$metadata = new \OCA\meta_data\Metadata($this->keyvals);
+		return $metadata;
+	}
+	
 	public function jsonSerialize(){
-		return empty($this->keyvals) ?
-			[
-			'fileid' => $this->fileid,
-			'tagid' => $this->tagid
-			] :
-			[
-			'fileid' => $this->fileid,
-			'tagid' => $this->tagid,
-			'keyvals' => $this->keyvals
-			];
+		$ret = ['fileid' => $this->fileid, 'tagid' => $this->tagid];
+		\OCP\Util::writeLog('meta_data', 'Serializing '. serialize($ret), \OC_Log::WARN);
+		if(!empty($this->keyvals)){
+			$ret['keyvals'] = $this->getMetadata();
+			$ret['metadata'] = $this->getMetadata();
+		}
+		if(!empty($this->filename)){
+			$ret['filename'] = $this->filename;
+		}
+		if(!empty($this->tagname)){
+			$ret['tagname'] = $this->tagname;
+		}
+		return $ret;
 	}
 }
 
@@ -142,7 +196,7 @@ class Tags {
 	}
 	
 	public static function dbSearchKey($tagid, $name, $userid) {
-		$sql = "SELECT id,name FROM *PREFIX*meta_data_keys WHERE tagid=? AND name LIKE ? ORDER BY id";
+		$sql = "SELECT * FROM *PREFIX*meta_data_keys WHERE tagid=? AND name LIKE ? ORDER BY id";
 		$args = array($tagid,$name);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
@@ -237,7 +291,6 @@ class Tags {
 		return $result;
 	}
 	
-	// TODO: ditch this plus ws/searchTagByID.php
 	public static function searchTagByID($tagid){
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
 			$result = self::dbSearchTagByID($tagid);
@@ -282,11 +335,11 @@ class Tags {
 	}
 	
 	public static function dbSearchKeyByID($keyid){
-		$sql = "SELECT name FROM *PREFIX*meta_data_keys WHERE id=?";
+		$sql = "SELECT * FROM *PREFIX*meta_data_keys WHERE id=?";
 		$args = array($keyid);
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
-		$result=$resRsrc->fetchRow();
+		$result = $resRsrc->fetchRow();
 		return $result;
 	}
 	
@@ -639,6 +692,7 @@ class Tags {
 	public static function getTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
+		$storage = \OC\Files\Filesystem::getStorage('/');
 		foreach($data as $row){
 			$storage = \OC\Files\Filesystem::getStorage('/');
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
@@ -746,9 +800,9 @@ class Tags {
 			if(empty($tags)){
 				continue;
 			}
-			$result = empty($result)?$tags:array_unique($result + $tags, SORT_REGULAR);
+			$result = empty($result)?$tags:$result+$tags;
 		}
-		\OCP\Util::writeLog('meta_data', 'All file tags: '.serialize($result), \OC_Log::DEBUG);
+		\OCP\Util::writeLog('meta_data', 'All file tags: '.serialize($result), \OC_Log::WARN);
 		return $result;
 	}
 	
@@ -785,9 +839,10 @@ class Tags {
 	}
 	
 	/**
-	 * Object version - to allow returning all file/tag/key info for a user
+	 * Return all file/tag/key info for a user/file/tag.
+	 * Optionally, massage the output tag objects to use key names instead of IDs.
 	 */
-	public static function dbGetUserFileTags($user_id, $fileids=null){
+	public static function getUserFileTags($user_id, $fileids=null, $tagids=null, $useKeyNames=false){
 		if(empty($user_id)){
 			return new \OCA\meta_data\FilesTags();
 		}
@@ -808,6 +863,10 @@ class Tags {
 		// Each object in the list contains all tag/key/value info for the given file
 		$fileTagsArr = array();
 		while($row=$output->fetchRow()){
+			// If tags are given, match
+			if(!empty($tagids) && !in_array($row['tagid'], $tagids)){
+				continue;
+			}
 			// Check if file is owned by user
 			$path = self::getFilePath($row['fileid'], $user_id);
 			if(empty($path)){
@@ -815,10 +874,17 @@ class Tags {
 			}
 			// Create new FileTag object
 			$fileTag = new \OCA\meta_data\FileTag($row['fileid'], $row['tagid']);
+			$fileTag->setFileName($path);
+			$tag = self::searchTagByID($row['tagid']);
+			$tagname = $tag['name'];
+			$fileTag->setTagName($tagname);
 			// Add key/values to the FileTag object
 			$keyVals = self::dbLoadFileKeys($row['fileid'], $row['tagid']);
 			foreach($keyVals as $keyVal){
-				$fileTag->addKeyVal($keyVal['keyid'], $keyVal['value']);
+				$fileTag->addKeyVal(/*use name instead of id*/
+				/*self::searchKeyByID($keyVal['keyid'])['name']'*/
+					$keyVal['keyid'],
+					$keyVal['value']);
 			}
 			if(empty($fileTagsArr[$row['fileid']])){
 				// Add new FileTags object to the result list
@@ -851,45 +917,99 @@ class Tags {
 		return $ret;
 	}
 	
-	public static function dbNewKey($tagid, $keyname) {
+	public static function dbNewKey($tagid, $keyname, $type=null, $controlledvalues=null) {
 		if(empty($keyname) || trim($keyname) === '') {
 			return false;
 		}
-		$sql = "INSERT INTO *PREFIX*meta_data_keys (tagid,name) VALUES (?,?)";
-		$args = array($tagid,$keyname);
+			if(!empty($type)){
+			if($type=='""'){
+				$type = '';
+			}
+			$sql .= ', type=?';
+			$args[] = $type;
+		}
+		if(empty($controlledvalues) && empty($type)){
+			$sql = "INSERT INTO *PREFIX*meta_data_keys (tagid,name) VALUES (?,?)";
+			$args = array($tagid, $keyname);
+		}
+		elseif(empty($type) && !empty($controlledvalues)){
+			if($controlledvalues=='""'){
+				$controlledvalues = '';
+			}
+			$sql = "INSERT INTO *PREFIX*meta_data_keys (tagid,name, allowed_values) VALUES (?,?,?)";
+			$args = array($tagid,$keyname, $controlledvalues);
+		}
+		elseif(!empty($type) && empty($controlledvalues)){
+			if($type=='""'){
+				$type = '';
+			}
+			$sql = "INSERT INTO *PREFIX*meta_data_keys (tagid,name, type) VALUES (?,?,?)";
+			$args = array($tagid, $keyname, $type);
+		}
+		else{
+			if($controlledvalues=='""'){
+				$controlledvalues = '';
+			}
+			if($type=='""'){
+				$type = '';
+			}
+			$sql = "INSERT INTO *PREFIX*meta_data_keys (tagid,name, type, allowed_values) VALUES (?,?,?,?)";
+			$args = array($tagid,$keyname, $type, $controlledvalues);
+		}
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
 		$key = self::searchKey($tagid, $keyname);
 		return $key;
 	}
 
-	public static function newKey($tagid, $keyname){
+	public static function newKey($tagid, $keyname, $type='', $controlledvalues=''){
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			$result = self::dbNewkey($tagid, $keyname);
+			$result = self::dbNewkey($tagid, $keyname, $type, $controlledvalues);
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('newKey', array(
-					'tagid'=>$tagid, 'keyname'=>$keyname),
+					'tagid'=>$tagid, 'keyname'=>$keyname, 'type'=>$type,
+					'controlledvalues'=>$controlledvalues),
 					false, true, null, 'meta_data');
 		}
 		return $result;
 	}
 
-	public static function dbAlterKey($tagid, $keyid, $keyname, $userid) {
-		$sql = 'UPDATE *PREFIX*meta_data_keys SET name=? WHERE tagid=? AND id=?';
-		$args = array($keyname, $tagid,$keyid);
+	public static function dbAlterKey($tagid, $keyid, $keyname, $userid,
+			$type=null, $controlledvalues=null) {
+		$sql = 'UPDATE *PREFIX*meta_data_keys SET name=?';
+		$args = array($keyname);
+		if(!empty($type)){
+			if($type=='""'){
+				$type = '';
+			}
+			$sql .= ', type=?';
+			$args[] = $type;
+		}
+		if(!empty($controlledvalues)){
+			if($controlledvalues=='""'){
+				$controlledvalues = '';
+			}
+			$sql .= ', allowed_values=?';
+			$args[] = $controlledvalues;
+		}
+		$sql .= ' WHERE tagid=? AND id=?';
+		$args[] = $tagid;
+		$args[] = $keyid;
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
 		return $resRsrc;
 	}
 	
-	public static function alterKey($tagid, $keyid, $keyname, $userid){
+	public static function alterKey($tagid, $keyid, $keyname, $userid,
+			$type='', $controlledvalues=''){
 		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
-			$result = self::dbAlterKey($tagid, $keyid, $keyname, $userid);
+			$result = self::dbAlterKey($tagid, $keyid, $keyname, $userid, $type, $controlledvalues);
 		}
 		else{
 			$result = \OCA\FilesSharding\Lib::ws('alterKey', array('userid'=>$userid,
-					'tagid'=>$tagid,  'keyid'=>$keyid, 'keyname'=>$keyname),
+					'tagid'=>$tagid,  'keyid'=>$keyid, 'keyname'=>$keyname,
+					'controlledvalues'=>$controlledvalues, 'type'=>$type),
 					false, true, null, 'meta_data');
 		}
 		return $result;

@@ -138,7 +138,6 @@ switch($_GET['action']){
 		else{
 			$fileArr = array($files);
 		}
-		$fileIdArr = array();
 		foreach($fileArr as $file){
 			if(OCP\App::isEnabled('files_sharding') && OCP\App::isEnabled('user_group_admin')){
 				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
@@ -164,14 +163,13 @@ switch($_GET['action']){
 		else{
 			$fileArr = array($files);
 		}
-		$fileIdArr = array();
 		foreach($fileArr as $file){
 			if(OCP\App::isEnabled('files_sharding') && OCP\App::isEnabled('user_group_admin')){
 				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
 			}
 			else{
 				$fileInfo = $view->getFileInfo($file);
-				if ($fileInfo) {
+				if($fileInfo){
 					$fileid = $fileInfo['fileid'];
 				}
 			}
@@ -192,6 +190,28 @@ switch($_GET['action']){
 		$value = !empty($_GET['value']) ? $_GET['value'] : '';
 		$ret['files'] = \OCA\meta_data\Tags::getFilesWithMetadata($value, $userid, $tagid, $attributeid);
 		break;
+	case 'getmetadata':
+		$tag = !empty($_GET['tag']) ? $_GET['tag'] : '';
+		$tagid = !empty($tag)?\OCA\meta_data\Tags::getTagID($tag, $user) : '';
+		$files = !empty($_GET['file']) ? $_GET['file'] : "";
+		// $files is a json encoded list of paths
+		if(!empty($files)){
+			$fileArr = json_decode($files, true);
+		}
+		$fileIdArr = array();
+		foreach($fileArr as $file){
+			if(OCP\App::isEnabled('files_sharding') && OCP\App::isEnabled('user_group_admin')){
+				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
+			}
+			else{
+				$fileInfo = $view->getFileInfo($file);
+				if($fileInfo){
+					$fileid = $fileInfo['fileid'];
+				}
+			}
+			$fileIdArr[] = $fileid;
+		}
+		$ret = \OCA\meta_data\Tags::getUserFileTags($user, $fileIdArr, [$tagid]);
 	default:
 		break;
 }

@@ -33,8 +33,10 @@ $userid = isset($_GET['userid'])?$_GET['userid']:'';
 $tagid = isset($_GET['tagid'])?$_GET['tagid']:'';
 $keyid = isset($_GET['keyid'])?$_GET['keyid']:'';
 $keyname = isset($_GET['keyname'])?$_GET['keyname']:'';
+$type = !empty($_GET['type'])?$_GET['type']:null;
+$controlledvalues = !empty($_GET['controlledvalues'])?$_GET['controlledvalues']:null;
 
-$ret = \OCA\Meta_data\Tags::dbAlterKey($tagid, $keyid, $keyname, $userid);
+$ret = \OCA\Meta_data\Tags::dbAlterKey($tagid, $keyid, $keyname, $userid, $type, $controlledvalues);
 
 \OCP\Util::writeLog('meta_data', 'New key '.$ret, \OC_Log::WARN);
 

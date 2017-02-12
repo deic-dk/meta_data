@@ -267,9 +267,14 @@ function loadKeys(tagid, readonly, newkey){
 		type: "POST",
 		success: function(result) {
 			if(result['data']){
-				$('body').find('#emptysearch').toggleClass('hidden');
+				$('#emptysearch').toggleClass('hidden');
 				$.each(result['data'], function(i,item){
-					$('body').find('#meta_data_keys').append(newEntry(item, readonly, newkey));
+					el = $('#meta_data_keys').append(newEntry(item, readonly, newkey));
+					if(item['allowed_values']){
+					}
+					else{
+						//el.find('.controlled_values').hide();
+					}
 				});
 			}
 		}
@@ -408,11 +413,11 @@ $(document).ready(function() {
 				<h3>Meta-data fields:</h3><a class="oc-dialog-close close svg"></a>\
 				<div id="meta_data_container"><div id="emptysearch">No metadata defined</div><ul id="meta_data_keys"></ul></div>\
 				<span class="new_field"><button id="add_key" class="btn btn-flat btn-default">Add field</button></span>\
-				&nbsp;or&nbsp;\
-				<input class="edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="Select  tag to import from" autocomplete="off">\
+				<span class="new_field_filler">&nbsp;or&nbsp;</span>\
+				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="Select tag to import from" autocomplete="off">\
 				<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>\
 			<div class="schema_editor_buttons"><button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
-			<button id="popup_cancel" class="btn btn-flat btn-default" style="margin-right:15px;">Cancel</button></div></div>');
+			<button id="popup_cancel" class="btn btn-flat btn-default">Cancel</button></div></div>');
 		$(html).dialog({
 			dialogClass: "oc-dialog notitle",
 			resizable: true,
@@ -436,6 +441,8 @@ $(document).ready(function() {
 			$('.editdesc').prop('readonly', true);
 			$('.schema_editor_buttons').hide();
 			$('.new_field').hide();
+			$('.import_tag').hide();
+			$('.new_field_filler').hide();
 			readonly = true;
 		}
 		
@@ -453,9 +460,9 @@ $(document).ready(function() {
 			$('#meta_data_keys li:last-child input').focus();
 			return false;
 		}
-		$('body').find('#emptysearch').hide();
-		$('body').find('#meta_data_keys').append(newEntry());
-		$('body').find('#meta_data_keys li:last-child input').focus();
+		$('#emptysearch').hide();
+		$('#meta_data_keys').append(newEntry());
+		$('#meta_data_keys li:last-child input').focus();
 	});
 
 	$('body').on('focusout', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.edit', function(){
@@ -467,13 +474,13 @@ $(document).ready(function() {
 	$('body').on('keypress', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.edit', function (e) {
 		var key = e.which;
 		if(key == 13){
-			$('body').find('#add_key').focus();
+			$('#add_key').focus();
 			return false;
 		}
 	});
 
 	$('body').on('click', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li span.deletekey', function(){
-		if($(this).parent('li').siblings().size() === 0) $('body').find('#emptysearch').show();
+		if($(this).parent('li').siblings().size() === 0) $('#emptysearch').show();
 		if(!$(this).parent('li').hasClass('new')){
 			$(this).parent('li').addClass('del');
 			$(this).parent('li').hide();
@@ -488,13 +495,21 @@ $(document).ready(function() {
 		var tagname = $(this).parent().parent().find('#tagid').attr('data-name');
 		$(this).parent('div').siblings('div#meta_data_container').children('ul').children('li').each(function(){
 			if($(this).children('input.edit').val() != '' && $(this).hasClass('new')){
+				if($(this).children('select.type').val()==='controlled'){
+					var controlledValuesArr = $(this).children('input.controlled_values').val().match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
+				}
+				else if($(this).children('select.type').val()==='json'){
+					var type =  'json';
+				}
 				$.ajax({
 					url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
 					type: "POST",
 					data: {
 						tagOp: 'new_key',
 						keyName: $(this).children('input.edit').val(),
-						tagId: tagid
+						tagId: tagid,
+						controlledValues: JSON.stringify(controlledValuesArr),
+						type: type
 					},
 					success: function(result) {
 					},
@@ -514,14 +529,25 @@ $(document).ready(function() {
 				});
 			}
 			else if($(this).children('input.edit').val() != '' && $(this).hasClass('alt')){
+				if($(this).children('select.type').val()==='controlled'){
+					var controlledValuesArr = $(this).children('input.controlled_values').val().match(/(?=\S)[^,]+?(?=\s*(,|$))/g);
+				}
+				else{
+					var controlledValuesArr = '';
+				}
+				if($(this).children('select.type').val().length){
+					var type = $(this).children('select.type').val();
+				}
 				$.ajax({
 					url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
 					type: "POST",
 					data: {
-						tagOp: 'rename_key',
+						tagOp: 'alter_key',
 						keyId:  $(this).attr('id'),
 						tagId:  tagid,
-						newName:$(this).children('input.edit').val()
+						newName:$(this).children('input.edit').val(),
+						controlledValues: JSON.stringify(controlledValuesArr),
+						type: type
 					},
 					success: function(result) {
 					},
@@ -534,7 +560,7 @@ $(document).ready(function() {
 		}
 		var newtagdesc = $(this).parent('div').parent('div').find('.editdesc').val();
 		setDesc(tagid, newtagdesc);
-		$('body').find('.ui-dialog').remove();
+		$('.ui-dialog').remove();
   });
 
 
