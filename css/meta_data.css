@@ -89,10 +89,15 @@ input.edit {
 span.keyname {
   text-align: left;
   display: inline-block;
+  width: 128px;
 }
 
 .oc-dialog input.value{
   width:70%;
+  margin-left: 10px;
+}
+
+.oc-dialog select.value{
   margin-left: 10px;
 }
 

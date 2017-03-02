@@ -9,7 +9,7 @@
  *
  */
  
-(function() {
+$(document).ready(function() {
 
 	var FileList = function($el, options) {
 		this.initialize($el, options);
@@ -81,4 +81,4 @@
 	});
 	
 	OCA.Meta_data.FileList = FileList;
-})();
+});
