@@ -433,7 +433,7 @@ function loadKeys(fileid, tagid, owner){
 		}
 	});
 }
-function loadValues(fileid, tagid, owner){
+function loadValues(fileid, file, tagid, owner, callback){
 	$.ajax({
 		url:OC.filePath('meta_data', 'ajax', 'loadValues.php'),
 		async: false,
@@ -448,6 +448,9 @@ function loadValues(fileid, tagid, owner){
 				$.each(result['data'], function(i,item){
 					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('.value').val(item['value']);
 				});
+				if(typeof callback!='undefined'){
+					callback(fileid, file);
+				}
 			}
 		}
 	});
@@ -479,7 +482,7 @@ function showMetaPopup(fileid, tagid, file, title, callback){
 		width: "80%",
 		buttons: [
 		{"id": "ok-"+fileid+"-"+tagid, "text": "OK", "class": "popup_ok btn btn-flat btn-primary",
-			 "click": function(){saveMeta(); if(typeof callback!= 'undefined'){callback(fileid);}}},
+			 "click": function(){saveMeta(); if(typeof callback!= 'undefined'){callback(fileid, file);}}},
 			{"id": "cancel-"+fileid+"-"+tagid, "text": "Cancel", "class": "popup_cancel btn btn-flat btn-default",
 				 "click": function() {$('body').find('.ui-dialog').remove();}}]
 	});
@@ -585,7 +588,7 @@ function getGetParam(key) {
   return this.getParam(window.location.href, key);
 }
 
-function editMeta(title, file, fileid, tagid, callback){
+function editMeta(title, file, fileid, tagid, preCallback, callback){
 	var selectedFiles = FileList.getSelectedFiles();
 	var fileIds = [parseInt(fileid)];
 	for( var i=0;i<selectedFiles.length;++i){
@@ -607,7 +610,7 @@ function editMeta(title, file, fileid, tagid, callback){
 	else{
 		var owner = showMetaPopup(fileid, tagid, file, title, callback);
 		loadKeys(fileid, tagid, owner);
-		loadValues(fileid, tagid, owner);
+		loadValues(fileid, file, tagid, owner, preCallback);
 		// Disable editing meta-data of files shared with me
 		if(owner!=''){
   		$('#meta_data_keys input').prop('readonly', true);
