@@ -24,7 +24,9 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 
 	if(\OCP\User::isLoggedIn()){
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
-			OCP\Util::addScript('meta_data', 'filelist');
+			if(strpos($_SERVER['REQUEST_URI'], "/apps/meta_data")===false){
+				OCP\Util::addScript('meta_data', 'filelist');
+			}
 			OCP\Util::addScript('meta_data', 'editor');
 			OCP\Util::addStyle('meta_data', 'meta_data');
 			$tags = \OCA\Meta_data\Tags::searchTags('%',\OCP\User::getUser());
