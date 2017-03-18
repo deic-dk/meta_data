@@ -24,7 +24,7 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 
 	if(\OCP\User::isLoggedIn()){
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
-			if(strpos($_SERVER['REQUEST_URI'], "/apps/meta_data")===false){
+			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false){
 				OCP\Util::addScript('meta_data', 'filelist');
 			}
 			OCP\Util::addScript('meta_data', 'editor');
