@@ -9,6 +9,22 @@
  *
  */
  
+function getGetParams() {
+  var ptrn = new RegExp('([\?&])([^&#]+)=([^&#]+)', 'g');
+	var match;
+	var results = {};
+	while ((match = ptrn.exec(window.location.href)) != null) {
+		if(match[1]=='?' && match[2]=='dir'){
+			continue;
+		}
+		if(match[2]=='view' && match[3].substring(0, 4)=='tag-'){
+			continue;
+		}
+		results[match[2]] = match[3];
+	}
+	return results;
+}
+
 $(document).ready(function() {
 
 	var FileList = function($el, options) {
@@ -35,14 +51,16 @@ $(document).ready(function() {
 					this._reloadCall.abort();
 				}
 				if(!this._reloadCall){
+				var data = {
+						dir : this.getCurrentDirectory(),
+						sort: this._sort,
+						sortdirection: this._sortDirection,
+						tagid: this.tagid,
+						keyvals: getGetParams()
+					}
 					this._reloadCall = $.ajax({
 						url: this.getAjaxUrl('list'),
-						data: { 
-							dir : this.getCurrentDirectory(),
-							sort: this._sort,
-							sortdirection: this._sortDirection,
-							tagid: this.tagid
-						}
+						data: data
 					});
 				}
 				var callBack = this.reloadCallback.bind(this);

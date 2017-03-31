@@ -24,7 +24,10 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 
 	if(\OCP\User::isLoggedIn()){
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
-			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false){
+			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false ||
+					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files_")===false &&
+					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files")!==false &&
+					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files")>=0){
 				OCP\Util::addScript('meta_data', 'filelist');
 			}
 			OCP\Util::addScript('meta_data', 'editor');

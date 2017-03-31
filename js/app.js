@@ -9,6 +9,43 @@
  *
  */
 
+// For comparing two arrays - from http://stackoverflow.com/questions/7837456/how-to-compare-arrays-in-javascript
+// Warn if overriding existing method
+if(Array.prototype.equals)
+    console.warn("Overriding existing Array.prototype.equals. Possible causes: New API defines the method, there's a framework conflict or you've got double inclusions in your code.");
+// attach the .equals method to Array's prototype to call it on any array
+Array.prototype.equals = function (array) {
+    // if the other array is a falsy value, return
+    if (!array)
+        return false;
+
+    // compare lengths - can save a lot of time 
+    if (this.length != array.length)
+        return false;
+
+    for (var i = 0, l=this.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (this[i] instanceof Array && array[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!this[i].equals(array[i]))
+                return false;
+        }
+        else if (typeof this[i].id!=='undefined' && typeof array[i].id!=='undefined') {
+          if(this[i].id != array[i].id){
+            return false;
+          }
+        }
+        else if (this[i] != array[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;   
+        }
+    }
+    return true;
+}
+
+// Hide method from for-in loops
+Object.defineProperty(Array.prototype, "equals", {enumerable: false});
+
 if (!OCA.Meta_data){
   OCA.Meta_data = {};
 }
@@ -204,9 +241,11 @@ OCA.Meta_data.App = {
   		filelist = _filelist;
   	}
 		OCA.Meta_data.App.tag_semaphore = true;
+		OCA.Meta_data.App.previous_tag_fileids = [];
 		var oldnextPage = filelist.prototype._nextPage;
 		filelist.prototype._nextPage = function(animate) {
 			var getfiletags = function(data, dir, dirowner, fileowners, callback) {
+				OCA.Meta_data.App.tag_semaphore = false;
 				$.ajax({
 					async: false,
 					type: "POST",
@@ -229,17 +268,21 @@ OCA.Meta_data.App = {
 			if(typeof owner=='undefined' || owner==''){
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
 			}
-			getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(data){
-				files = data.files;
-			});
-			for(var i=0; i<this.files.length; i++){
-				var id = this.files[i]['id'];
-				var entry = $.grep(files, function(e){ return e.id==id});
-				if(entry.length>0 && typeof entry[0].tags!=='undefined') {
-					this.files[i]['tags'] = entry[0].tags;
-				}
-				else {
-					this.files[i]['tags'] = {};
+			if(OCA.Meta_data.App.tag_semaphore && !OCA.Meta_data.App.previous_tag_fileids.equals(fileids)){
+				getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(data){
+					files = data.files;
+					OCA.Meta_data.App.tag_semaphore = true;
+					OCA.Meta_data.App.previous_tag_fileids = fileids;
+				});
+				for(var i=0; i<this.files.length; i++){
+					var id = this.files[i]['id'];
+					var entry = $.grep(files, function(e){ return e.id==id});
+					if(entry.length>0 && typeof entry[0].tags!=='undefined') {
+						this.files[i]['tags'] = entry[0].tags;
+					}
+					else {
+						this.files[i]['tags'] = {};
+					}
 				}
 			}
 			return  oldnextPage.apply(this,arguments);
@@ -272,7 +315,7 @@ function colorTranslate(color){
  * This function shortens the file name to make room for the tags
  */
 function start_and_end(str, element) {
-  if(str.length > 24 ){
+  if($('.filetags-wrap:visible').length && str.length > 24 ){
 	return str.substr(0, 10) + '...' + str.substr(str.length-8, str.length);
   } else {
 	return str;

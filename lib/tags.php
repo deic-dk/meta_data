@@ -550,23 +550,47 @@ class Tags {
 		return $ret;
 	}
 	
-	public static function searchMetadata($val, $userid, $tagid='', $keyid='') {
+	public static function searchMetadata($val, $userid, $tagid='', $keyid='', $keyvals=[]) {
+		$result = array();
 		if(empty($tagid) && empty($keyid)){
-			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
-			$args = array($val);
+			if(empty($val)){
+				$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE TRUE";
+				$args = array();
+			}
+			else{
+				$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ?";
+				$args = array('%'.$val.'%');
+			}
 		}
 		elseif(!empty($tagid) && empty($keyid)){
 			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND tagid = ?";
-			$args = array($val, $tagid);
+			$args = array('%'.$val.'%', $tagid);
 		}
 		elseif(empty($tagid) &&! empty($keyid)){
 			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND keyid = ?";
-			$args = array($val, $keyid);
+			$args = array('%'.$val.'%', $keyid);
 		}
 		else{
 			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND tagid = ? AND keyid = ?";
-			$args = array($val, $tagid, $keyid);
+			$args = array('%'.$val.'%', $tagid, $keyid);
 		}
+		if(!empty($tagid) && !empty($keyvals)){
+			$sql .= " AND tagid LIKE ?";
+			$args[] = $tagid;
+			foreach($keyvals as $key=>$val){
+				$keys = self::searchKey($tagid, $key, $userid);
+				if(empty($keys)){
+					continue;
+				}
+				if(sizeof($keys)>1){
+					\OCP\Util::writeLog('meta_data', 'WARNING: multiple key matches for key '.$key.', tag '.$tagid, \OC_Log::INFO);
+				}
+				$sql .= " AND keyid LIKE ? AND value LIKE ?";
+				$args[] = $keys[0]['id'];
+				$args[] = $val;
+			}
+		}
+		\OCP\Util::writeLog('meta_data', 'SQL: '.$sql.' --> '.implode(' // ', $args), \OC_Log::WARN);
 		$query = \OCP\DB::prepare($sql);
 		$output = $query->execute($args);
 		if($output->rowCount() > 0){
@@ -688,8 +712,11 @@ class Tags {
 		//return $result;
 		return $files;
 	}
+	
+	public static $keyArr;
 
-	public static function getTaggedFiles($tagid, $userid = null, $sortAttribute = '', $sortDescending = false){
+	public static function getTaggedFiles($tagid, $userid = null,
+			$sortAttribute = '', $sortDescending = false, $keyVals = []){
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
 		$storage = \OC\Files\Filesystem::getStorage('/');
@@ -701,9 +728,29 @@ class Tags {
 				$storage = \OCP\Files::getStorage('user_group_admin');
 				$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			}
-			if(!empty($info)){
-				$results[] = $info;
+			$badMatch = false;
+			if(!empty($info) && !empty($keyVals)){
+				$fileKeyVals = self::dbLoadFileKeys($info['fileid'], $tagid);
+				$badMatch = false;
+				foreach($keyVals as $keyName=>$val){
+					Tags::$keyArr = self::searchKey($tagid, $keyName, $userid);
+					$fileValArr = array_values(array_filter($fileKeyVals,
+							function($row){return $row['keyid']==Tags::$keyArr[0]['id'];
+					}));
+					$fileVal = empty($fileValArr)?'':$fileValArr[0]['value'];
+					\OCP\Util::writeLog('meta_data', 'Matching key: '.Tags::$keyArr[0]['id'].'-->'.
+							$val.'<->'.$fileVal, \OC_Log::WARN);
+					if(!empty(Tags::$keyArr) && !empty(Tags::$keyArr[0]['id']) &&
+							$val != $fileVal){
+						$badMatch = true;
+						break;
+					}
+				}
 			}
+			if(empty($info) || $badMatch){
+				continue;
+			}
+			$results[] = $info;
 		}
 		if($sortAttribute !== '') {
 			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);

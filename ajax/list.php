@@ -12,12 +12,13 @@ $tagid = isset( $_GET['tagid'] ) ? $_GET['tagid'] : '';
 $dir = isset( $_GET['dir'] ) ? $_GET['dir'] : '';
 $sortAttribute = isset( $_GET['sort'] ) ? $_GET['sort'] : 'name';
 $sortDescending = isset( $_GET['sortdirection'] ) ? ($_GET['sortdirection'] === 'desc') : false;
+$keyVals = isset( $_GET['keyvals'] ) ? $_GET['keyvals'] : [];
 $data = array();
 
 $user = \OCP\USER::getUser();
 // make filelist
 try{
-	$files = \OCA\Meta_data\Tags::getTaggedFiles($tagid, $user, $sortAttribute, $sortDescending);	
+	$files = \OCA\Meta_data\Tags::getTaggedFiles($tagid, $user, $sortAttribute, $sortDescending, $keyVals);	
 }
 catch(Exception $e){
 	header("HTTP/1.0 404 Not Found");
