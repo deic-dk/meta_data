@@ -138,13 +138,14 @@ class Metadata extends \OC_Search_Provider {
 			$result['text']  = "<a class='label outline' href='".$tagLink."'><i class='icon-tag'></i>".
 				$tagInfo['name']."</a>".(empty($keyInfo)?'':$keyInfo['name']."=".$tagData['value']);
 			$result['color'] = $tagInfo['color'];
+			$path = preg_replace('|^files/|', '/', $fileInfo['path']);
 			$result['link'] = \OCP\Util::linkTo(
 				'files',
 				'index.php',
-				array('dir' => $fileInfo['path'], 'file' => $fileInfo['name'])
+				array('dir' => $path, 'file' => $fileInfo['name'])
 			);
 			$result['permissions'] = $fileInfo['permissions'];
-			$result['path'] = $fileInfo['path'];
+			$result['path'] = $path;
 			$result['modified'] = $fileInfo['mtime'];
 			$result['mime_type'] = $fileInfo['mimetype'];
 			$results[] = $result;
