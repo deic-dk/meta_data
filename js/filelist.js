@@ -93,6 +93,9 @@ $(document).ready(function() {
 		
 		_createRow: function(fileData) {
 			var tr = FileList.oldCreateRow.apply(this, arguments);
+			if(typeof OCA.Meta_data.App.tag_semaphore!=='undefined'){
+				return tr;
+			};
 			return OCA.Meta_data.App.newCreateRow(fileData, tr);
 		}
 		

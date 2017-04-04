@@ -50,6 +50,7 @@ function updateTagsView(sortValue, direction){
 			stags = 0;
 		}
 		ptags = ntags - stags;
+		$('tfoot .summary:visible').remove();
 		$('tfoot').append('\
 			<tr class="summary text-sm">\
 			<td><span class="info">'+ptags+' personal tags / '+stags+' tags shared with you</span></td>\
