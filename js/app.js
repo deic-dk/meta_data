@@ -201,7 +201,7 @@ OCA.Meta_data.App = {
 			tr.find('div.filelink-wrap').removeClass('col-xs-8').addClass('col-xs-4');
 			var width = tr.find('div.filelink-wrap').width();
 			var filename = tr.find('span.innernametext').html();
-			tr.find('span.innernametext').html(start_and_end( filename, tr.find('div.filelink-wrap')));
+			tr.find('span.innernametext').html(start_and_end( filename, tr));
 	}
 	tr.find('.more-tags').tipsy({gravity:'s',fade:true});
 	// Support sharding
@@ -314,12 +314,13 @@ function colorTranslate(color){
 /*
  * This function shortens the file name to make room for the tags
  */
-function start_and_end(str, element) {
-  if($('.filetags-wrap:visible').length && str.length > 24 ){
-	return str.substr(0, 10) + '...' + str.substr(str.length-8, str.length);
-  } else {
-	return str;
-  }
+function start_and_end(str, tr) {
+	if($('#body-user:visible').length && tr.find('.filetags-wrap:visible').length && str.length > 24 ){
+		return str.substr(0, 10) + '...' + str.substr(str.length-8, str.length);
+	}
+	else {
+		return str;
+	}
 }
 
 /*
@@ -720,7 +721,7 @@ $(document).ready(function() {
   /*
    * This next block of code is for deleting tags from a file
    */
-  $('tbody').on('mouseenter', 'tr td div.row div.filetags-wrap span[class^=label]', function(){
+  $('#body-user tbody').on('mouseenter', 'tr td div.row div.filetags-wrap span[class^=label]', function(){
   	if($('.nav-sidebar li[data-id="sharing_in"] a.active').length){
   		return false;
   	}
@@ -731,7 +732,7 @@ $(document).ready(function() {
 		$(this).children('span.deletetag').hide();
   });
 
-  $('tbody').on('click', 'span.deletetag', function(e){
+  $('#body-user tbody').on('click', 'span.deletetag', function(e){
 		e.stopPropagation();
 		var tagid = $(this).parent('span').attr('data-tag');
 		var fileid = $(this).parent('span').parent('div').parent('div').parent('td').parent('tr').attr('data-id');
@@ -759,7 +760,7 @@ $(document).ready(function() {
   /*
    * This next block of code is for entering the meta-data editor
    */
-	$('tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
+	$('#body-user tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
 		if($('.ui-dialog').length>0){
 			return false;
 		}

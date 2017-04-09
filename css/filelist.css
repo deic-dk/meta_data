@@ -20,7 +20,7 @@ span.tagtext {
 		display: inline-block;
 }
 
-span.label {
+#body-user span.label {
 		cursor: pointer;
 }
 
