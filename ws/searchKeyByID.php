@@ -29,7 +29,7 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 	exit;
 }
 
-$keyid = isset($_GET['tagid'])?$_GET['keyid']:null;
+$keyid = isset($_GET['keyid'])?$_GET['keyid']:null;
 
 $keys = \OCA\Meta_data\Tags::dbSearchKeyByID($keyid);
 
