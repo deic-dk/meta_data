@@ -22,7 +22,8 @@ OCP\JSON::checkLoggedIn();
 $userServerAccess = \OCA\FilesSharding\Lib::getUserServerAccess();
 // Block all access if account is locked on server
 if($ok && \OCP\App::isEnabled('files_sharding') &&
-		$userServerAccess!=\OCA\FilesSharding\Lib::$USER_ACCESS_ALL){
+		$userServerAccess!=\OCA\FilesSharding\Lib::$USER_ACCESS_ALL &&
+		$userServerAccess!=\OCA\FilesSharding\Lib::$USER_ACCESS_READ_ONLY){
 	$ok = false;
 }
 
