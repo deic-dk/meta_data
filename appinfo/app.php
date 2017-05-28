@@ -23,7 +23,8 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 	
 
 	if(\OCP\User::isLoggedIn()){
-		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
+		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false &&
+			strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false){
 			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false ||
 					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files_")===false &&
 					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files")!==false &&
@@ -46,10 +47,12 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 				);
 			}
 		}
-		OCP\Util::addScript('meta_data', 'fileactions');
-		OCP\Util::addScript('meta_data', 'app');
-		OCP\Util::addScript('meta_data', 'dropdown');
-		OCP\Util::addStyle('meta_data', 'filelist');
+		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false){
+			OCP\Util::addScript('meta_data', 'fileactions');
+			OCP\Util::addScript('meta_data', 'app');
+			OCP\Util::addScript('meta_data', 'dropdown');
+			OCP\Util::addStyle('meta_data', 'filelist');
+		}
 	}
 	
 	\OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\meta_data\hooks', 'deleteFile');

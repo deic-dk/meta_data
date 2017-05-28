@@ -89,6 +89,9 @@ OCA.Meta_data.App = {
 		if(scanFiles.scanning) {
 			return false;// Workaround to prevent additional http request block scanning feedback
 		}
+		if(getGetParam('view')=='trashbin'){
+			return false;
+		}
   	if($('#dropdown').length>0){
 			$("#dropdown").slideUp(200, function(){ $(this).remove();});
 			$('tr').removeClass('mouseOver');
@@ -244,6 +247,9 @@ OCA.Meta_data.App = {
 		OCA.Meta_data.App.previous_tag_fileids = [];
 		var oldnextPage = filelist.prototype._nextPage;
 		filelist.prototype._nextPage = function(animate) {
+			if(getGetParam('view')=='trashbin'){
+				return  oldnextPage.apply(this,arguments);
+			}
 			var getfiletags = function(data, dir, dirowner, fileowners, callback) {
 				OCA.Meta_data.App.tag_semaphore = false;
 				$.ajax({
@@ -714,7 +720,8 @@ $(document).ready(function() {
 		OCA.Meta_data.App.removeTaggedFiles();
 	});
 
-	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files && OCA.Files.FileList){
+	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files &&
+			OCA.Files.FileList && getGetParam('view')!='trashbin'){
 		OCA.Meta_data.App.modifyFilelist();
 	}
 
