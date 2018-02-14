@@ -24,6 +24,7 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 
 	if(\OCP\User::isLoggedIn()){
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false &&
+			strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin/")===false &&
 			strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false){
 			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false ||
 					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files_")===false &&
