@@ -26,7 +26,7 @@ function updateTagsView(sortValue, direction){
 			total+=value.size;
 		});
 		}
-		$('tr.shared_tag').first().before('<tr class="tag_separator"><td colspan=5>Shared tags</td></tr>');
+		$('tr.shared_tag').first().before('<tr class="tag_separator"><td colspan=6>'+t('meta_data', 'Shared tags')+'</td></tr>');
 		$('tbody#fileList tr td.color').hover(
 			function(){
 				if($(this).parents('tr').attr('data-tag-owner')){
@@ -53,7 +53,7 @@ function updateTagsView(sortValue, direction){
 		$('tfoot .summary:visible').remove();
 		$('tfoot').append('\
 			<tr class="summary text-sm">\
-			<td><span class="info">'+ptags+' personal tags / '+stags+' tags shared with you</span></td>\
+			<td><span class="info">'+ptags+' '+t('meta_data', 'personal tags')+' /  '+stags+' '+t('meta_data', 'tags shared with me')+'</span></td>\
 			<td></td>\
 			<td></td>\
 			<td class="filesize">'+total+' files</td>\
@@ -100,8 +100,7 @@ function addTagRow(value){
 			<td class="display"><input type="checkbox" name="display"> </td>\
 			<td class="public"><input type="checkbox" name="public"> </td>\
 			<td class="taggedfiles"><a href="/index.php/apps/files/?dir=%2F&view=tag-'+value.id+'" style="text-decoration:none">'+(typeof value.size !== 'undefined'?value.size:0)+'</a></td>\
-			<td><a class="action action-delete icon icon-trash-empty" style="color:#c5c5c5;font-size:16px;background-image:none" data-action="Delete" href="#"></a>\
-			</td>\
+			<td><a class="action action-delete icon icon-trash-empty" style="color:#c5c5c5;font-size:16px;background-image:none" data-action="Delete" href="#"></a></td>\
 		</tr>\
 		');
 	$('tbody#fileList tr[data-id='+value.id+'] div.'+value.color).addClass('border');
@@ -409,16 +408,16 @@ $(document).ready(function() {
 		var owner = $(this).parents('tr').attr('data-tag-owner');
 		
 		var html = $('<div><span id="tagid" data-id="'+tagid+'" data-name="'+tagname+'">\
-				<h3 class="tagname">Tag name: <input class="edittag" type="text" value="'+tagname+'" /></h3>\
-				<h3 class="tagdesc">Tag description: </h3><textarea class="editdesc">'+(typeof tagdesc!=='undefined'?tagdesc:'')+'</textarea></span>\
-				<h3>Meta-data fields:</h3><a class="oc-dialog-close close svg"></a>\
+				<h3 class="tagname">'+t('meta_data', 'Tag name')+': <input class="edittag" type="text" value="'+tagname+'" /></h3>\
+				<h3 class="tagdesc">'+t('meta_data', 'Tag description')+': </h3><textarea class="editdesc">'+(typeof tagdesc!=='undefined'?tagdesc:'')+'</textarea></span>\
+				<h3>'+t('meta_data', 'Metadata fields')+':</h3><a class="oc-dialog-close close svg"></a>\
 				<div id="meta_data_container"><div id="emptysearch">No metadata defined</div><ul id="meta_data_keys"></ul></div>\
-				<span class="new_field"><button id="add_key" class="btn btn-flat btn-default">Add field</button></span>\
-				<span class="new_field_filler">&nbsp;or&nbsp;</span>\
-				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="Select tag to import from" autocomplete="off">\
+				<span class="new_field"><button id="add_key" class="btn btn-flat btn-default">'+t('meta_data', 'Add field')+'</button></span>\
+				<span class="new_field_filler">&nbsp;'+t('meta_data', 'or')+'&nbsp;</span>\
+				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="'+t('meta_data', 'Select tag to import from')+'" autocomplete="off">\
 				<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>\
-			<div class="schema_editor_buttons"><button id="popup_ok" class="btn btn-flat btn-primary">OK</button>&nbsp;\
-			<button id="popup_cancel" class="btn btn-flat btn-default">Cancel</button></div></div>');
+			<div class="schema_editor_buttons"><button id="popup_ok" class="btn btn-flat btn-primary">'+t('meta_data', 'OK')+'</button>&nbsp;\
+			<button id="popup_cancel" class="btn btn-flat btn-default">'+t('meta_data', 'Cancel')+'</button></div></div>');
 		$(html).dialog({
 			dialogClass: "oc-dialog notitle",
 			resizable: true,

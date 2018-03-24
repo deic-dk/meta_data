@@ -16,7 +16,7 @@ function addNewDropDown(file){
 		url: OC.filePath('meta_data', 'ajax', 'getTags.php'),
 		data: {sortValue: 'color', direction: 'asc', fileId: file},
 		success: function(response) {
-			$('#tag_action').html('<div id="newTag"><input type=\"text\" value=\"\" placeholder=\"new tag\"></div><p>');
+			$('#tag_action').html('<div id="newTag"><input type="text" value="" placeholder="'+t('meta_data', 'new tag')+'"></div><p>');
 			if(response){
 				var containerWidth = $('#tag_action').width();
 				var tagWidth = 0;

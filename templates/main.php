@@ -1,4 +1,5 @@
 
+
 <div id="app-content" style="transition: all 0.3s ease 0s;">
 <div id="app-content-meta_data" class="viewcontainer">
 <div id="controls">
@@ -7,7 +8,7 @@
       <div class="actions creatable">
         <div id="addtag" original-title="">
           <a class="btn btn-primary btn-flat" href="#"><i class="icon-tag"></i>
-             New tag
+             <?php p($l->t("New tag")); ?>
           </a>
         </div>
       </div>
@@ -15,7 +16,7 @@
   </div>
   <div id="newtag" class="panel-heading">
     <span class="newtag-edit">
-	  <input class="edittag" type="text" placeholder="New tag">
+	  <input class="edittag" type="text" placeholder="<?php p($l->t("New tag")); ?>">
 	  <div class="color-box color-1 border"></div>
 	  <div class="color-box color-2"></div>
 	  <div class="color-box color-3"></div>
@@ -23,8 +24,8 @@
 	  <div class="color-box color-5"></div>
 	  <div class="color-box color-6"></div>
 	    <span class="newtag-buttons">
-					<a class="newtag-add btn btn-default btn-flat" href="#">Add</a>&nbsp;
-					<a class="newtag-clear btn btn-default btn-flat" href="#">Cancel</a>
+					<a class="newtag-add btn btn-default btn-flat" href="#"><?php p($l->t("Add")); ?></a>&nbsp;
+					<a class="newtag-clear btn btn-default btn-flat" href="#"><?php p($l->t("Cancel")); ?></a>
 	    </span>
       </span>
   </div>
@@ -35,33 +36,35 @@
 <tr>
 	<th id="headerName" class="column-name">
 		<a class="name sort columntitle" data-sort="name">
-			<span>Name</span>
+			<span><?php p($l->t("Name")); ?></span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerColor" class="column-color">
 		<a class="color sort columntitle" data-sort="color">
-			<span>Color</span>
+			<span><?php p($l->t("Color")); ?></span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerDisplay" class="column-display">
 		<a class="display sort columntitle" data-sort="display">
-			<span>On left menu</span>
+			<span><?php p($l->t("On left menu")); ?></span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerPublic" class="column-public">
 		<a class="display sort columntitle" data-sort="public">
-			<span>Public</span>
+			<span><?php p($l->t("Public")); ?></span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
 	</th>
 	<th id="headerSize" class="column-size">
 		<a class="size sort columntitle" data-sort="size">
-			<span>Files</span>
+			<span><?php p($l->t("Files")); ?></span>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
+	</th>
+	<th>
 	</th>
 </tr>
 </thead>

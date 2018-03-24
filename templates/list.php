@@ -15,7 +15,7 @@
 			<label for="select_all_files"></label>
 		  </div>
 		  <div class="col-xs-3">
-			<a class="name sort columntitle" data-sort="name"><span class="text-semibold"><?php p($l->t( 'Name' )); ?></span><span class="sort-indicator"></span></a>
+			<a class="name sort columntitle" data-sort="name"><span class="text-semibold"><?php p($l->t('Name')); ?></span><span class="sort-indicator"></span></a>
 		  </div>
 		  <div class="col-xs-5 col-sm-5 text-right">
 			<span id="" class="selectedActions">
