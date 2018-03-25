@@ -19,6 +19,11 @@ $TRANSLATIONS = array(
 		"OK" => "OK",
 		"or" => "eller",
 		"Select tag to import from" => "Vælg mærke at importere fra",
-		"tags shared with me" => "mærker delt med mig"
+		"tags shared with me" => "mærker delt med mig",
+		"New key name" => "Ny attribut",
+		"Non-string types" => "Alternativer til tekst-type",
+		"Controlled" => "Kontrolleret",
+		"Type" => "Type",
+		"No metadata defined" => "Ingen metadata endnu"
 );
 $PLURAL_FORMS = "nplurals=2; plural=(n != 1);";

@@ -411,7 +411,7 @@ $(document).ready(function() {
 				<h3 class="tagname">'+t('meta_data', 'Tag name')+': <input class="edittag" type="text" value="'+tagname+'" /></h3>\
 				<h3 class="tagdesc">'+t('meta_data', 'Tag description')+': </h3><textarea class="editdesc">'+(typeof tagdesc!=='undefined'?tagdesc:'')+'</textarea></span>\
 				<h3>'+t('meta_data', 'Metadata fields')+':</h3><a class="oc-dialog-close close svg"></a>\
-				<div id="meta_data_container"><div id="emptysearch">No metadata defined</div><ul id="meta_data_keys"></ul></div>\
+				<div id="meta_data_container"><div id="emptysearch">'+t('meta_data', 'No metadata defined')+'</div><ul id="meta_data_keys"></ul></div>\
 				<span class="new_field"><button id="add_key" class="btn btn-flat btn-default">'+t('meta_data', 'Add field')+'</button></span>\
 				<span class="new_field_filler">&nbsp;'+t('meta_data', 'or')+'&nbsp;</span>\
 				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="'+t('meta_data', 'Select tag to import from')+'" autocomplete="off">\

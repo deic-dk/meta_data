@@ -555,14 +555,14 @@ $(this).click(function(event) {
 
 function newEntry(entry, readonly, newkey){
 	entry = typeof entry !== 'undefined' ? entry : null;
-	optionSelect = '<select title="Special options (usually leave empty)" class="type"><option selected value="">Select option</option>\
-		<option value="controlled">controlled</option><option value="json">json</option></select>\
+	optionSelect = '<select title="'+t('meta_data', 'Non-string types')+'" class="type"><option selected value="">'+t('meta_data', 'Type')+'</option>\
+		<option value="controlled">'+t('meta_data', 'Controlled')+'</option><option value="json">JSON</option></select>\
 	<input placeholder="value1, value2, ..." title="Comma separated list of allowed values" class="controlled_values" type="text" value="" />'
 	if(!entry){
 		var ret = $('\
 				<li class="new">\
 					<span class="keyname hidden"></span>\
-					<input class="edit" type="text" placeholder="New key name" value="" />'+
+					<input class="edit" type="text" placeholder="'+t('meta_data', 'New key name')+'" value="" />'+
 					'<input class="value hidden" type="text" value="" />'+
 					optionSelect+
 					(readonly?'':'<span class="deletekey">&#10006;</span>')+
