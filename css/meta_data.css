@@ -265,7 +265,7 @@ span[data-tag]:last-of-type{
 	width: 460px;
 }
 
-#app-content-meta_data table th#headerSize, th#headerDisplay {
+#app-content-meta_data table th#headerSize, #app-content-meta_data table th#headerDisplay {
     text-align: center;
 }
 
