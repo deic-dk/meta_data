@@ -375,7 +375,7 @@ class Tags {
 		}
 		else{
 			$idarray = array();
-			foreach($tagids as $n=>$keyid){
+			foreach($keyids as $n=>$keyid){
 				$idarray['keyid['.$n.']'] = $keyid;
 			}
 			$result = \OCA\FilesSharding\Lib::ws('searchKeysByIDs', $idarray, true, true, null, 'meta_data');
