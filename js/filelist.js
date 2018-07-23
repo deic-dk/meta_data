@@ -38,7 +38,7 @@ $(document).ready(function() {
 		
 		appName: 'Meta_data',
 
-		reload: function() {
+		reload: function(_id, _owner, _group, _errorCallback) {
 			if(this.tagid) {
 				this._selectedFiles = {};
 				this._selectionSummary.clear();
@@ -64,7 +64,9 @@ $(document).ready(function() {
 					});
 				}
 				var callBack = this.reloadCallback.bind(this);
-				return this._reloadCall.then(callBack, callBack);
+				var errorCallback = (typeof _errorCallback !== 'undefined'?_errorCallback:function(){return true;});
+				return this._reloadCall.then(function(response){return callBack(response, errorCallback);},
+				 function(response){return callBack(response, errorCallback);});
 			}
 			else {
 				return OCA.Files.FileList.prototype.reload.apply(this, arguments);
