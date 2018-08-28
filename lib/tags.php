@@ -694,8 +694,9 @@ class Tags {
 			$data = $fileInfo->getData();
 			$data['type'] = $fileInfo->getType();
 			//$data['storage'] = $fileInfo->getStorage();
-			$data['path'] = $fileInfo->getpath();
-			$data['internalPath'] = $fileInfo->getInternalPath();
+			//$data['path'] = $fileInfo->getPath();
+			$data['path'] = $fileInfo->getInternalPath();
+			//$data['internalPath'] = $fileInfo->getInternalPath();
 			$tagArr = self::dbGetFileTags(array($row['fileid']));
 			$data['tags'] = $tagArr[$row['fileid']];
 			if(!empty($group)){
