@@ -1,5 +1,5 @@
 <div id="controls" style="height:63px;">
-  <input type="hidden" name="permissions" value="" id="permissions">
+  <input type="hidden" name="permissions" value="" id="permissions"/>
 </div>
 
 <div id="emptycontent" class="hidden"></div>
