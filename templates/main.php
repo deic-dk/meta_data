@@ -16,7 +16,7 @@
   </div>
   <div id="newtag" class="panel-heading">
     <span class="newtag-edit">
-	  <input class="edittag" type="text" placeholder="<?php p($l->t("New tag")); ?>">
+	  <input class="edittag" type="text" placeholder="<?php p($l->t("New tag")); ?>"/>
 	  <div class="color-box color-1 border"></div>
 	  <div class="color-box color-2"></div>
 	  <div class="color-box color-3"></div>
