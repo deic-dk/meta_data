@@ -45,6 +45,8 @@ foreach ($data['files'] as $i => $file){
 	if(!empty($tags)){
 		usort($tags,build_sorter_desc('color')); 
 		$data['files'][$i]['tags'] = $tags;
+		// preview.php expects path to be w/o user/files/
+		$data['files'][$i]['path'] = preg_replace("|^$user/files/|", '', $data['files'][$i]['path']);
 	}
 	
 	$fileData = $files[$i]->getData();

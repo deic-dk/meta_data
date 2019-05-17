@@ -374,8 +374,10 @@ function addTagToSidebar(id, name, color){
 /*
  * This function updates the tags on a single file
  */
-function updateFileListTags(tr, showall){
-	var width = 20;
+function updateFileListTags(tr, showall, width){
+	if(typeof width==='undefined'){
+		width = 20;
+	}
 	if(tr.find('.filetags-wrap').length !=0){
 		tr.find('.filetags-wrap').empty();
 	}
