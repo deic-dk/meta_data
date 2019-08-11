@@ -16,13 +16,39 @@ OCP\JSON::checkLoggedIn();
 $key = isset( $_GET['sortValue'] ) ? $_GET['sortValue'] : 'color';
 $dir = isset( $_GET['direction'] ) ? $_GET['direction'] : '';
 $fileId = isset( $_GET['fileId'] ) ? $_GET['fileId'] : null;
+$onlyFileId = isset( $_GET['onlyFileId'] ) ? $_GET['onlyFileId'] : null;
 $name = isset( $_GET['name'] ) ? $_GET['name'] : '';
 
 $allTags = \OCA\Meta_data\Tags::searchTags($name.'%',\OCP\User::getUser());
 
 // If $fileId is set, we exclude tags of the given file ids
 $ii = 0;
-if($fileId){
+if($onlyFileId){
+	$onlyFileIds = explode(':', $onlyFileId);
+	$tags = array();
+	$fileTagsArr = \OCA\meta_data\Tags::getFileTags($onlyFileIds);
+	foreach($onlyFileIds as $fileid){
+		\OCP\Util::writeLog('meta_data', 'File tags: '.serialize(', ', $fileTagsArr[$fileid]), \OC_Log::WARN);
+		$fileTags = isset($fileTagsArr[$fileid])?$fileTagsArr[$fileid]:[];
+		if(empty($filesTags)){
+			$filesTags = $fileTags;
+		}
+		else{
+			$filesTags = array_intersect($filesTags, $fileTags);
+		}
+	}
+	foreach($allTags as $i => $tag){
+		$fileTags = isset($fileTagsArr[$fileid])?$fileTagsArr[$fileid]:[];
+		foreach($fileTags as $fileTag){
+			if($fileTag==$tag['id']){
+				$tags[$ii] = $tag;
+				++$ii;
+				
+			}
+		}
+	}
+}
+elseif($fileId){
 	// This is somewhat hacky: if $fileId is of the form a:b:c, it's three ids.
 	if($fileId && strpos($fileId, ':')>0){
 		$fileIds = explode(':', $fileId);

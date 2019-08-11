@@ -250,7 +250,7 @@ OCA.Meta_data.App = {
 			if(getGetParam('view')=='trashbin'){
 				return  oldnextPage.apply(this,arguments);
 			}
-			var getfiletags = function(data, dir, dirowner, fileowners, callback) {
+			var getfiletags = function(data, oldfiles, dir, dirowner, fileowners, callback) {
 				OCA.Meta_data.App.tag_semaphore = false;
 				$.ajax({
 					async: false,
@@ -262,12 +262,12 @@ OCA.Meta_data.App = {
 						owner: dirowner,
 						fileowners: fileowners
 					},
-					success: function(data){
-						callback(data);
+					success: function(ret){
+						callback(oldfiles, ret);
 					}
 				});
 			}
-			var files;
+			var newfiles;
 			var fileids = this.files.map(function(obj){ return {id: obj.id};});
 			var owner = $('.crumb.last a').length>0?OCA.Meta_data.App.getParam($('.crumb.last a').attr('href'), 'owner'):'';
 			var fileowners = '';
@@ -275,21 +275,21 @@ OCA.Meta_data.App = {
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
 			}
 			if(OCA.Meta_data.App.tag_semaphore && !OCA.Meta_data.App.previous_tag_fileids.equals(fileids)){
-				getfiletags(fileids, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(data){
-					files = data.files;
+				getfiletags(fileids, this.files, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(oldfiles, ret){
+					newfiles = ret.files;
 					OCA.Meta_data.App.tag_semaphore = true;
 					OCA.Meta_data.App.previous_tag_fileids = fileids;
+					for(var i=0; i<oldfiles.length; i++){
+						var id = oldfiles[i]['id'];
+						var entry = $.grep(newfiles, function(e){ return e.id==id});
+						if(entry.length>0 && typeof entry[0].tags!=='undefined') {
+							oldfiles[i]['tags'] = entry[0].tags;
+						}
+						else {
+							oldfiles[i]['tags'] = {};
+						}
+					}
 				});
-				for(var i=0; i<this.files.length; i++){
-					var id = this.files[i]['id'];
-					var entry = $.grep(files, function(e){ return e.id==id});
-					if(entry.length>0 && typeof entry[0].tags!=='undefined') {
-						this.files[i]['tags'] = entry[0].tags;
-					}
-					else {
-						this.files[i]['tags'] = {};
-					}
-				}
 			}
 			return  oldnextPage.apply(this,arguments);
 		}
