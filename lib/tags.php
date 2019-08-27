@@ -1018,7 +1018,7 @@ class Tags {
 			$result = \OCA\FilesSharding\Lib::ws('newKey', array(
 					'tagid'=>$tagid, 'keyname'=>$keyname, 'type'=>$type,
 					'controlledvalues'=>$controlledvalues),
-					false, true, null, 'meta_data');
+					false, true, null, 'meta_data', true);
 		}
 		return $result;
 	}
@@ -1058,7 +1058,7 @@ class Tags {
 			$result = \OCA\FilesSharding\Lib::ws('alterKey', array('userid'=>$userid,
 					'tagid'=>$tagid,  'keyid'=>$keyid, 'keyname'=>$keyname,
 					'controlledvalues'=>$controlledvalues, 'type'=>$type),
-					false, true, null, 'meta_data');
+					false, true, null, 'meta_data', true);
 		}
 		return $result;
 	}
@@ -1175,7 +1175,7 @@ class Tags {
 				$sql = 'UPDATE *PREFIX*meta_data_docKeys SET value=? WHERE fileid=? AND keyid=? AND tagid=?';
 				$args = array($value, (int) $fileid, $keyid, $tagid);
 				$query = \OCP\DB::prepare($sql);
-				\OCP\Util::writeLog('meta_data', 'ARGS1: '.implode('#', $args).'-->'.sizeof($args), \OC_Log::WARN);
+				\OCP\Util::writeLog('meta_data', 'ARGS1: '.$value.'-->'.implode('#', $args).'-->'.sizeof($args), \OC_Log::WARN);
 				$resRsrc = $query->execute($args);
 				if($resRsrc){
 					$res[] = array('tagid'=>$tagid, 'keyid'=>$keyid, 'fileid'=>$fileid, 'value'=>$value);
@@ -1349,6 +1349,57 @@ class Tags {
 				(isset($fileTag->{'keyvals'})?$fileTag->{'keyvals'}:array())));
 		}
 		return $fileTags1;
+	}
+	
+	// https://stackoverflow.com/questions/34956163/htmlentites-not-working-for-emoji
+	public static function entities( $string ) {
+		$stringBuilder = "";
+		$offset = 0;
+		
+		if ( empty( $string ) ) {
+			return "";
+		}
+		
+		while ( $offset >= 0 ) {
+			$decValue = self::ordutf8( $string, $offset );
+			$char = self::unichr($decValue);
+			
+			$htmlEntited = htmlentities( $char );
+			if( $char != $htmlEntited ){
+				$stringBuilder .= $htmlEntited;
+			} elseif( $decValue >= 128 ){
+				$stringBuilder .= "&#" . $decValue . ";";
+			} else {
+				$stringBuilder .= $char;
+			}
+		}
+		
+		return $stringBuilder;
+	}
+	
+	// source - http://php.net/manual/en/function.ord.php#109812
+	private static function ordutf8($string, &$offset) {
+		$code = ord(substr($string, $offset,1));
+		if ($code >= 128) {        //otherwise 0xxxxxxx
+			if ($code < 224) $bytesnumber = 2;                //110xxxxx
+			else if ($code < 240) $bytesnumber = 3;        //1110xxxx
+			else if ($code < 248) $bytesnumber = 4;    //11110xxx
+			$codetemp = $code - 192 - ($bytesnumber > 2 ? 32 : 0) - ($bytesnumber > 3 ? 16 : 0);
+			for ($i = 2; $i <= $bytesnumber; $i++) {
+				$offset ++;
+				$code2 = ord(substr($string, $offset, 1)) - 128;        //10xxxxxx
+				$codetemp = $codetemp*64 + $code2;
+			}
+			$code = $codetemp;
+		}
+		$offset += 1;
+		if ($offset >= strlen($string)) $offset = -1;
+		return $code;
+	}
+	
+	// source - http://php.net/manual/en/function.chr.php#88611
+	private static function unichr($u) {
+		return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
 	}
 
 }

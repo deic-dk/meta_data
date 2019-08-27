@@ -21,26 +21,25 @@ $name = isset( $_GET['name'] ) ? $_GET['name'] : '';
 
 $allTags = \OCA\Meta_data\Tags::searchTags($name.'%',\OCP\User::getUser());
 
-// If $fileId is set, we exclude tags of the given file ids
 $ii = 0;
+// If $onlyFileId is set, we only include tags of the given file ids
 if($onlyFileId){
 	$onlyFileIds = explode(':', $onlyFileId);
 	$tags = array();
 	$fileTagsArr = \OCA\meta_data\Tags::getFileTags($onlyFileIds);
 	foreach($onlyFileIds as $fileid){
-		\OCP\Util::writeLog('meta_data', 'File tags: '.serialize(', ', $fileTagsArr[$fileid]), \OC_Log::WARN);
 		$fileTags = isset($fileTagsArr[$fileid])?$fileTagsArr[$fileid]:[];
 		if(empty($filesTags)){
 			$filesTags = $fileTags;
 		}
 		else{
-			$filesTags = array_intersect($filesTags, $fileTags);
+			$filesTags = array_merge($filesTags, $fileTags);
 		}
 	}
+	\OCP\Util::writeLog('meta_data', 'File tags : '.serialize($filesTags), \OC_Log::WARN);
 	foreach($allTags as $i => $tag){
-		$fileTags = isset($fileTagsArr[$fileid])?$fileTagsArr[$fileid]:[];
-		foreach($fileTags as $fileTag){
-			if($fileTag==$tag['id']){
+		foreach($filesTags as $fileTag){
+			if($fileTag==$tag['id'] && !in_array($tag, $tags)){
 				$tags[$ii] = $tag;
 				++$ii;
 				
@@ -48,6 +47,7 @@ if($onlyFileId){
 		}
 	}
 }
+// If $fileId is set, we exclude tags of the given file ids
 elseif($fileId){
 	// This is somewhat hacky: if $fileId is of the form a:b:c, it's three ids.
 	if($fileId && strpos($fileId, ':')>0){
@@ -70,13 +70,13 @@ elseif($fileId){
 	$tags = array();
 	foreach($allTags as $i => $tag){
 		$addTag = true;
-		foreach($fileTags as $fileTag){
+		foreach($filesTags as $fileTag){
 			if($fileTag==$tag['id']){
 				$addTag = false;
 				break;
 			}
 		}
-		if($addTag){
+		if($addTag && !in_array($tag, $tags)){
 			$tags[$ii] = $tag;
 			++$ii;
 		}

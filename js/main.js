@@ -465,7 +465,7 @@ $(document).ready(function() {
 		$('#meta_data_keys li:last-child input').focus();
 	});
 
-	$('body').on('focusout', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input.edit', function(){
+	$('body').on('input', 'div.oc-dialog div.ui-dialog-content div#meta_data_container ul#meta_data_keys li input', function(){
 		if(!$(this).parent('li').hasClass('new')){
 			$(this).parent('li').addClass('alt');
 		}

@@ -36,7 +36,7 @@ $controlledvalues = !empty($_GET['controlledvalues'])?$_GET['controlledvalues']:
 
 $ret = \OCA\Meta_data\Tags::dbNewkey($tagid, $keyname, $type, $controlledvalues);
 
-\OCP\Util::writeLog('meta_data', 'New key '.$ret, \OC_Log::WARN);
+\OCP\Util::writeLog('meta_data', 'New key '.$controlledvalues.'-->'.serialize($ret), \OC_Log::WARN);
 
 OCP\JSON::encodedPrint($ret);
 

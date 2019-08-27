@@ -485,6 +485,17 @@ function loadKeys(fileid, tagid, owner){
 		}
 	});
 }
+
+function htmlEncode(value){
+	//create a in-memory div, set it's inner text(which jQuery automatically encodes)
+	//then grab the encoded contents back out. The div never exists on the page.
+	return $('<div/>').text(value).html();
+}
+
+function htmlDecode(value){
+	return $('<div/>').html(value).text();
+}
+
 function loadValues(fileid, file, tagid, owner, callback){
 	$.ajax({
 		url:OC.filePath('meta_data', 'ajax', 'loadValues.php'),
@@ -498,7 +509,7 @@ function loadValues(fileid, file, tagid, owner, callback){
 		success: function(result){
 			if(result['data']){
 				$.each(result['data'], function(i,item){
-					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('.value').val(item['value']);
+					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('.value').first().val(htmlDecode(item['value']));
 				});
 				if(typeof callback!='undefined'){
 					callback(fileid, file);
