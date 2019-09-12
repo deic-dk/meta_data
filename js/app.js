@@ -235,6 +235,8 @@ OCA.Meta_data.App = {
     }
 },
 
+_newfiles: [],
+
   modifyFilelist: function(_filelist) {
   	var filelist;
   	if(typeof _filelist === 'undefined'){
@@ -252,31 +254,35 @@ OCA.Meta_data.App = {
 			}
 			var getfiletags = function(data, oldfiles, dir, dirowner, fileowners, callback) {
 				OCA.Meta_data.App.tag_semaphore = false;
-				$.ajax({
-					async: false,
-					type: "POST",
-					url: OC.linkTo('meta_data','ajax/getFileTags.php'),
-					data: {
-						files: data,
-						dir: dir,
-						owner: dirowner,
-						fileowners: fileowners
-					},
-					success: function(ret){
-						callback(oldfiles, ret);
-					}
-				});
+				if(OCA.Meta_data.App.previous_tag_fileids.equals(fileids)){
+					callback(oldfiles, OCA.Meta_data.App._newfiles);
+				}
+				else{
+					$.ajax({
+						async: false,
+						type: "POST",
+						url: OC.linkTo('meta_data','ajax/getFileTags.php'),
+						data: {
+							files: data,
+							dir: dir,
+							owner: dirowner,
+							fileowners: fileowners
+						},
+						success: function(ret){
+							callback(oldfiles, ret.files);
+						}
+					});
+				}
 			}
-			var newfiles;
 			var fileids = this.files.map(function(obj){ return {id: obj.id};});
 			var owner = $('.crumb.last a').length>0?OCA.Meta_data.App.getParam($('.crumb.last a').attr('href'), 'owner'):'';
 			var fileowners = '';
 			if(typeof owner=='undefined' || owner==''){
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
 			}
-			if(OCA.Meta_data.App.tag_semaphore && !OCA.Meta_data.App.previous_tag_fileids.equals(fileids)){
-				getfiletags(fileids, this.files, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(oldfiles, ret){
-					newfiles = ret.files;
+			if(OCA.Meta_data.App.tag_semaphore){
+				getfiletags(fileids, this.files, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(oldfiles, newfiles){
+					OCA.Meta_data.App._newfiles = newfiles;
 					OCA.Meta_data.App.tag_semaphore = true;
 					OCA.Meta_data.App.previous_tag_fileids = fileids;
 					for(var i=0; i<oldfiles.length; i++){
