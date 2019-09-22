@@ -21,17 +21,17 @@
 		initialize: function(fileActions) {
 			FileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename) {
 				if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
-				if($('#dropdown').length==0){
+				if($('#dropdown.metadata').length==0){
 					var tr = FileList.findFileEl(filename);
 					var itemType = 'file';
 					var itemSource = $(tr).data('id');
-					var html = '<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="tag_action"></div></div>';
+					var html = '<div id="dropdown" class="drop metadata" data-item-type="'+itemType+'" data-item-source="'+itemSource+'"><div id="tag_action"></div></div>';
 					$(html).appendTo( $(tr).find('td.filename') );
 					$(tr).addClass('mouseOver');
 					addNewDropDown(itemSource);
 				}
 				else {
-					$("#dropdown").slideUp(200, function(){ $(this).remove();});
+					$("#dropdown.metadata").slideUp(200, function(){ $(this).remove();});
 					$('tr').removeClass('mouseOver');
 				}
 			});

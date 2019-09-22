@@ -38,15 +38,15 @@ function addNewDropDown(file){
 			$('#tag_action').show();
 		},
 	});
-	$('div#dropdown').on("click", function(e) {
+	$('div#dropdown.metadata').on("click", function(e) {
 		e.stopPropagation();
 	});
-	$('div#dropdown').on("keypress", 'input', function(e){
+	$('div#dropdown.metadata').on("keypress", 'input', function(e){
 		if(e.which == 13){
 			$(this).blur();
 		}
 	});
-	$('div#dropdown').on("focusout", "input", function() {
+	$('div#dropdown.metadata').on("focusout", "input", function() {
 		if($(this).val() != ''){
 			$.ajax({
 				url: OC.filePath('meta_data', 'ajax', 'tagOps.php'),
@@ -67,7 +67,7 @@ function addNewDropDown(file){
 					},
 					type: "POST",
 					success: function(result) {
-						$("#dropdown").remove();
+						$("#dropdown.metadata").remove();
 						$('tr').removeClass('mouseOver');
 						//updateSidebar();
 						for (var i = 0; i < files.length; i++) {
@@ -79,7 +79,7 @@ function addNewDropDown(file){
 			});
 		};
 	});
-	$('div#dropdown').on("click", "div#tag_action span.label" , function() {
+	$('div#dropdown.metadata').on("click", "div#tag_action span.label" , function() {
 		if($(this).attr('id') != "newTag"){
 			var tagid = $(this).parent('span').attr('data-id').split('-');
 			$.ajax({
@@ -92,7 +92,7 @@ function addNewDropDown(file){
 				},
 				type: "POST",
 				success: function(result) {
-					$("#dropdown").remove();
+					$("#dropdown.metadata").remove();
 					$('tr').removeClass('mouseOver');
 					$('a#tag.tag').removeClass('mouseOver');
 					for (var i = 0; i < files.length; i++) {

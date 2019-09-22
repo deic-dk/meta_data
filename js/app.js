@@ -92,8 +92,8 @@ OCA.Meta_data.App = {
 		if(getGetParam('view')=='trashbin'){
 			return false;
 		}
-  	if($('#dropdown').length>0){
-			$("#dropdown").slideUp(200, function(){ $(this).remove();});
+  	if($('#dropdown.metadata').length>0){
+			$("#dropdown.metadata").slideUp(200, function(){ $(this).remove();});
 			$('tr').removeClass('mouseOver');
 			$('a#tag.tag').removeClass('mouseOver');
 		return false;
@@ -119,7 +119,7 @@ OCA.Meta_data.App = {
   		return false;
   	}
 		var html = '\
-			<div id="dropdown" class="drop" data-item-type="'+type+'" data-item-source="'+fileIds.join(':')+'">\
+			<div id="dropdown" class="drop metadata" data-item-type="'+type+'" data-item-source="'+fileIds.join(':')+'">\
 			<div id="tag_action"></div>\
 		</div>\
 		';
@@ -140,12 +140,12 @@ OCA.Meta_data.App = {
 		fileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename,context){
 			// Action to perform when clicked
 			if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
-			if($('#dropdown').length == 0){
+			if($('#dropdown.metadata').length == 0){
 				var tr = context.$file;
 				var itemType = 'file';
 				var itemSource = $(tr).data('id');
 				var html = '\
-								<div id="dropdown" class="drop" data-item-type="'+itemType+'" data-item-source="'+itemSource+'">\
+								<div id="dropdown" class="drop metadata" data-item-type="'+itemType+'" data-item-source="'+itemSource+'">\
 								<div id="tag_action"></div>\
 							</div>\
 							';
@@ -154,7 +154,7 @@ OCA.Meta_data.App = {
 				addNewDropDown(itemSource);
 			}
 			else{
-				$("#dropdown").slideUp(200, function(){ $(this).remove();});
+				$("#dropdown.metadata").slideUp(200, function(){ $(this).remove();});
 				$('tr').removeClass('mouseOver');
 			}
 		});
@@ -564,9 +564,9 @@ function showMetaPopup(fileid, tagid, file, title, callback){
 }
 
 $(this).click(function(event) {
-	if ($('.row #dropdown').has(event.target).length===0 && $('#dropdown').hasClass('drop')) {
-		$('.row #dropdown').hide('blind', function() {
-			$('.row #dropdown').remove();
+	if ($('.row #dropdown.metadata').has(event.target).length===0 && $('#dropdown.metadata').hasClass('drop')) {
+		$('.row #dropdown.metadata').hide('blind', function() {
+			$('.row #dropdown.metadata').remove();
 			$('tr').removeClass('mouseOver');
 		});
 	}
