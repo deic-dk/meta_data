@@ -838,10 +838,10 @@ class Tags {
 		foreach($fileowners as $owner){
 			$servers[] = \OCA\FilesSharding\Lib::getServerForUser($owner, true);
 		}
-		\OCP\Util::writeLog('meta_data', 'SERVERS: '.serialize($fileowners).'-->'.serialize($servers), \OC_Log::WARN);
+		\OCP\Util::writeLog('meta_data', 'SERVERS: '.serialize($fileowners).'-->'.serialize($servers), \OC_Log::INFO);
 		$servers = array_unique($servers);
 		foreach($servers as $server){
-			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, false, true, $server, 'meta_data');
+			$tags = \OCA\FilesSharding\Lib::ws('getFileTags', $idarray, true, true, $server, 'meta_data');
 			\OCP\Util::writeLog('meta_data', 'WS file tags: '.implode(', ', $fileids).'-->'.serialize($result).
 					'-->'.serialize($tags),
 					\OC_Log::WARN);

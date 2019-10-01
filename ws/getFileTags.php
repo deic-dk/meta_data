@@ -29,7 +29,7 @@ if(!OCA\FilesSharding\Lib::checkIP()){
 	exit;
 }
 
-$fileids = isset($_GET['fileid'])?$_GET['fileid']:'';
+$fileids = isset($_POST['fileid'])?$_POST['fileid']:'';
 
 $tags = \OCA\Meta_data\Tags::dbGetFileTags($fileids);
 
