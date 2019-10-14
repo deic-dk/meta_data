@@ -609,7 +609,7 @@ class Tags {
 	public static function getFilesWithMetadata($val, $userid, $tagid='', $keyid=''){
 		$data = self::searchMetadata($val, $userid, $tagid, $keyid);
 		foreach($data as $row){
-			$storage = \OC\Files\Filesystem::getStorage('/');
+			$storage = \OC\Files\Filesystem::getStorage('/'.$userid.'/');
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			if(empty($info)){
 				// TODO: test that this works
@@ -720,9 +720,10 @@ class Tags {
 			$sortAttribute = '', $sortDescending = false, $keyVals = []){
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
-		$storage = \OC\Files\Filesystem::getStorage('/');
+		$user_id = empty($userid)?\OCP\USER::getUser():$userid;
+		$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
 		foreach($data as $row){
-			$storage = \OC\Files\Filesystem::getStorage('/');
+			$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			if(empty($info)){
 				// TODO: test that this works
