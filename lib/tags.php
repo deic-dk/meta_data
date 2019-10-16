@@ -528,9 +528,14 @@ class Tags {
 			if(isset($user_id) && $user_id){
 				self::restoreUser($user_id);
 			}
+			\OCP\Util::writeLog('files_sharding', 'User: '.$userid.', can read file  '.$fileid.'-->'.$path, \OC_Log::WARN);
 			return true;
 		}
-		if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
+		// This is mostly wasted as tagged files will usually be in a shared folder.
+		// I.e. we would have to do a lengthy match of parents with shares - like elsewhere.
+		// Since this is called from the search field in the web interface, priority is
+		// given to speed.
+		/*if(!\OCP\App::isEnabled('files_sharding') || \OCA\FilesSharding\Lib::isMaster()){
 			$shares = \OCP\Share::getItemsSharedWith('file');
 		}
 		else{
@@ -543,11 +548,11 @@ class Tags {
 				$ret = true;
 				break;
 			}
-		}
+		}*/
 		if(isset($user_id) && $user_id){
 			self::restoreUser($user_id);
 		}
-		return $ret;
+		return false;
 	}
 	
 	public static function searchMetadata($val, $userid, $tagid='', $keyid='', $keyvals=[]) {

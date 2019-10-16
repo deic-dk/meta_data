@@ -146,6 +146,8 @@ class Metadata extends \OC_Search_Provider {
 			);
 			$result['permissions'] = $fileInfo['permissions'];
 			$result['path'] = $path;
+			$result['parentdir'] = dirname($path);
+			$result['parentid'] = \OCA\FilesSharding\Lib::getFileId($result['parentdir']);
 			$result['modified'] = $fileInfo['mtime'];
 			$result['mime_type'] = $fileInfo['mimetype'];
 			$results[] = $result;
