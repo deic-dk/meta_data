@@ -722,16 +722,14 @@ class Tags {
 	public static $keyArr;
 
 	public static function getTaggedFiles($tagid, $userid = null,
-			$sortAttribute = '', $sortDescending = false, $keyVals = []){
+			$sortAttribute = '', $sortDescending = false, $keyVals = [], $onlyLocal = false){
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
 		$user_id = empty($userid)?\OCP\USER::getUser():$userid;
 		$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
 		foreach($data as $row){
-			$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			if(empty($info)){
-				// TODO: test that this works
 				$storage = \OCP\Files::getStorage('user_group_admin');
 				$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			}
@@ -763,10 +761,21 @@ class Tags {
 			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
 		}
 		
-		if(!\OCP\App::isEnabled('files_sharding')){
+		if(!\OCP\App::isEnabled('files_sharding') || $onlyLocal){
 			return $results;
 		}
-		
+		$remoteResults = self::getRemoteTaggedFiles($tagid, $userid);
+		$results = array_merge($results, $remoteResults);
+		if($sortAttribute !== '') {
+			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
+		}
+		return $results;
+	}
+	
+	private static function getRemoteTaggedFiles($tagid, $userid=null) {
+		$user_id = empty($userid)?\OCP\USER::getUser():$userid;
+		$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
+		$results = array();
 		$sharedItems = \OCA\FilesSharding\Lib::getItemsSharedWithUser($userid);
 		$serverUsers = \OCA\FilesSharding\Lib::getServerUsers($sharedItems);
 		\OCP\Util::writeLog('meta_data', 'Server users '.serialize($serverUsers), \OC_Log::WARN);
@@ -788,7 +797,7 @@ class Tags {
 					foreach($sharedItems as $item){
 						if(isset($item['fileid']) && isset($match['fileid']) && $item['fileid']==$match['fileid']){
 							\OCP\Util::writeLog('meta_data', 'Matched '.$match['path'].':'.$item['owner_path'].' --> '.$server['internal_url'].
-								' --> '.$owner, \OC_Log::WARN);
+									' --> '.$owner, \OC_Log::WARN);
 							$match['server'] = $server['internal_url'];
 							$match['owner'] = $owner;
 							$info = new \OC\Files\FileInfo($match['path'], $storage, $match['internalPath'], $match);
@@ -817,9 +826,6 @@ class Tags {
 				}
 				$results = array_merge($results, $res);
 			}
-		}
-		if($sortAttribute !== '') {
-			$results = \OCA\Files\Helper::sortFiles($results, $sortAttribute, $sortDescending);
 		}
 		return $results;
 	}

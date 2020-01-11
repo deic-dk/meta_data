@@ -9,15 +9,21 @@
  */
 
 function updateTagsView(sortValue, direction){
+	var spinner = '<div id="spinnerText" style="display:table;margin:0 auto;">Loading</div>\
+		<div id="spinner" style="display:table;margin:0 auto;"><img src="'+ OC.imagePath('core', 'loading-small.gif') +'"></div>';
+	$('#filestable').after(spinner);
+	
   $('tbody#fileList').html('');
   $('tfoot').html('');
 
   // sortValue = typeof sortValue !== 'undefined' ? sortValue : 'color';
   //direction = typeof direction !== 'undefined' ? direction : 'asc';
 
+  var onlyLocal = !$('#checkAllServers').length ||  !$('#checkAllServers').is(':checked') ? 'yes':'no' ;
+  
 	$.ajax({
 	url: OC.filePath('meta_data', 'ajax', 'getTags.php'),
-	data: {sortValue: sortValue, direction: direction, fileCount: true, display: true},
+	data: {sortValue: sortValue, direction: direction, fileCount: true, display: true, onlyLocal: onlyLocal},
 	success: function(response) {
 		var total=0;
 		if(response) {
@@ -282,10 +288,6 @@ function loadKeys(tagid, readonly, newkey){
 }
 
 $(document).ready(function() {
-	
-	var spinner = '<div id="spinnerText" style="display:table;margin:0 auto;">Loading</div>\
-		<div id="spinner" style="display:table;margin:0 auto;"><img src="'+ OC.imagePath('core', 'loading-small.gif') +'"></div>';
-	$('#filestable').after(spinner);
 	
   updateTagsView();
 
@@ -563,6 +565,7 @@ $(document).ready(function() {
 		$('.ui-dialog').remove();
   });
 
+  $('body').on('click', '#checkAllServers', function(){updateTagsView();});
 
   $('body').on('click', '.editstuff .color-box', setColor);
 

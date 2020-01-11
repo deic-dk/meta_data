@@ -269,3 +269,14 @@ span[data-tag]:last-of-type{
     text-align: center;
 }
 
+#app-content-meta_data table th#headerPublic a {
+	padding-left: 11px;
+}
+
+#app-content-meta_data table th#headerSize a {
+	padding-right: 3px;
+}
+
+#app-content-meta_data table th#headerSize input#checkAllServers {
+	margin: 0;
+}

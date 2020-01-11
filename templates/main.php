@@ -60,9 +60,10 @@
 	</th>
 	<th id="headerSize" class="column-size">
 		<a class="size sort columntitle" data-sort="size">
-			<span><?php p($l->t("Files")); ?></span>
+			<span><?php p($l->t("Files")); ?>
 			<span class="sort-indicator hidden icon-triangle-n"></span>
 		</a>
+		<input type="checkbox" id="checkAllServers" title="<?php p($l->t("Check all backend servers (slow)")); ?>"/></span>
 	</th>
 	<th>
 	</th>

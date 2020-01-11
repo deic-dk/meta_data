@@ -88,8 +88,8 @@ else{
 
 foreach($tags as $i => $tag){
 	if(isset( $_GET['fileCount'] )){
-		$total = 0; 
-		$result = \OCA\meta_data\Tags::getTaggedFiles($tag['id'], \OCP\User::getUser());
+		$result = \OCA\meta_data\Tags::getTaggedFiles($tag['id'], \OCP\User::getUser(),
+				'', false, [], !empty($_GET['onlyLocal']) && $_GET['onlyLocal']=='yes');
 		if($result){
 			$tags[$i]['size'] = count($result);
 		}
