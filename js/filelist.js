@@ -32,6 +32,10 @@ $(document).ready(function() {
 		this.tagid = options.tagid;
 	};
 	
+	if(typeof OCA.Files == 'undefined'){
+		return;
+	}
+	
 	FileList.oldCreateRow = OCA.Files.FileList.prototype._createRow;
 
   FileList.prototype = _.extend({}, OCA.Files.FileList.prototype, {
