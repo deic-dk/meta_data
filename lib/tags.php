@@ -11,7 +11,8 @@ class MetaData implements \JsonSerializable {
 			$this->metadata = array();
 			foreach($keyvals as $keyID=>$val){
 				$key = \OCA\meta_data\Tags::searchKeyByID($keyID);
-				\OCP\Util::writeLog('meta_data', 'KEY: '.$keyID.'-->'.$key['name'], \OC_Log::WARN);
+				\OCP\Util::writeLog('meta_data', 'KEY: '.$keyID.'-->'.$key['name'].'-->'.$key['type'].
+						". VAL: ".$val, \OC_Log::WARN);
 				if(!empty($key)){
 					if($key['type']=='json'){
 						if(json_decode($val, false)!=null){
@@ -601,6 +602,7 @@ class Tags {
 		if($output->rowCount() > 0){
 			while($row=$output->fetchRow()){
 				if(self::userCanReadFile($row['fileid'], $userid)){
+					$row['value'] = html_entity_decode($row['value']);
 					$result[] = $row;
 				}
 			}
@@ -638,8 +640,10 @@ class Tags {
 		$query = \OCP\DB::prepare($sql);
 		$resRsrc = $query->execute($args);
 		while($row=$resRsrc->fetchRow()){
-			$result[] = array( 'value' => $row['value'],
-					'keyid' => $row['keyid']);
+			$result[] = array(
+					'keyid' => $row['keyid'],
+					'value' => html_entity_decode($row['value'])
+			);
 		}
 		return $result;
 	}
@@ -1158,9 +1162,21 @@ class Tags {
 			$args = array($fileid, $tagid, $keyid);
 			$query = \OCP\DB::prepare($sql);
 			$output = $query->execute($args);
+			return $output;
+	}
+	
+	public static function removeFileKeys($tagid, $fileid){
+		$sql = 'DELETE FROM *PREFIX*meta_data_docKeys WHERE fileid LIKE ? AND tagid=?';
+		$args = array($fileid, $tagid);
+		$query = \OCP\DB::prepare($sql);
+		$output = $query->execute($args);
+		return $output;
 	}
 
-	public static function updateFileKeyVal($fileids, $tagid, $keyid, $value){
+	public static function updateFileKeyVal($fileids, $tagid, $keyid, $val){
+		// We htmlencode before inserting into mysql because php does not
+		// support unicode/UTF8.
+		$value = self::entities($val);
 		// We allow $fileid to be a colon-separated list of ids
 		$fileidArr = explode(':', $fileids);
 		$res = array();
@@ -1368,24 +1384,24 @@ class Tags {
 		$stringBuilder = "";
 		$offset = 0;
 		
-		if ( empty( $string ) ) {
+		if(empty($string)){
 			return "";
 		}
 		
-		while ( $offset >= 0 ) {
-			$decValue = self::ordutf8( $string, $offset );
+		while($offset>=0){
+			$decValue = self::ordutf8($string, $offset);
 			$char = self::unichr($decValue);
-			
-			$htmlEntited = htmlentities( $char );
+			$htmlEntited = htmlentities($char);
 			if( $char != $htmlEntited ){
 				$stringBuilder .= $htmlEntited;
-			} elseif( $decValue >= 128 ){
+			}
+			elseif($decValue>=128){
 				$stringBuilder .= "&#" . $decValue . ";";
-			} else {
+			}
+			else{
 				$stringBuilder .= $char;
 			}
 		}
-		
 		return $stringBuilder;
 	}
 	

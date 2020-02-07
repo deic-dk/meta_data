@@ -36,9 +36,7 @@ switch($_POST['tagOp']) {
     }
     case 'update_file_key': {
         $result = \OCA\meta_data\Tags::updateFileKeyVal($_POST['fileId'], $_POST['tagId'],
-        		// We htmlencode before inserting into mysql because php does not
-        		// support unicode/UTF8.
-        		$_POST['keyId'], \OCA\meta_data\Tags::entities($_POST['value']));
+        		$_POST['keyId'], $_POST['value']);
         break;
     }
 }
