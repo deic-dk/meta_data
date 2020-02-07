@@ -25,8 +25,7 @@ function getGetParams() {
 	return results;
 }
 
-$(document).ready(function() {
-
+function addTags(){
 	var FileList = function($el, options) {
 		this.initialize($el, options);
 		this.tagid = options.tagid;
@@ -108,4 +107,8 @@ $(document).ready(function() {
 	});
 	
 	OCA.Meta_data.FileList = FileList;
+}
+
+$(document).ready(function() {
+	addTags();
 });
