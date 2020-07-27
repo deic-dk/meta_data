@@ -10,7 +10,6 @@
 
 \OCP\Util::addStyle('files', 'files');
 \OCP\Util::addStyle('meta_data', 'meta_data');
-\OCP\Util::addScript('meta_data', 'app');
 \OCP\Util::addScript('meta_data', 'main');
 \OCP\Util::addScript('meta_data', 'editor');
 

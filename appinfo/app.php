@@ -32,9 +32,7 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 					strpos($_SERVER['REQUEST_URI'], "index.php/apps/files")>=0){
 				OCP\Util::addScript('meta_data', 'filelist');
 			}
-			if(\OC_App::getCurrentApp()=='meta_data'){
-				OCP\Util::addScript('meta_data', 'editor');
-			}
+			OCP\Util::addScript('meta_data', 'editor');
 			OCP\Util::addStyle('meta_data', 'meta_data');
 			$tags = \OCA\Meta_data\Tags::searchTags('%',\OCP\User::getUser());
 			foreach ($tags as $tag){
@@ -52,9 +50,7 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 		}
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false){
 			OCP\Util::addScript('meta_data', 'fileactions');
-			if(\OC_App::getCurrentApp()=='meta_data'){
-				OCP\Util::addScript('meta_data', 'app');
-			}
+			OCP\Util::addScript('meta_data', 'app');
 			OCP\Util::addScript('meta_data', 'dropdown');
 			OCP\Util::addStyle('meta_data', 'filelist');
 		}
