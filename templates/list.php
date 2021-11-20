@@ -20,7 +20,7 @@
 		  <div class="col-xs-5 col-sm-5 text-right">
 			<span id="" class="selectedActions">
 			  <a href="" class="download btn btn-xs btn-default">
-				<i class="icon-download-cloud"></i>
+				<i class="icon-download"></i>
 				<?php p($l->t('Download'))?>
 			  </a>
 			  <a href="" class="delete-selected btn btn-xs btn-danger">
