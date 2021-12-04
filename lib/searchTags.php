@@ -34,34 +34,40 @@ class Tag extends \OC_Search_Provider {
    */
   function search($query) {
 		$results = array();
-  	if(empty($query)){
-  		return $results;
-  	}
-  	\OCP\Util::writeLog('meta_data', 'Searching tags: '.$query, \OC_Log::WARN);
-		$tags = Tags::searchTags($query."%", User::getUser());
-		if(!empty($tags)){
-			foreach($tags as $tagData) {
-				$result['type'] = 'tag';
-				$result['name'] = $tagData['name'];
-				$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
-				$result['owner'] = $tagData['owner'];
-				$result['public'] = $tagData['public'];
-				$results[] = $result;
+		if(empty($query)){
+			return $results;
+		}
+		\OCP\Util::writeLog('meta_data', 'Searching tags/keys: '.$query, \OC_Log::WARN);
+		$tagName = preg_replace("/^tag:(.*)$/", "$1", $query);
+		$keyName = preg_replace("/^key:(.*)$/", "$1", $query);
+		if(!empty($tagName)){
+			$tags = Tags::searchTags($tagName."%", User::getUser());
+			if(!empty($tags)){
+				foreach($tags as $tagData) {
+					$result['type'] = 'tag';
+					$result['name'] = $tagData['name'];
+					$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
+					$result['owner'] = $tagData['owner'];
+					$result['public'] = $tagData['public'];
+					$results[] = $result;
+				}
 			}
 		}
-  	\OCP\Util::writeLog('meta_data', 'Searching keys: '.$query, \OC_Log::WARN);
-		$tags = Tags::searchKeys($query."%", User::getUser());
-		if(!empty($tags)){
-			foreach($tags as $tagData) {
-				$result['type'] = 'tag';
-				$result['name'] = $tagData['name'];
-				$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
-				$result['owner'] = $tagData['owner'];
-				$result['public'] = $tagData['public'];
-				if(in_array($result, $results)){
-					continue;
+		
+		if(!empty($keyName)){
+			$tags = Tags::searchKeys($keyName."%", User::getUser());
+			if(!empty($tags)){
+				foreach($tags as $tagData) {
+					$result['type'] = 'tag';
+					$result['name'] = $tagData['name'];
+					$result['link'] = "/index.php/apps/files?dir=%2F&view=tag-".$tagData['id'];
+					$result['owner'] = $tagData['owner'];
+					$result['public'] = $tagData['public'];
+					if(in_array($result, $results)){
+						continue;
+					}
+					$results[] = $result;
 				}
-				$results[] = $result;
 			}
 		}
 		return $results;

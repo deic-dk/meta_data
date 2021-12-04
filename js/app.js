@@ -217,9 +217,11 @@ OCA.Meta_data.App = {
 			id: fileData.id,
 			group: fileData.group
 		}, function (event) {
-			event.stopPropagation();
-			event.preventDefault();
-			(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, fileData.group));
+			if(event.data.dir && fileData.type == 'file'){
+				(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, fileData.group));
+				event.stopPropagation();
+				event.preventDefault();
+		}
 	});
 	}
 	return tr;

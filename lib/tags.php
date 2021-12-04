@@ -572,7 +572,7 @@ class Tags {
 			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND tagid = ?";
 			$args = array('%'.$val.'%', $tagid);
 		}
-		elseif(empty($tagid) &&! empty($keyid)){
+		elseif(empty($tagid) && !empty($keyid)){
 			$sql = "SELECT id, fileid, tagid, keyid, value FROM *PREFIX*meta_data_docKeys WHERE value LIKE ? AND keyid = ?";
 			$args = array('%'.$val.'%', $keyid);
 		}
