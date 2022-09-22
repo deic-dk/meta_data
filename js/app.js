@@ -52,9 +52,10 @@ if (!OCA.Meta_data){
 
 OCA.Meta_data.App = {
 
-  _tagid: null,
-  _FileList: null,
-  initTaggedFiles: function($el, tagid) {
+	_tagid: null,
+	_FileList: null,
+	initTaggedFiles: function($el, tagid) {
+
 		if(this._FileList && this._tagid==tagid) {
 			return this._FileList;
 		}
@@ -163,17 +164,10 @@ OCA.Meta_data.App = {
   },
 
 	newCreateRow: function(fileData, tr) {
-		// Group folder support - Not necessary - group is now set directly in fileData, by list.php
-		/*fileData.group =  '';
-		if(fileData.path){
-			var firstSlashIndex = fileData.path.indexOf('/');
-			if(firstSlashIndex === fileData.path.indexOf('/user_group_admin/')){
-				var secondSlashIndex =  fileData.path.indexOf('/', firstSlashIndex+1);
-				var thirdSlashIndex =  fileData.path.indexOf('/', secondSlashIndex+1);
-				fileData.group =  thirdSlashIndex>0?fileData.path.substring(secondSlashIndex+1, thirdSlashIndex-1):
-					fileData.path.substring(secondSlashIndex+1);
-			}
-		}*/
+		if(tr.find('.filetags-wrap').length){
+			// Already applied
+			return tr;
+		}
 		if(fileData.type == 'file'){
 			var tagwidth = 0;
 			var overflow = 0;
@@ -237,78 +231,147 @@ OCA.Meta_data.App = {
     }
 },
 
-_newfiles: [],
+	previous_tag_fileids: [],
+	previous_tags: [],
+	tag_semaphore: true,
+	
+	// Cannot use showMask from filelist.js when filelist has not been initialized
+	showMask: function() {
+		var view = OCA.Files.App.getActiveView() || 'files';
+		var $el = this.$el = $('#app-content-'+view);
+		var $mask = this.$el.find('.mask');
+		if ($mask.exists()) {
+			return;
+		}
+		$mask = $('<div class="mask transparent"></div>');
+		$mask.css('background-image', 'url('+ OC.imagePath('core', 'loading.gif') + ')');
+		$mask.css('background-repeat', 'no-repeat');
+		this.$el.append($mask);
+		$mask.removeClass('transparent');
+	},
+	hideMask: function() {
+		this.$el.find('.mask').remove();
+	},
 
-  modifyFilelist: function(_filelist) {
-  	var filelist;
-  	if(typeof _filelist === 'undefined'){
-  		filelist = OCA.Files.FileList;
-  	}
-  	else{
-  		filelist = _filelist;
-  	}
-		OCA.Meta_data.App.tag_semaphore = true;
-		OCA.Meta_data.App.previous_tag_fileids = [];
-		var oldnextPage = filelist.prototype._nextPage;
-		filelist.prototype._nextPage = function(animate) {
-			if(getGetParam('view')=='trashbin'){
-				return  oldnextPage.apply(this,arguments);
+	getfiletags: function(fileids, files, dir, dirowner, fileowners, callback) {
+		this.tag_semaphore = false;
+		if(!fileids || fileids.length==0){
+			this.tag_semaphore = true;
+			return;
+		}
+		console.log("fileids: "+fileids.length + ": " + JSON.stringify(fileids)+"<-->"+
+				(typeof OCA.Meta_data.App.previous_tag_fileids!=='undefined'?JSON.stringify(OCA.Meta_data.App.previous_tag_fileids):'empty'));
+		if(this.previous_tag_fileids.equals(fileids)){
+			console.log("same ids");
+			callback(files, OCA.Meta_data.App.previous_tags);
+			this.tag_semaphore = true;
+		}
+		else{
+			if(!OCA.Meta_data.App.fileList.prototype.$el){
+				OCA.Meta_data.App.fileList.prototype.$el=$('#app-content-'+OCA.Files.App.getActiveView());
+				OCA.Meta_data.App.fileList.prototype.$table = OCA.Meta_data.App.fileList.prototype.$el.find('table:first');
 			}
-			var getfiletags = function(data, oldfiles, dir, dirowner, fileowners, callback) {
-				OCA.Meta_data.App.tag_semaphore = false;
-				if(OCA.Meta_data.App.previous_tag_fileids.equals(fileids)){
-					callback(oldfiles, OCA.Meta_data.App._newfiles);
+			this.showMask(true);
+			$.ajax({
+				async: false,
+				type: "POST",
+				url: OC.linkTo('meta_data','ajax/getFileTags.php'),
+				data: {
+					files: fileids,
+					dir: dir,
+					owner: dirowner,
+					fileowners: fileowners
+				},
+				success: function(ret){
+					callback(files, ret.files);
+					OCA.Meta_data.App.hideMask();
+				},
+				error: function(ret){
+					OCA.Meta_data.App.hideMask();
 				}
-				else{
-					$.ajax({
-						async: false,
-						type: "POST",
-						url: OC.linkTo('meta_data','ajax/getFileTags.php'),
-						data: {
-							files: data,
-							dir: dir,
-							owner: dirowner,
-							fileowners: fileowners
-						},
-						success: function(ret){
-							callback(oldfiles, ret.files);
-						}
-					});
-				}
+			});
+		}
+	},
+
+	oldnextPage: null,
+	
+	oldsetFiles: null,
+	
+	fileList: null,
+
+	modifyNextPage: function(_filelist){
+		
+		var view =getGetParam('view');
+		
+		if(typeof _filelist === 'undefined'){
+				this.fileList = OCA.Files.FileList;
+		}
+		else{
+			this.fileList = _filelist;
+		}
+		
+		if(this.fileList.oldnextPage!=null || !this.tag_semaphore || view=='trashbin'){
+			console.log("Already modified _nextPage et al.");
+			return;
+		}
+		
+		this.fileList.oldnextPage = this.fileList.prototype._nextPage;
+
+		console.log("Modifying _nextpage: "+this.fileList.prototype.appName+", files:"+this.fileList.prototype.files.length/*+", window.files:"+window.FileList.files.length*/);
+		this.fileList.prototype._nextPage = function(animate) {
+			console.log("meta_data _nextpage");
+			var view =getGetParam('view');
+			if(view=='trashbin'){
+				return  this.oldnextPage.apply(this, arguments);
 			}
-			var fileids = this.files.map(function(obj){ return {id: obj.id};});
 			var owner = $('.crumb.last a').length>0?OCA.Meta_data.App.getParam($('.crumb.last a').attr('href'), 'owner'):'';
 			var fileowners = '';
 			if(typeof owner=='undefined' || owner==''){
 				fileowners = this.files.map(function(obj){ return {owner: typeof obj.shareOwnerUID=='undefined'?'':obj.shareOwnerUID};});
 			}
-			if(OCA.Meta_data.App.tag_semaphore){
-				getfiletags(fileids, this.files, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners, function(oldfiles, newfiles){
-					OCA.Meta_data.App._newfiles = newfiles;
-					OCA.Meta_data.App.tag_semaphore = true;
+			if(OCA.Meta_data.App.tag_semaphore && typeof OCA.Meta_data.App.fileList !== 'undefined' && typeof OCA.Meta_data.App.fileList.files !== 'undefined'){
+				var fileids = OCA.Meta_data.App.fileList.files.map(function(obj){ return {id: obj.id};});
+				OCA.Meta_data.App.getfiletags(fileids, OCA.Meta_data.App.fileList.files, this.getCurrentDirectory(), typeof owner != 'undefined' ? owner : '', fileowners,
+						function(files, retfiles){
 					OCA.Meta_data.App.previous_tag_fileids = fileids;
-					for(var i=0; i<oldfiles.length; i++){
-						var id = oldfiles[i]['id'];
-						var entry = $.grep(newfiles, function(e){ return e.id==id});
+					OCA.Meta_data.App.previous_tags = retfiles;
+					// Fill in tags
+					for(var i=0; i<files.length; i++){
+						var id = files[i]['id'];
+						var entry = $.grep(retfiles, function(e){ return e.id==id});
 						if(entry.length>0 && typeof entry[0].tags!=='undefined') {
-							oldfiles[i]['tags'] = entry[0].tags;
+							files[i]['tags'] = entry[0].tags;
 						}
 						else {
-							oldfiles[i]['tags'] = {};
+							files[i]['tags'] = {};
 						}
 					}
+					OCA.Meta_data.App.tag_semaphore = true;
 				});
 			}
-			return  oldnextPage.apply(this,arguments);
+			else{
+				console.log("Skipping tags");
+			}
+			return  OCA.Meta_data.App.fileList.oldnextPage.apply(this, arguments);
 		}
-
-		var oldCreateRow = filelist.prototype._createRow;
-
-		filelist.prototype._createRow = function(fileData) {
+		
+		this.oldsetFiles = this.fileList.prototype.setFiles;
+		 this.fileList.prototype.setFiles = function(animate) {
+			console.log("meta_data setFiles");
+			var view =getGetParam('view');
+			if(view!='trashbin'){
+				OCA.Meta_data.App.modifyNextPage();
+			}
+			return  OCA.Meta_data.App.oldsetFiles.apply(this, arguments);
+		}
+		
+		var oldCreateRow = this.fileList.prototype._createRow;
+		 this.fileList.prototype._createRow = function(fileData) {
 			var tr = oldCreateRow.apply(this, arguments);
 			return OCA.Meta_data.App.newCreateRow(fileData, tr);
 		}
-  }
+	},
+
 };
 
 /*
@@ -717,6 +780,7 @@ function saveMeta(){
 }
 
 $(document).ready(function() {
+		
 	/* Always update menu on reload */
 	updateSidebar();
 
@@ -741,10 +805,7 @@ $(document).ready(function() {
 		OCA.Meta_data.App.removeTaggedFiles();
 	});
 
-	if(typeof OCA.Meta_data.App.tag_semaphore == 'undefined' && OCA.Files &&
-			OCA.Files.FileList && getGetParam('view')!='trashbin'){
-		OCA.Meta_data.App.modifyFilelist();
-	}
+	OCA.Meta_data.App.modifyNextPage();
 
   /*
    * This next block of code is for deleting tags from a file

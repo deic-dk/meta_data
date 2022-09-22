@@ -51,7 +51,9 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 			}
 		}
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false &&
-				strpos($_SERVER['REQUEST_URI'], "/apps/chooser/")===false){
+				strpos($_SERVER['REQUEST_URI'], "/apps/chooser/")===false &&
+				strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin")===false &&
+				strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
 			OCP\Util::addScript('meta_data', 'fileactions');
 			OCP\Util::addScript('meta_data', 'app');
 			OCP\Util::addScript('meta_data', 'dropdown');
