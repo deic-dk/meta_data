@@ -805,7 +805,9 @@ $(document).ready(function() {
 		OCA.Meta_data.App.removeTaggedFiles();
 	});
 
-	OCA.Meta_data.App.modifyNextPage();
+	if(typeof OCA.Files!='undefined'){
+		OCA.Meta_data.App.modifyNextPage();
+	}
 
   /*
    * This next block of code is for deleting tags from a file

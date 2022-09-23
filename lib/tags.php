@@ -730,7 +730,14 @@ class Tags {
 		$results = array();
 		$data = self::dbGetTaggedFiles($tagid, $userid);
 		$user_id = empty($userid)?\OCP\USER::getUser():$userid;
+		\OCP\Util::writeLog('meta_data', 'user_id: '.$user_id, \OC_Log::WARN);
+
+		// Why is this now necessary?
+		\OC_Util::teardownFS();
+		\OC_User::setUserId($user_id);
+		\OC_Util::setupFS($user_id);
 		$storage = \OC\Files\Filesystem::getStorage('/'.$user_id.'/');
+
 		foreach($data as $row){
 			$info = new \OC\Files\FileInfo($row['path'], $storage, $row['internalPath'], $row);
 			if(empty($info)){
