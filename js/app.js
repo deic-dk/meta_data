@@ -322,6 +322,9 @@ OCA.Meta_data.App = {
 			console.log("meta_data _nextpage");
 			var view =getGetParam('view');
 			if(view=='trashbin'){
+				if(typeof this.oldnextPage =='undefined'){
+					return;
+				}
 				return  this.oldnextPage.apply(this, arguments);
 			}
 			var owner = $('.crumb.last a').length>0?OCA.Meta_data.App.getParam($('.crumb.last a').attr('href'), 'owner'):'';
