@@ -67,7 +67,10 @@ function addTags(){
 					});
 				}
 				var callBack = this.reloadCallback.bind(this);
-				var errorCallback = (typeof _errorCallback !== 'undefined'?_errorCallback:function(){return true;});
+				var errorCallback = (typeof _errorCallback !== 'undefined'?_errorCallback:function(){
+					this.hideMask();
+					return true;
+				});
 				return this._reloadCall.then(function(response){return callBack(response, errorCallback);},
 				 function(response){return callBack(response, errorCallback);});
 			}
