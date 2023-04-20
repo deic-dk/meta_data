@@ -203,9 +203,11 @@ OCA.Meta_data.App = {
 	tr.find('.more-tags').tipsy({gravity:'s',fade:true});
 	// Support sharding
 	if(typeof fileData.owner != 'undefined'){
-		tr.find('.filename .name').prepend('<span class="fileicon extraicon"><i class="icon-share invert-image">&nbsp;</i></span>');
+		//tr.find('.filename .name').prepend('<span class="fileicon extraicon"><i class="icon-share invert-image">&nbsp;</i></span>');
 		tr.attr('data-share-owner', fileData.owner);
-		tr.attr('data-share-permissions', '0');
+	// UPDATE: permissions are now set in list.php and resharing is allowed for files shared with a group that allows it.
+		//tr.attr('data-share-permissions', '0');
+		tr.attr('data-share-permissions', typeof fileData.owner != 'undefined'?fileData.permissions:'0');
 		tr.find('td.filename a').click({
 			owner: fileData.owner,
 			id: fileData.id,
@@ -215,8 +217,8 @@ OCA.Meta_data.App = {
 				(OCA.Files.FileList.prototype.serveFiles(event.data.dir, event.data.file, event.data.owner, event.data.id, fileData.group));
 				event.stopPropagation();
 				event.preventDefault();
-		}
-	});
+			}
+		});
 	}
 	return tr;
 	},
@@ -369,7 +371,7 @@ OCA.Meta_data.App = {
 		}
 		
 		var oldCreateRow = this.fileList.prototype._createRow;
-		 this.fileList.prototype._createRow = function(fileData) {
+		this.fileList.prototype._createRow = function(fileData) {
 			var tr = oldCreateRow.apply(this, arguments);
 			return OCA.Meta_data.App.newCreateRow(fileData, tr);
 		}
