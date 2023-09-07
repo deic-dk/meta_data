@@ -17,6 +17,19 @@ if(!$ok){
 	$ok = $authBackendIP->checkUserPass($_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW']);
 }
 
+if(!$ok){
+	$user = \OC_Chooser::checkIP();
+	if(empty($user)){
+		if(!OCA\FilesSharding\Lib::checkIP()){
+			http_response_code(401);
+			exit;
+		}
+	}
+}
+else{
+	$user = OCP\USER::getUser();
+}
+
 OCP\JSON::checkLoggedIn();
 
 $userServerAccess = \OCA\FilesSharding\Lib::getUserServerAccess();
@@ -36,9 +49,7 @@ if($ok && \OCP\App::isEnabled('files_sharding') &&
 	$ok = false;
 }
 
-\OCP\Util::writeLog('importer', 'User '.$_SERVER['PHP_AUTH_USER']." --> ".$ok, \OC_Log::WARN);
-
-$user = OCP\USER::getUser();
+\OCP\Util::writeLog('meta_data', 'User '.$_SERVER['PHP_AUTH_USER']." --> ".$ok, \OC_Log::WARN);
 
 if(!$ok || empty($user)){
 	header($_SERVER['SERVER_PROTOCOL'] . ' 403 Forbidden');
@@ -56,6 +67,7 @@ if(OCP\App::isEnabled('files_sharding')){
 		}
 		header("HTTP/1.1 301 Moved Permanently");
 		header("Location: " . $serverUrl . $_SERVER['REQUEST_URI']);
+		header("User: " . $user);
 		exit;
 	}
 }
@@ -80,6 +92,8 @@ require_once('meta_data/lib/tags.php');
 
 header("Content-Type: application/json");
 
+$ret = [];
+
 switch($_GET['action']){
 	case 'searchtags':
 		$tag = !empty($_GET['tag']) ? $_GET['tag'] : '';
@@ -101,7 +115,7 @@ switch($_GET['action']){
 		$public = !empty($_POST['public']) ? $_POST['public'] : '';
 		$description = !empty($_POST['description']) ? $_POST['description'] : '';
 		$ret['status'] = empty($tagid)?0:
-			\OCA\meta_data\Tags::updateTag($tagid, $name, $description, $color, $public, $user, $display);
+			\OCA\meta_data\Tags::updateTag($tagid, null, $description, $color, $public, $user, $display);
 		break;
 	case 'deletetag':
 		$tag = !empty($_POST['tag']) ? $_POST['tag'] : '';
@@ -144,6 +158,7 @@ switch($_GET['action']){
 				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
 			}
 			else{
+				$view = new \OC\Files\View('/'.$user.'/files');
 				$fileInfo = $view->getFileInfo($file);
 				if($fileInfo){
 					$fileid = $fileInfo['fileid'];
@@ -169,6 +184,7 @@ switch($_GET['action']){
 				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
 			}
 			else{
+				$view = new \OC\Files\View('/'.$user.'/files');
 				$fileInfo = $view->getFileInfo($file);
 				if($fileInfo){
 					$fileid = $fileInfo['fileid'];
@@ -189,22 +205,24 @@ switch($_GET['action']){
 		$attribute = !empty($_GET['attribute']) ? $_GET['attribute'] : '';
 		$attributeid = empty($tag)?'':\OCA\meta_data\Tags::getKeyID($tagid, $attribute, $user);
 		$value = !empty($_GET['value']) ? $_GET['value'] : '';
-		$ret['files'] = \OCA\meta_data\Tags::getFilesWithMetadata($value, $userid, $tagid, $attributeid);
+		$ret['files'] = \OCA\meta_data\Tags::getFilesWithMetadata($value, $user, $tagid, $attributeid);
 		break;
 	case 'getmetadata':
 		$tag = !empty($_GET['tag']) ? $_GET['tag'] : '';
-		$tagid = !empty($tag)?\OCA\meta_data\Tags::getTagID($tag, $user) : '';
-		$files = !empty($_GET['file']) ? $_GET['file'] : "";
+		$tagids = !empty($tag)?[\OCA\meta_data\Tags::getTagID($tag, $user)] : [];
+		$files = !empty($_GET['files']) ? $_GET['files'] : "";
 		// $files is a json encoded list of paths
 		if(!empty($files)){
 			$fileArr = json_decode($files, true);
 		}
+		\OCP\Util::writeLog('meta_data', 'Getting metadata for '.$files.' --> '.serialize($fileArr), \OC_Log::WARN);
 		$fileIdArr = array();
 		foreach($fileArr as $file){
 			if(OCP\App::isEnabled('files_sharding') && OCP\App::isEnabled('user_group_admin')){
 				$fileid = \OCA\FilesSharding\Lib::getFileId($file, $user, $group);
 			}
 			else{
+				$view = new \OC\Files\View('/'.$user.'/files');
 				$fileInfo = $view->getFileInfo($file);
 				if($fileInfo){
 					$fileid = $fileInfo['fileid'];
@@ -212,7 +230,8 @@ switch($_GET['action']){
 			}
 			$fileIdArr[] = $fileid;
 		}
-		$ret = \OCA\meta_data\Tags::getUserFileTags($user, $fileIdArr, [$tagid]);
+		\OCP\Util::writeLog('meta_data', 'Getting tags for '.$user.':'.$files.' --> '.serialize($fileIdArr).':'.$tagid, \OC_Log::WARN);
+		$ret = \OCA\meta_data\Tags::getUserFileTags($user, $fileIdArr, $tagids, true, true);
 	default:
 		break;
 }

@@ -85,7 +85,7 @@ class FileTag implements \JsonSerializable {
 		$ret = ['fileid' => $this->fileid, 'tagid' => $this->tagid];
 		\OCP\Util::writeLog('meta_data', 'Serializing '. serialize($ret), \OC_Log::WARN);
 		if(!empty($this->keyvals)){
-			$ret['keyvals'] = $this->getMetadata();
+			//$ret['keyvals'] = $this->getMetadata();
 			$ret['metadata'] = $this->getMetadata();
 		}
 		if(!empty($this->filename)){
@@ -911,9 +911,9 @@ class Tags {
 	
 	/**
 	 * Return all file/tag/key info for a user/file/tag.
-	 * Optionally, massage the output tag objects to use key names instead of IDs.
 	 */
-	public static function getUserFileTags($user_id, $fileids=null, $tagids=null, $useKeyNames=false){
+	public static function getUserFileTags($user_id, $fileids=null, $tagids=null,
+			$includeMetadata=true){
 		if(empty($user_id)){
 			return new \OCA\meta_data\FilesTags();
 		}
@@ -935,11 +935,13 @@ class Tags {
 		$fileTagsArr = array();
 		while($row=$output->fetchRow()){
 			// If tags are given, match
+			\OCP\Util::writeLog('meta_data', 'Tag: '.serialize($row).'-->'.serialize($tagids), \OC_Log::WARN);
 			if(!empty($tagids) && !in_array($row['tagid'], $tagids)){
 				continue;
 			}
 			// Check if file is owned by user
 			$path = self::getFilePath($row['fileid'], $user_id);
+			\OCP\Util::writeLog('meta_data', 'Path: '.serialize($row).'-->'.$path, \OC_Log::WARN);
 			if(empty($path)){
 				continue;
 			}
@@ -948,14 +950,17 @@ class Tags {
 			$fileTag->setFileName($path);
 			$tag = self::searchTagByID($row['tagid']);
 			$tagname = $tag['name'];
+			\OCP\Util::writeLog('meta_data', 'Tag: '.serialize($row).'-->'.$tagname, \OC_Log::WARN);
 			$fileTag->setTagName($tagname);
 			// Add key/values to the FileTag object
-			$keyVals = self::dbLoadFileKeys($row['fileid'], $row['tagid']);
-			foreach($keyVals as $keyVal){
-				$fileTag->addKeyVal(/*use name instead of id*/
-				/*self::searchKeyByID($keyVal['keyid'])['name']'*/
-					$keyVal['keyid'],
-					$keyVal['value']);
+			if($includeMetadata){
+				$keyVals = self::dbLoadFileKeys($row['fileid'], $row['tagid']);
+				foreach($keyVals as $keyVal){
+					$fileTag->addKeyVal(/*use name instead of id*/
+							/*self::searchKeyByID($keyVal['keyid'])['name']'*/
+							$keyVal['keyid'],
+							$keyVal['value']);
+				}
 			}
 			if(empty($fileTagsArr[$row['fileid']])){
 				// Add new FileTags object to the result list
