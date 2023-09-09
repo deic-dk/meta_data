@@ -115,9 +115,9 @@ OCA.Meta_data.App = {
   	}
   	if(dirIds.length>0){
   		type = 'folder';
-    	// TODO: Consider allowing tagging directories and directory content recursively
-  		OC.dialogs.alert('You cannot tag directories', 'Tagging not possible', function(res){}, true);
-  		return false;
+    	// TODO: Consider tagging directory content recursively
+  		//OC.dialogs.alert('You cannot tag directories', 'Tagging not possible', function(res){}, true);
+  		//return false;
   	}
 		var html = '\
 			<div id="dropdown" class="drop metadata" data-item-type="'+type+'" data-item-source="'+fileIds.join(':')+'">\
@@ -168,7 +168,7 @@ OCA.Meta_data.App = {
 			// Already applied
 			return tr;
 		}
-		if(fileData.type == 'file'){
+		if(fileData.type == 'file' || fileData.type == 'dir'){
 			var tagwidth = 0;
 			var overflow = 0;
 			tr.find('div.filelink-wrap').after('<div class="filetags-wrap col-xs-4"></div>');

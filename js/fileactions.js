@@ -19,7 +19,7 @@
 	}
 	OCA.Meta_data.Util = {
 		initialize: function(fileActions) {
-			FileActions.register('file', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename) {
+			FileActions.register('all', 'Tags', OC.PERMISSION_UPDATE, OC.imagePath('meta_data', 'tag.png'), function(filename) {
 				if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
 				if($('#dropdown.metadata').length==0){
 					var tr = FileList.findFileEl(filename);
