@@ -587,7 +587,7 @@ function loadValues(fileid, file, tagid, owner, callback){
 				$.each(result['data'], function(i,item){
 					$('body').find('#meta_data_keys').children('li[id="'+item['keyid']+'"]').children('.value').first().val(htmlDecode(item['value']));
 				});
-				if(typeof callback!='undefined'){
+				if(typeof callback!=='undefined' && callback!=null){
 					callback(fileid, file);
 				}
 			}
