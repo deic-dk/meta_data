@@ -621,7 +621,7 @@ function showMetaPopup(fileid, tagid, file, title, callback){
 		width: "80%",
 		buttons: [
 		{"id": "ok-"+fileid+"-"+tagid, "text": "OK", "class": "popup_ok btn btn-flat btn-primary",
-			 "click": function(){saveMeta(); if(typeof callback!= 'undefined'){callback(fileid, file);}}},
+			 "click": function(){if(typeof callback!= 'undefined'){saveMeta();callback(fileid, file);}else{saveMeta();$('body').find('.ui-dialog').remove();};}},
 			{"id": "cancel-"+fileid+"-"+tagid, "text": "Cancel", "class": "popup_cancel btn btn-flat btn-default",
 				 "click": function() {$('body').find('.ui-dialog').remove();}}]
 	});
@@ -781,7 +781,6 @@ function saveMeta(){
 		});
 		//}
 	});
-	$('body').find('.ui-dialog').remove();
 }
 
 $(document).ready(function() {
