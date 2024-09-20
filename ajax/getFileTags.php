@@ -25,7 +25,7 @@ foreach($tagidsArr as $fileid=>$filetags){
 }
 $alltagids = array_unique($tagids);
 \OCP\Util::writeLog('meta_data',
-			'File tags: '.$dirowner.':'.serialize($fileowners).'-->'.implode(', ', $fileids).'-->'.implode($alltagids),
+		'File tags: '.\OC_User::getUser().':'.$dirowner.':'.serialize($fileowners).'-->'.implode(', ', $fileids).'-->'.implode($alltagids),
 			\OC_Log::DEBUG);
 // Get full tags from master
 $alltags = \OCA\Meta_data\Tags::getTags($alltagids);

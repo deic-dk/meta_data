@@ -477,6 +477,10 @@ function updateFileListTags(tr, showall, width){
 					var overflow = 0;
 					if(showall){
 						tr.find('div.filetags-wrap').append('<a class="less-tags action" href="#" title="Show fewer tags"><i class="icon icon-resize-small"></i></a>').tipsy({gravity:'s',fade:true});
+						tr.nextAll('tr').first().find("div.filetags-wrap").first().css('z-index', '0');
+					}
+					else{
+						tr.nextAll('tr').first().find("div.filetags-wrap").first().css('z-index', '');
 					}
 					$.each(response['tags'], function(key,value) {
 						var color = colorTranslate(value.color);
@@ -595,7 +599,7 @@ function loadValues(fileid, file, tagid, owner, callback){
 	});
 }
 
-function showMetaPopup(fileid, tagid, file, title, callback){
+function showMetaPopup(fileid/*:-joined array*/, tagid, files/*array*/, title, callback){
 	var html = $('\
 			<div>\
 			<span>\
@@ -621,7 +625,7 @@ function showMetaPopup(fileid, tagid, file, title, callback){
 		width: "80%",
 		buttons: [
 		{"id": "ok-"+fileid+"-"+tagid, "text": "OK", "class": "popup_ok btn btn-flat btn-primary",
-			 "click": function(){if(typeof callback!= 'undefined'){saveMeta();callback(fileid, file);}else{saveMeta();$('body').find('.ui-dialog').remove();};}},
+			 "click": function(){if(typeof callback!= 'undefined'){saveMeta();callback(fileid, files);}else{saveMeta();$('body').find('.ui-dialog').remove();};}},
 			{"id": "cancel-"+fileid+"-"+tagid, "text": "Cancel", "class": "popup_cancel btn btn-flat btn-default",
 				 "click": function() {$('body').find('.ui-dialog').remove();}}]
 	});
@@ -730,24 +734,33 @@ function getGetParam(key) {
 function editMeta(title, file, fileid, tagid, preCallback, callback){
 	var selectedFiles = FileList.getSelectedFiles();
 	var fileIds = [parseInt(fileid)];
+	var files = [file];
 	for( var i=0;i<selectedFiles.length;++i){
 		if(fileIds.indexOf(selectedFiles[i].id)==-1){
 			fileIds.push(selectedFiles[i].id);
+			files.push(selectedFiles[i].name);
 		}
 	}
 	if(selectedFiles.length>1 || selectedFiles.length===1 && selectedFiles[0].id!=fileid){
-		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten)?', 'Confirm overwrite',
+		OC.dialogs.confirm('Are you sure you want to enter meta-data for multiple files (existing meta-data will be overwritten by non-empty values)?', 'Confirm overwrite',
         function(res){
   				if(res){
   					$(this).hide();
-  					showMetaPopup(fileIds.join(':'), tagid, fileIds.length + ' files', title, callback);
-  		  		loadKeys(fileid, tagid, owner);
+  					var owner = showMetaPopup(fileIds.join(':'), tagid, files, title, callback);
+  					// Disable editing meta-data of files shared with me
+  					if(owner!=''){
+  			  		$('#meta_data_keys input').prop('readonly', true);
+  			  		$('.ui-dialog-buttonpane').hide();
+  					}
+  					loadKeys(fileid, tagid, owner);
+  					//if(selectedFiles.length==0 || selectedFiles.length==1 && selectedFiles[0].id==fileid){
+    						preCallback(fileid, file);
+  					//}
   				}
-        }
-     );
+		});
 	}
 	else{
-		var owner = showMetaPopup(fileid, tagid, file, title, callback);
+		var owner = showMetaPopup(fileid, tagid, files, title, callback);
 		loadKeys(fileid, tagid, owner);
 		loadValues(fileid, file, tagid, owner, preCallback);
 		// Disable editing meta-data of files shared with me
