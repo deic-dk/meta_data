@@ -416,7 +416,7 @@ $(document).ready(function() {
 				<div id="meta_data_container"><div id="emptysearch">'+t('meta_data', 'No metadata defined')+'</div><ul id="meta_data_keys"></ul></div>\
 				<span class="new_field"><button id="add_key" class="btn btn-flat btn-default">'+t('meta_data', 'Add field')+'</button></span>\
 				<span class="new_field_filler">&nbsp;'+t('meta_data', 'or')+'&nbsp;</span>\
-				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="'+t('meta_data', 'Select tag to import from')+'" autocomplete="off">\
+				<input class="import_tag edit ui-autocomplete-input" style="padding-top: 4px;"  type="text" placeholder="'+t('meta_data', 'Type tag to import from')+'" autocomplete="off">\
 				<span role="status" aria-live="polite" class="ui-helper-hidden-accessible"></span>\
 			<div class="schema_editor_buttons"><button id="popup_ok" class="btn btn-flat btn-primary">'+t('meta_data', 'OK')+'</button>&nbsp;\
 			<button id="popup_cancel" class="btn btn-flat btn-default">'+t('meta_data', 'Cancel')+'</button></div></div>');
