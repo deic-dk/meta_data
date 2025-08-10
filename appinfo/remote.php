@@ -75,7 +75,7 @@ if(OCP\App::isEnabled('files_sharding')){
 $group = isset($_REQUEST['group']) ? $_REQUEST['group'] : '';
 if(!empty($group) && !empty($user)){
 	$filesDir = '/'.$user.'/user_group_admin/'.$group;
-	OC_Log::write('importer','Non-files access: '.$filesDir, OC_Log::WARN);
+	OC_Log::write('meta_data','Non-files access: '.$filesDir, OC_Log::WARN);
 	\OC\Files\Filesystem::tearDown();
 	\OC\Files\Filesystem::init($user, $filesDir);
 }
