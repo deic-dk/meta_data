@@ -56,12 +56,17 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 				strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/shared/")!==0 &&
 				strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/public/")!==0 &&
 				strpos($_SERVER['REQUEST_URI'], "/apps/chooser/")===false &&
+				// Hmm, this means the Tags on the left bar are missing. Why did we not want scripts loaded in group admin view?
+				// Adding just app.js below
 				strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin")===false &&
 				strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
 			OCP\Util::addScript('meta_data', 'fileactions');
 			OCP\Util::addScript('meta_data', 'app');
 			OCP\Util::addScript('meta_data', 'dropdown');
 			OCP\Util::addStyle('meta_data', 'filelist');
+		}
+		elseif(strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin")!==false){
+			OCP\Util::addScript('meta_data', 'app');
 		}
 	}
 	
