@@ -24,6 +24,8 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 
 	if(\OCP\User::isLoggedIn()){
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "/settings/")===false &&
+			strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/shared/")!==0 &&
+			strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/public/")!==0 &&
 			strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin/")===false &&
 			strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false){
 			if(strpos($_SERVER['REQUEST_URI'], "index.php/apps/")===false ||
@@ -51,6 +53,8 @@ if(isset($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI']!='/' &&
 			}
 		}
 		if(isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], "&view=trashbin")===false &&
+				strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/shared/")!==0 &&
+				strpos($_SERVER['REQUEST_URI'], OC::$WEBROOT ."/public/")!==0 &&
 				strpos($_SERVER['REQUEST_URI'], "/apps/chooser/")===false &&
 				strpos($_SERVER['REQUEST_URI'], "/apps/user_group_admin")===false &&
 				strpos($_SERVER['REQUEST_URI'], "/settings/")===false){
