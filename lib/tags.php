@@ -1251,6 +1251,7 @@ class Tags {
 		$entry['icon'] = \OCA\Files\Helper::determineIcon($i);
 		if (\OC::$server->getPreviewManager()->isMimeSupported($i['mimetype'])) {
 				$entry['isPreviewAvailable'] = true;
+				$entry['has_preview'] = 1;
 		}
 		$entry['name'] = $i->getName();
 		$entry['permissions'] = $i['permissions'];
