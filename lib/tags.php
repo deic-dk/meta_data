@@ -843,8 +843,8 @@ class Tags {
 	
 	public static function getFileTags($fileids, $owner=null, $fileowners=null){
 		$result = self::dbGetFileTags($fileids);
-		\OCP\Util::writeLog('meta_data', 'DB file tags: '.$owner.':'.serialize($fileowners).'-->'.
-				implode(', ', $fileids).'-->'.serialize($result), \OC_Log::DEBUG);
+		//\OCP\Util::writeLog('meta_data', 'DB file tags: '.$owner.':'.serialize($fileowners).'-->'.
+		//		implode(', ', $fileids).'-->'.serialize($result), \OC_Log::DEBUG);
 		if(empty($owner) && empty($fileowners) || !\OCP\App::isEnabled('files_sharding')){
 			return $result;
 		}
