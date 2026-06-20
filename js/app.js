@@ -869,7 +869,7 @@ $(document).ready(function() {
    * This next block of code is for entering the meta-data editor
    */
 	$('#body-user tbody').on('click', '.filetags-wrap span.label:not(.more-tags)', function(e){
-		if($('.ui-dialog').length>0){
+		if($('.ui-dialog:visible').length){
 			return false;
 		}
 		e.preventDefault();
